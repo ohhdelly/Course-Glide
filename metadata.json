@@ -1,0 +1,6 @@
+{
+  "name": "CourseGlide",
+  "description": "Better feedback. Smarter course decisions. A university course intelligence platform for trustworthy reviews, transparent statistics, teaching-team feedback, and study strategies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
