@@ -5,23 +5,26 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GoogleGenAI, Type } from '@google/genai';
 import {
-  DEMO_COURSES,
   DEMO_FACULTY_RESPONSES,
   DEMO_INSTRUCTORS,
   DEMO_MODERATION_REPORTS,
   DEMO_REVIEWS,
   DEMO_UNIVERSITIES,
 } from './src/data/demoDataset.ts';
+import { CatalogueService } from './server/catalogueService.ts';
 import {
+  computeCourseStats,
   generateDeterministicInsights,
   rankAndFilterReviews,
 } from './src/utils/trustLens.ts';
 import type {
+  CourseFilters,
   CourseInsightReport,
   FacultyResponse,
   ModerationReport,
   Review,
   StudyMethodKey,
+  UniversityId,
 } from './src/types/course.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -108,6 +111,7 @@ function detectPolicyViolation(text: string): string | null {
 }
 
 let store = loadStore();
+const catalogue = new CatalogueService(process.env.UWATERLOO_API_KEY);
 
 // Cache AI insights in memory per course + review count
 const insightsCache = new Map<string, CourseInsightReport>();
@@ -134,19 +138,35 @@ app.get('/api/health', (_req, res) => {
     mode: 'demonstration',
     firebaseConfigured: false,
     geminiConfigured: Boolean(aiClient),
+    catalogue: catalogue.getMetadata(),
   });
 });
 
 app.get('/api/bootstrap', (req, res) => {
   const userId = sanitizeText(req.query.userId, 64) || 'demo-student';
+  const savedCourseIds = store.savedCoursesByUser[userId] ?? [];
+  const bootstrapCourses = catalogue.getBootstrapCourses(store.reviews);
+  const bootstrapIds = new Set(bootstrapCourses.map((c) => c.id));
+  for (const savedId of savedCourseIds) {
+    if (!bootstrapIds.has(savedId)) {
+      const found = catalogue.getCourseById(savedId);
+      if (found) {
+        bootstrapCourses.push(found);
+        bootstrapIds.add(savedId);
+      }
+    }
+  }
+
   res.json({
     universities: DEMO_UNIVERSITIES,
-    courses: DEMO_COURSES,
+    courses: bootstrapCourses,
+    catalogueMeta: catalogue.getMetadata(),
+    subjects: catalogue.getSubjects('all'),
     instructors: DEMO_INSTRUCTORS,
     reviews: store.reviews,
     facultyResponses: store.facultyResponses,
     moderationReports: store.moderationReports,
-    savedCourseIds: store.savedCoursesByUser[userId] ?? [],
+    savedCourseIds,
     userVotes: Object.fromEntries(
       Object.entries(store.votesByVoterAndReview)
         .filter(([k]) => k.startsWith(`${userId}::`))
@@ -155,16 +175,101 @@ app.get('/api/bootstrap', (req, res) => {
     capabilities: {
       firebaseConfigured: false,
       geminiConfigured: Boolean(aiClient),
+      openDataConfigured: Boolean(process.env.UWATERLOO_API_KEY?.trim()),
       mode: 'demonstration',
     },
+  });
+});
+
+app.get('/api/courses', (req, res) => {
+  const q = sanitizeText(req.query.q, 120);
+  const uniRaw = sanitizeText(req.query.universityId, 24);
+  const universityId: UniversityId =
+    uniRaw === 'uwaterloo' || uniRaw === 'uottawa' ? uniRaw : 'all';
+  const department = sanitizeText(req.query.department, 80) || 'all';
+  const levelRaw = Number(req.query.level);
+  const level: CourseFilters['level'] =
+    levelRaw === 100 || levelRaw === 200 || levelRaw === 300 || levelRaw === 400 || levelRaw === 500
+      ? levelRaw
+      : 'all';
+  const maxDiffRaw = Number(req.query.maxDifficulty);
+  const maxDifficulty: CourseFilters['maxDifficulty'] =
+    maxDiffRaw === 2 || maxDiffRaw === 3 || maxDiffRaw === 4 || maxDiffRaw === 5
+      ? maxDiffRaw
+      : 'all';
+  const maxHoursRaw = Number(req.query.maxHours);
+  const maxHours: CourseFilters['maxHours'] =
+    maxHoursRaw === 6 || maxHoursRaw === 10 || maxHoursRaw === 14 ? maxHoursRaw : 'all';
+  const hasReviewsRaw = sanitizeText(req.query.hasReviews, 24);
+  const hasReviews: CourseFilters['hasReviews'] =
+    hasReviewsRaw === 'with_reviews' || hasReviewsRaw === 'without_reviews'
+      ? hasReviewsRaw
+      : 'all';
+  const sortRaw = sanitizeText(req.query.sortBy, 24);
+  const sortBy: CourseFilters['sortBy'] =
+    sortRaw === 'recommended' ||
+    sortRaw === 'reviews' ||
+    sortRaw === 'workload_asc' ||
+    sortRaw === 'workload_desc' ||
+    sortRaw === 'code'
+      ? sortRaw
+      : 'relevance';
+
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.max(1, Math.min(60, Number(req.query.limit) || 24));
+
+  const result = catalogue.queryCourses({
+    query: q,
+    filters: {
+      universityId,
+      department,
+      level,
+      maxDifficulty,
+      maxHours,
+      hasReviews,
+      sortBy,
+    },
+    reviews: store.reviews,
+    page,
+    limit,
+  });
+
+  res.json(result);
+});
+
+app.get('/api/courses/:id', async (req, res) => {
+  const courseId = sanitizeText(req.params.id, 64);
+  const baseCourse = catalogue.getCourseById(courseId);
+  if (!baseCourse) {
+    res.status(404).json({ error: 'Course not found.' });
+    return;
+  }
+
+  const scheduleCheck = await catalogue.getTermScheduleStatus(baseCourse);
+  const course = {
+    ...baseCourse,
+    catalogStatus: scheduleCheck.catalogStatus,
+    termScheduleNote: scheduleCheck.termScheduleNote,
+  };
+
+  const courseReviews = store.reviews.filter((r) => r.courseId === course.id);
+  const stats = computeCourseStats(courseReviews);
+  const instructors = DEMO_INSTRUCTORS.filter((i) => i.courseId === course.id);
+  const facultyResponses = store.facultyResponses.filter((f) => f.courseId === course.id);
+
+  res.json({
+    course,
+    stats,
+    reviews: courseReviews,
+    instructors,
+    facultyResponses,
   });
 });
 
 app.post('/api/saved-courses', (req, res) => {
   const userId = sanitizeText(req.body?.userId, 64) || 'demo-student';
   const courseId = sanitizeText(req.body?.courseId, 64);
-  const courseExists = DEMO_COURSES.some((c) => c.id === courseId);
-  if (!courseExists) {
+  if (!catalogue.hasCourse(courseId)) {
     res.status(404).json({ error: 'Course not found.' });
     return;
   }
@@ -190,7 +295,7 @@ app.post('/api/saved-courses', (req, res) => {
 app.post('/api/reviews', (req, res) => {
   const body = req.body ?? {};
   const courseId = sanitizeText(body.courseId, 64);
-  const course = DEMO_COURSES.find((c) => c.id === courseId);
+  const course = catalogue.getCourseById(courseId);
   if (!course) {
     res.status(404).json({ error: 'Course not found.' });
     return;
@@ -284,9 +389,10 @@ app.post('/api/reviews', (req, res) => {
 
   store.reviews.unshift(newReview);
   insightsCache.delete(course.id);
+  catalogue.invalidateCache();
   saveStore(store);
 
-  res.status(201).json({ review: newReview });
+  res.status(201).json({ review: newReview, course });
 });
 
 app.post('/api/reviews/:id/vote', (req, res) => {
@@ -380,6 +486,7 @@ app.post('/api/moderation/:reportId/resolve', (req, res) => {
     report.status = 'reviewed_kept';
     if (review) review.moderationStatus = 'visible';
   }
+  catalogue.invalidateCache();
   saveStore(store);
 
   res.json({ report, review });
@@ -388,7 +495,7 @@ app.post('/api/moderation/:reportId/resolve', (req, res) => {
 app.post('/api/faculty-responses', (req, res) => {
   const body = req.body ?? {};
   const courseId = sanitizeText(body.courseId, 64);
-  const course = DEMO_COURSES.find((c) => c.id === courseId);
+  const course = catalogue.getCourseById(courseId);
   if (!course) {
     res.status(404).json({ error: 'Course not found.' });
     return;
@@ -428,7 +535,7 @@ app.post('/api/faculty-responses', (req, res) => {
 app.post('/api/insights', async (req, res) => {
   const courseId = sanitizeText(req.body?.courseId, 64);
   const forceRefresh = Boolean(req.body?.forceRefresh);
-  const course = DEMO_COURSES.find((c) => c.id === courseId);
+  const course = catalogue.getCourseById(courseId);
   if (!course) {
     res.status(404).json({ error: 'Course not found.' });
     return;

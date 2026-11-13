@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Flag,
   ThumbsDown,
   ThumbsUp,
   XCircle,
 } from 'lucide-react';
 import type { EnrichedReview } from '../../types/course';
-import { STUDY_METHOD_CATALOG } from '../../utils/trustLens';
+import {
+  extractReviewHighlightSegments,
+  STUDY_METHOD_CATALOG,
+} from '../../utils/trustLens';
 
 interface ReviewCardProps {
   review: EnrichedReview;
@@ -17,6 +22,26 @@ interface ReviewCardProps {
   onReport: (reviewId: string) => void;
 }
 
+const HighlightedReviewText: React.FC<{ text: string }> = ({ text }) => {
+  const segments = extractReviewHighlightSegments(text);
+  return (
+    <>
+      {segments.map((seg, idx) =>
+        seg.category ? (
+          <mark
+            key={idx}
+            className="rounded-xs bg-[var(--highlight-bg)] px-0.5 font-medium text-[var(--highlight-text)]"
+          >
+            {seg.text}
+          </mark>
+        ) : (
+          <React.Fragment key={idx}>{seg.text}</React.Fragment>
+        )
+      )}
+    </>
+  );
+};
+
 export const ReviewCard: React.FC<ReviewCardProps> = ({
   review,
   highlighted = false,
@@ -25,26 +50,46 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   onReport,
 }) => {
   const isLimited = review.trustLens.tier === 'limited';
+  const [expanded, setExpanded] = useState(highlighted);
+
+  useEffect(() => {
+    if (highlighted) setExpanded(true);
+  }, [highlighted]);
+
+  const hasExpandedDetails =
+    review.whatWorkedWell.trim().length > 0 ||
+    review.whatWasChallenging.trim().length > 0 ||
+    review.practicalAdvice.trim().length > 0 ||
+    review.studyMethods.length > 0;
+
+  const utilitySummary = isLimited
+    ? review.trustLens.signals.isDuplicateOrRepetitive
+      ? 'Possible duplicate · Limited context'
+      : 'Brief entry · Limited context'
+    : !review.recommended && review.trustLens.labels.includes('Balanced Critique')
+    ? 'Balanced critique · Course-specific'
+    : review.trustLens.tier === 'most_informative'
+    ? 'Detailed & course-specific'
+    : 'Standard student review';
 
   return (
     <article
       id={`review-${review.id}`}
       className={`rounded-2xl p-5 sm:p-6 transition-all ${
         highlighted
-          ? 'surface-card border-blue-600 ring-2 ring-blue-600/20'
+          ? 'surface-card border-[var(--ring)] ring-2 ring-[var(--ring-soft)]'
           : isLimited
-          ? 'border border-slate-200/80 bg-[#F8FAFD] shadow-xs'
+          ? 'border border-[var(--border)] bg-[var(--surface-subtle)] shadow-xs'
           : 'surface-card'
       }`}
     >
-      {/* Top Header Metadata */}
-      <div className="flex flex-wrap items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
-        <div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600">
-            <span className="rounded-md bg-[#F1F5FB] px-2 py-0.5 font-semibold text-slate-900">
-              {review.term}
-            </span>
-            <span className="font-medium text-slate-700">{review.instructorName}</span>
+      {/* Top Header Metadata & Essential Ratings */}
+      <div className="flex flex-col justify-between gap-3 pb-3.5 border-b border-[var(--border)] sm:flex-row sm:items-start">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-[var(--text-secondary)]">
+            <span className="font-semibold text-[var(--text-primary)]">{review.term}</span>
+            <span aria-hidden="true">·</span>
+            <span className="font-medium text-[var(--text-primary)]">{review.instructorName}</span>
             {review.taName && (
               <>
                 <span aria-hidden="true">·</span>
@@ -52,125 +97,145 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               </>
             )}
             <span aria-hidden="true">·</span>
-            <span>{review.authorAlias}</span>
-            {review.isDemoData && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="text-slate-400">Demo entry</span>
-              </>
-            )}
+            <span className="text-[var(--text-muted)]">{review.authorAlias}</span>
           </div>
 
-          {/* Trust Lens Context Labels */}
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium">
-            {review.trustLens.labels.map((label) => {
-              const colorClass =
-                label === 'Limited Context' ||
-                label === 'Low Specificity' ||
-                label === 'Possible Duplicate'
-                  ? 'bg-amber-50 text-amber-800 border-amber-200/70'
-                  : label === 'Balanced Critique'
-                  ? 'bg-blue-50 text-blue-800 border-blue-200/70'
-                  : 'bg-teal-50 text-teal-800 border-teal-200/70';
-              return (
-                <span key={label} className={`rounded-md border px-2 py-0.5 ${colorClass}`}>
-                  {label}
-                </span>
-              );
-            })}
-            <span className="rounded-md bg-slate-100/90 px-2 py-0.5 font-mono text-slate-600 tabular-nums">
-              Context score {review.trustLens.score}/100
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
+            <span
+              className={`font-semibold ${
+                isLimited ? 'text-[var(--status-warning)]' : 'text-[var(--status-positive)]'
+              }`}
+            >
+              {utilitySummary}
+            </span>
+            <span aria-hidden="true" className="text-[var(--border-strong)]">
+              ·
+            </span>
+            <span className="font-mono text-[var(--text-muted)] tabular-nums">
+              Context {review.trustLens.score}/100
             </span>
           </div>
         </div>
 
-        {/* Metrics & Recommendation Status (never hue-only) */}
-        <div className="flex flex-wrap items-center gap-2 text-xs shrink-0">
-          <div className="rounded-lg border border-slate-200/75 bg-[#F4F7FB] px-2.5 py-1 font-mono text-slate-700 tabular-nums">
-            Difficulty <strong className="text-slate-900">{review.difficulty}/5</strong>
-          </div>
-          <div className="rounded-lg border border-slate-200/75 bg-[#F4F7FB] px-2.5 py-1 font-mono text-slate-700 tabular-nums">
-            <strong className="text-slate-900">{review.weeklyHours}</strong> hrs/wk
-          </div>
-          <div
-            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 font-medium ${
-              review.recommended
-                ? 'border-teal-200/75 bg-teal-50/75 text-teal-800'
-                : 'border-amber-200/75 bg-amber-50/75 text-amber-900'
+        {/* Essential Metrics (Plain typography + status icon+text) */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs shrink-0">
+          <span className="font-mono text-[var(--text-secondary)] tabular-nums">
+            Difficulty <strong className="font-bold text-[var(--text-primary)]">{review.difficulty}/5</strong>
+          </span>
+          <span aria-hidden="true" className="text-[var(--border-strong)]">
+            ·
+          </span>
+          <span className="font-mono text-[var(--text-secondary)] tabular-nums">
+            <strong className="font-bold text-[var(--text-primary)]">{review.weeklyHours}</strong> hrs/wk
+          </span>
+          <span aria-hidden="true" className="text-[var(--border-strong)]">
+            ·
+          </span>
+          <span
+            className={`inline-flex items-center gap-1 font-semibold ${
+              review.recommended ? 'text-[var(--status-positive)]' : 'text-[var(--status-warning)]'
             }`}
           >
             {review.recommended ? (
               <>
-                <CheckCircle2 className="h-3.5 w-3.5 text-teal-700" aria-hidden="true" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[var(--status-positive)] shrink-0" aria-hidden="true" />
                 <span>Recommended</span>
               </>
             ) : (
               <>
-                <XCircle className="h-3.5 w-3.5 text-amber-700" aria-hidden="true" />
+                <XCircle className="h-3.5 w-3.5 text-[var(--status-warning)] shrink-0" aria-hidden="true" />
                 <span>Not recommended</span>
               </>
             )}
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* Review Content */}
-      <div className="mt-4 space-y-3.5">
-        <p className="text-sm font-medium leading-relaxed text-slate-900">
-          {review.overallExperience}
+      {/* Primary Summary (Consistent Readable Typography) */}
+      <div className="mt-3.5">
+        <p className="text-[15px] leading-relaxed text-[var(--text-primary)]">
+          <HighlightedReviewText text={review.overallExperience} />
         </p>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-slate-200/65 bg-[#F6F8FC] p-3.5">
-            <div className="text-xs font-semibold text-slate-800">What worked well</div>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">{review.whatWorkedWell}</p>
-          </div>
-          <div className="rounded-xl border border-slate-200/65 bg-[#F6F8FC] p-3.5">
-            <div className="text-xs font-semibold text-slate-800">What was challenging</div>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              {review.whatWasChallenging}
-            </p>
-          </div>
-        </div>
+        {/* Progressive Disclosure: Full Structured Details */}
+        {expanded && hasExpandedDetails && (
+          <div className="mt-4 space-y-3 pt-4 border-t border-[var(--border)]">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {review.whatWorkedWell.trim().length > 0 && (
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+                  <div className="text-xs font-semibold text-[var(--text-primary)]">What worked well</div>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                    <HighlightedReviewText text={review.whatWorkedWell} />
+                  </p>
+                </div>
+              )}
+              {review.whatWasChallenging.trim().length > 0 && (
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+                  <div className="text-xs font-semibold text-[var(--text-primary)]">What was challenging</div>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                    <HighlightedReviewText text={review.whatWasChallenging} />
+                  </p>
+                </div>
+              )}
+            </div>
 
-        <div className="rounded-xl border border-blue-200/65 bg-[#EFF5FD]/85 p-3.5">
-          <div className="text-xs font-semibold text-blue-900">
-            Practical advice for future students
-          </div>
-          <p className="mt-1 text-sm leading-relaxed text-slate-700">{review.practicalAdvice}</p>
-        </div>
+            {review.practicalAdvice.trim().length > 0 && (
+              <div className="rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/85 p-3.5">
+                <div className="text-xs font-semibold text-[var(--accent-code)]">
+                  Practical advice for future students
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-[var(--text-primary)]">
+                  <HighlightedReviewText text={review.practicalAdvice} />
+                </p>
+              </div>
+            )}
 
-        {review.studyMethods.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 pt-0.5">
-            <span className="font-medium text-slate-700 mr-1">Study methods used:</span>
-            {review.studyMethods.map((m) => (
-              <span
-                key={m}
-                className="rounded-md border border-slate-200/75 bg-[#F4F7FB] px-2 py-0.5 text-[11px] font-medium text-slate-700"
-              >
-                {STUDY_METHOD_CATALOG[m]?.label ?? m}
-              </span>
-            ))}
+            {review.studyMethods.length > 0 && (
+              <div className="text-xs text-[var(--text-secondary)] pt-0.5">
+                <span className="font-semibold text-[var(--text-primary)] mr-1.5">Study methods used:</span>
+                <span>
+                  {review.studyMethods
+                    .map((m) => STUDY_METHOD_CATALOG[m]?.label ?? m)
+                    .join(' · ')}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Footer Actions: Helpful Voting & Reporting */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3.5 border-t border-slate-100">
-        <div className="flex items-center gap-2">
+      {/* Footer Actions: Expand Details + Helpful Voting + Reporting */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3.5 border-t border-[var(--border)]">
+        <div className="flex flex-wrap items-center gap-2">
+          {hasExpandedDetails && (
+            <button
+              type="button"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((v) => !v)}
+              className="btn-soft inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+            >
+              <span>{expanded ? 'Hide details' : 'Read full review'}</span>
+              {expanded ? (
+                <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => onVote(review.id, 'helpful')}
             aria-pressed={userVote === 'helpful'}
-            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
               userVote === 'helpful'
-                ? 'border-blue-600 bg-blue-50 text-blue-800 shadow-xs'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-[#F5F8FC] hover:text-slate-900'
+                ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs font-semibold'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]'
             }`}
           >
             <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Helpful</span>
-            <span className="font-mono tabular-nums text-slate-500">
+            <span className="font-mono tabular-nums text-[var(--text-muted)]">
               ({review.helpfulVotes})
             </span>
           </button>
@@ -179,15 +244,15 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             type="button"
             onClick={() => onVote(review.id, 'not_helpful')}
             aria-pressed={userVote === 'not_helpful'}
-            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
               userVote === 'not_helpful'
-                ? 'border-slate-700 bg-slate-100 text-slate-900 shadow-xs'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-[#F5F8FC] hover:text-slate-900'
+                ? 'border-[var(--border-strong)] bg-[var(--surface-muted)] text-[var(--text-primary)] shadow-xs font-semibold'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)]'
             }`}
           >
             <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Not helpful</span>
-            <span className="font-mono tabular-nums text-slate-500">
+            <span className="font-mono tabular-nums text-[var(--text-muted)]">
               ({review.notHelpfulVotes})
             </span>
           </button>
@@ -196,7 +261,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         <button
           type="button"
           onClick={() => onReport(review.id)}
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-subtle)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
         >
           <Flag className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Report</span>

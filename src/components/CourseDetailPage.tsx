@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   Bookmark,
+  CalendarCheck2,
   CheckCircle2,
   Info,
   PenSquare,
 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type {
   Course,
   CourseInsightReport,
@@ -63,6 +65,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   onReportReview,
   onSubmitFacultyResponse,
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<CourseDetailTab>(initialTab);
   const [highlightReviewId, setHighlightReviewId] = useState<string | undefined>(
     initialHighlightReviewId
@@ -70,7 +73,21 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [insights, setInsights] = useState<CourseInsightReport | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const hasReviews = stats.responseCount > 0;
+  const isLongDescription = course.description.length > 230;
+
+  useEffect(() => {
+    setShowFullDescription(false);
+  }, [course.id]);
+
   const loadInsights = async (forceRefresh = false) => {
+    if (!hasReviews) {
+      setInsights(null);
+      setInsightsLoading(false);
+      return;
+    }
     setInsightsLoading(true);
     try {
       const res = await fetch('/api/insights', {
@@ -117,48 +134,76 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     { id: 'strategies', label: 'Study Strategies' },
   ];
 
+  const scheduleLabel =
+    course.catalogStatus === 'scheduled_for_term'
+      ? 'Scheduled in term API'
+      : course.catalogStatus === 'not_confirmed_for_term'
+      ? 'Not confirmed for active term'
+      : course.isOfficialCatalog
+      ? `Listed in ${course.calendarVersion ?? '2026–2027 Academic Calendar'}`
+      : 'Demonstration course profile';
+
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
       {/* Breadcrumb Back Link */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
         <button
           type="button"
           onClick={onBackToExplore}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 font-medium text-slate-600 transition-colors hover:bg-white/80 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface)]/85 hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Explore Courses</span>
         </button>
-        <span className="rounded-md bg-white/70 px-2.5 py-1 text-[11px] font-medium text-slate-500 border border-slate-200/60">
-          Demonstration course intelligence profile
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+          <CalendarCheck2 className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+          <span>{scheduleLabel}</span>
         </span>
       </div>
 
       {/* Course Header Card */}
-      <section className="surface-card rounded-2xl bg-gradient-to-b from-[#F5F8FD] via-white to-white p-6 sm:p-7 mb-6">
-        <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
+      <section className="surface-card rounded-2xl bg-gradient-to-b from-[var(--surface-hero-mid)] via-[var(--surface)] to-[var(--surface)] p-6 sm:p-7 mb-6">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
           <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-slate-500">
-              <span className="rounded-md bg-blue-50/95 px-2.5 py-0.5 font-mono text-sm font-bold text-blue-800 tabular-nums">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--text-muted)]">
+              <span className="font-mono text-sm font-bold text-[var(--accent-code)] tabular-nums">
                 {course.code}
               </span>
               <span aria-hidden="true">·</span>
-              <span className="font-medium text-slate-700">{course.universityName}</span>
+              <span className="font-semibold text-[var(--text-primary)]">{course.universityName}</span>
               <span aria-hidden="true">·</span>
               <span>{course.department}</span>
               <span aria-hidden="true">·</span>
               <span>{course.credits}</span>
-              <span aria-hidden="true">·</span>
-              <span>Offered {course.termsOffered.join(', ')}</span>
+              {course.termsOffered.length > 0 && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>{course.termsOffered.join(', ')}</span>
+                </>
+              )}
             </div>
 
-            <h1 className="mt-2.5 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl text-balance">
+            <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl text-balance">
               {course.title}
             </h1>
 
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+            <p
+              className={`mt-2.5 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-[15px] ${
+                isLongDescription && !showFullDescription ? 'line-clamp-2' : ''
+              }`}
+            >
               {course.description}
             </p>
+            {isLongDescription && (
+              <button
+                type="button"
+                aria-expanded={showFullDescription}
+                onClick={() => setShowFullDescription((v) => !v)}
+                className="mt-1 text-xs font-semibold text-[var(--accent-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded"
+              >
+                {showFullDescription ? 'Show less' : 'Read full description'}
+              </button>
+            )}
           </div>
 
           {/* Primary Actions */}
@@ -167,71 +212,94 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               type="button"
               onClick={() => onToggleSave(course.id)}
               aria-pressed={isSaved}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-xs transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-xs transition-all active:scale-[0.98] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
                 isSaved
-                  ? 'border-blue-200 bg-blue-50/95 text-blue-800'
-                  : 'border-slate-200/90 bg-white text-slate-700 hover:bg-[#F5F8FC] hover:border-slate-300'
+                  ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)]'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-subtle)] hover:border-[var(--border-strong)]'
               }`}
             >
-              <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-blue-700 text-blue-700' : ''}`} />
+              <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
               <span>{isSaved ? 'Saved' : 'Save Course'}</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenWriteReview}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-blue-800 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+              className="btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-xs active:scale-[0.98] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
               <PenSquare className="h-4 w-4" aria-hidden="true" />
-              <span>Write a Review</span>
+              <span>{hasReviews ? 'Write a Review' : 'Be the first to review'}</span>
             </button>
           </div>
         </div>
 
-        {/* 4 Core KPI Strip */}
-        <div className="mt-6 grid grid-cols-2 gap-3 pt-5 border-t border-slate-200/70 sm:grid-cols-4">
-          <div className="rounded-xl border border-slate-200/75 bg-[#F4F7FB] px-4 py-3.5">
-            <div className="text-xs font-medium text-slate-500">Difficulty rating</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
-              {stats.avgDifficulty.toFixed(1)}
-              <span className="text-sm font-normal text-slate-400"> / 5.0</span>
+        {/* Unified 4-Column Primary Metric Strip */}
+        <div className="mt-6 grid grid-cols-2 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
+          <div className="px-4 py-3.5 sm:px-5">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Difficulty</div>
+            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+              {hasReviews ? (
+                <>
+                  {stats.avgDifficulty.toFixed(1)}
+                  <span className="text-sm font-normal text-[var(--text-muted)]"> / 5.0</span>
+                </>
+              ) : (
+                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+              )}
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/75 bg-[#F4F7FB] px-4 py-3.5">
-            <div className="text-xs font-medium text-slate-500">Avg weekly study</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
-              {stats.avgWeeklyHours.toFixed(1)}
-              <span className="text-sm font-normal text-slate-500"> hrs/wk</span>
+          <div className="border-l border-[var(--border)] px-4 py-3.5 sm:border-l-0 sm:px-5">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Weekly workload</div>
+            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+              {hasReviews ? (
+                <>
+                  {stats.avgWeeklyHours.toFixed(1)}
+                  <span className="text-sm font-normal text-[var(--text-muted)]"> hrs/wk</span>
+                </>
+              ) : (
+                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+              )}
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/75 bg-[#F4F7FB] px-4 py-3.5">
-            <div className="text-xs font-medium text-slate-500">Student recommendation</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-teal-700 tabular-nums">
-              {stats.recommendationRate}%
+          <div className="px-4 py-3.5 sm:px-5">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Student recommendation</div>
+            <div className="mt-1 font-mono text-2xl font-bold text-[var(--status-positive)] tabular-nums">
+              {hasReviews ? (
+                `${stats.recommendationRate}%`
+              ) : (
+                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+              )}
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200/75 bg-[#F4F7FB] px-4 py-3.5">
-            <div className="text-xs font-medium text-slate-500">Student responses</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
+          <div className="border-l border-[var(--border)] px-4 py-3.5 sm:border-l-0 sm:px-5">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Student responses</div>
+            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
               {stats.responseCount}
-              <span className="ml-1.5 font-sans text-xs font-normal text-slate-500">
-                ({stats.informativeCount} detailed)
+              <span className="ml-1.5 font-sans text-xs font-normal text-[var(--text-muted)]">
+                {hasReviews ? `(${stats.informativeCount} detailed)` : 'No reviews yet'}
               </span>
             </div>
           </div>
         </div>
 
         {/* Sample-size confidence note */}
-        <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
-          {stats.confidenceLevel === 'limited' ? (
-            <Info className="h-3.5 w-3.5 text-amber-600 shrink-0" aria-hidden="true" />
+        <div className="mt-3.5 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          {!hasReviews || stats.confidenceLevel === 'limited' ? (
+            <Info
+              className={`h-3.5 w-3.5 shrink-0 ${hasReviews ? 'text-[var(--status-warning)]' : 'text-[var(--accent-text)]'}`}
+              aria-hidden="true"
+            />
           ) : (
-            <CheckCircle2 className="h-3.5 w-3.5 text-teal-600 shrink-0" aria-hidden="true" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--status-positive)] shrink-0" aria-hidden="true" />
           )}
-          <span>{stats.confidenceNote}</span>
+          <span>
+            {hasReviews
+              ? stats.confidenceNote
+              : 'No student reviews recorded yet. Official academic calendar information is displayed below without fabricated student averages.'}
+          </span>
         </div>
       </section>
 
@@ -239,7 +307,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       <div
         role="tablist"
         aria-label="Course detail sections"
-        className="mb-6 flex overflow-x-auto rounded-xl border border-slate-200/80 bg-[#E6ECF4]/80 p-1.5 gap-1.5"
+        className="mb-6 flex overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1.5 gap-1.5"
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -250,10 +318,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               type="button"
               aria-selected={isActive}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+              className={`whitespace-nowrap shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
                 isActive
-                  ? 'bg-white text-blue-800 shadow-xs'
-                  : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                  ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface)]/70 hover:text-[var(--text-primary)] border border-transparent'
               }`}
             >
               <span>{tab.label}</span>
@@ -261,8 +329,8 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 <span
                   className={`ml-1.5 rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'bg-slate-200/70 text-slate-600'
+                      ? 'bg-[var(--surface)]/90 text-[var(--accent-text)]'
+                      : 'bg-[var(--surface)]/65 text-[var(--text-muted)]'
                   }`}
                 >
                   {tab.count}
@@ -273,50 +341,63 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         })}
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Smooth Transition */}
       <div role="tabpanel">
-        {activeTab === 'overview' && (
-          <CourseOverviewTab
-            course={course}
-            stats={stats}
-            insights={insights}
-            insightsLoading={insightsLoading}
-            onRefreshInsights={() => loadInsights(true)}
-            onJumpToEvidence={jumpToReview}
-          />
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={`${course.id}-${activeTab}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: 'easeOut' }}
+          >
+            {activeTab === 'overview' && (
+              <CourseOverviewTab
+                course={course}
+                stats={stats}
+                insights={insights}
+                insightsLoading={insightsLoading}
+                onRefreshInsights={() => loadInsights(true)}
+                onJumpToEvidence={jumpToReview}
+                onOpenWriteReview={onOpenWriteReview}
+              />
+            )}
 
-        {activeTab === 'reviews' && (
-          <StudentReviewsTab
-            reviews={reviews}
-            highlightReviewId={highlightReviewId}
-            userVotes={userVotes}
-            onVote={onVote}
-            onReport={onReportReview}
-            onOpenWriteReview={onOpenWriteReview}
-          />
-        )}
+            {activeTab === 'reviews' && (
+              <StudentReviewsTab
+                reviews={reviews}
+                highlightReviewId={highlightReviewId}
+                userVotes={userVotes}
+                onVote={onVote}
+                onReport={onReportReview}
+                onOpenWriteReview={onOpenWriteReview}
+              />
+            )}
 
-        {activeTab === 'teaching' && (
-          <TeachingTeamTab
-            courseId={course.id}
-            courseCode={course.code}
-            instructors={instructors}
-            facultyResponses={facultyResponses}
-            reviews={reviews}
-            stats={stats}
-            onSubmitFacultyResponse={onSubmitFacultyResponse}
-          />
-        )}
+            {activeTab === 'teaching' && (
+              <TeachingTeamTab
+                courseId={course.id}
+                courseCode={course.code}
+                instructors={instructors}
+                facultyResponses={facultyResponses}
+                reviews={reviews}
+                stats={stats}
+                onSubmitFacultyResponse={onSubmitFacultyResponse}
+                onOpenWriteReview={onOpenWriteReview}
+              />
+            )}
 
-        {activeTab === 'strategies' && (
-          <StudyStrategiesTab
-            courseCode={course.code}
-            stats={stats}
-            reviews={reviews}
-            onJumpToReview={jumpToReview}
-          />
-        )}
+            {activeTab === 'strategies' && (
+              <StudyStrategiesTab
+                courseCode={course.code}
+                stats={stats}
+                reviews={reviews}
+                onJumpToReview={jumpToReview}
+                onOpenWriteReview={onOpenWriteReview}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </main>
   );

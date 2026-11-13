@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   computeCourseStats,
   evaluateReviewQuality,
+  extractReviewHighlightSegments,
   filterAndSearchCourses,
   rankAndFilterReviews,
 } from './trustLens.ts';
@@ -143,3 +144,115 @@ test('Course search handles partial codes, no-space codes, and minor typos', () 
   assert.ok(uottawaOnly.every((c) => c.universityId === 'uottawa'));
   assert.ok(uottawaOnly.some((c) => c.id === 'mat-1320'));
 });
+
+test('Empty-review courses do not spoof zero difficulty or zero study strategy metrics', () => {
+  const emptyStats = computeCourseStats([]);
+  assert.equal(emptyStats.responseCount, 0);
+  assert.equal(emptyStats.studyStrategyStats.length, 0);
+
+  const statsMap = {
+    'math-137': computeCourseStats(DEMO_REVIEWS.filter((r) => r.courseId === 'math-137')),
+    'ece-105': emptyStats,
+  };
+  const fakeUnreviewed = {
+    ...DEMO_COURSES[0],
+    id: 'ece-105',
+    code: 'ECE 105',
+    subjectCode: 'ECE',
+    title: 'Classical Mechanics',
+  };
+  const pool = [DEMO_COURSES[0], fakeUnreviewed];
+
+  const under6Hrs = filterAndSearchCourses(pool, statsMap, {}, '', {
+    universityId: 'all',
+    department: 'all',
+    level: 'all',
+    maxDifficulty: 'all',
+    maxHours: 6,
+    sortBy: 'relevance',
+  });
+  assert.equal(under6Hrs.some((c) => c.id === 'ece-105'), false);
+
+  const withoutReviews = filterAndSearchCourses(pool, statsMap, {}, '', {
+    universityId: 'all',
+    department: 'all',
+    level: 'all',
+    maxDifficulty: 'all',
+    maxHours: 'all',
+    hasReviews: 'without_reviews',
+    sortBy: 'relevance',
+  });
+  assert.deepEqual(
+    withoutReviews.map((c) => c.id),
+    ['ece-105']
+  );
+});
+
+test('CatalogueService loads full Waterloo 2026-2027 catalogue and keeps uOttawa strictly separated', async () => {
+  const { CatalogueService } = await import('../../server/catalogueService.ts');
+  const service = new CatalogueService();
+  const meta = service.getMetadata();
+
+  assert.ok(meta.waterlooCourseCount >= 4000, `Expected 4000+ Waterloo courses, got ${meta.waterlooCourseCount}`);
+  assert.equal(meta.uottawaCourseCount, 3);
+  assert.equal(meta.totalCourses, meta.waterlooCourseCount + meta.uottawaCourseCount);
+
+  const ece105 = service.getCourseById('ece-105');
+  assert.ok(ece105, 'Expected ECE 105 in Waterloo catalogue');
+  assert.equal(ece105.universityId, 'uwaterloo');
+  assert.equal(ece105.isOfficialCatalog, true);
+
+  const waterlooPage = service.queryCourses({
+    query: '',
+    filters: {
+      universityId: 'uwaterloo',
+      department: 'all',
+      level: 'all',
+      maxDifficulty: 'all',
+      maxHours: 'all',
+      sortBy: 'code',
+    },
+    reviews: DEMO_REVIEWS,
+    page: 1,
+    limit: 24,
+  });
+  assert.equal(waterlooPage.total, meta.waterlooCourseCount);
+  assert.ok(waterlooPage.courses.every((c) => c.universityId === 'uwaterloo'));
+
+  const uottawaPage = service.queryCourses({
+    query: '',
+    filters: {
+      universityId: 'uottawa',
+      department: 'all',
+      level: 'all',
+      maxDifficulty: 'all',
+      maxHours: 'all',
+      sortBy: 'code',
+    },
+    reviews: DEMO_REVIEWS,
+    page: 1,
+    limit: 24,
+  });
+  assert.equal(uottawaPage.total, 3);
+  assert.ok(uottawaPage.courses.every((c) => c.universityId === 'uottawa'));
+});
+
+test('Review highlight segmentation preserves verbatim text and tags concrete student details', () => {
+  const sample =
+    'Weekly problem sets took 12 hrs/wk and the midterm tested proofs, so use TA office hours and practice exams.';
+  const segments = extractReviewHighlightSegments(sample);
+  assert.equal(
+    segments.map((s) => s.text).join(''),
+    sample,
+    'Concatenated segments must match original review text verbatim'
+  );
+  const highlighted = segments.filter((s) => Boolean(s.category));
+  assert.ok(highlighted.length > 0 && highlighted.length <= 3);
+  assert.ok(highlighted.some((s) => s.category === 'workload'));
+
+  const vague = 'This course was alright overall.';
+  const vagueSegments = extractReviewHighlightSegments(vague);
+  assert.deepEqual(vagueSegments, [{ text: vague }]);
+  assert.deepEqual(extractReviewHighlightSegments(''), []);
+});
+

@@ -54,16 +54,15 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--status-positive-bg)] text-[var(--status-positive)]">
                 <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
               </span>
-              <h2 className="font-display text-base font-bold text-slate-900">
+              <h2 className="font-display text-base font-bold text-[var(--text-primary)]">
                 CourseGlide Trust Lens
               </h2>
             </div>
-            <p className="mt-1 text-xs text-slate-600">
-              Prioritize course-specific, actionable reviews while keeping legitimate critical
-              perspectives visible.
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              Surfaces specific, helpful reviews first while keeping valid criticism visible.
             </p>
           </div>
 
@@ -72,15 +71,15 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
             <div
               role="group"
               aria-label="Trust Lens ranking mode"
-              className="inline-flex rounded-xl border border-slate-200/80 bg-[#E6ECF4] p-1"
+              className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1"
             >
               <button
                 type="button"
                 onClick={() => setTrustMode('most_informative')}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                   trustMode === 'most_informative'
-                    ? 'bg-white text-blue-800 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
                 }`}
               >
                 Most Informative
@@ -90,8 +89,8 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
                 onClick={() => setTrustMode('most_recent')}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                   trustMode === 'most_recent'
-                    ? 'bg-white text-blue-800 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
                 }`}
               >
                 Most Recent
@@ -101,8 +100,8 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
                 onClick={() => setTrustMode('all')}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                   trustMode === 'all'
-                    ? 'bg-white text-blue-800 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
                 }`}
               >
                 All Reviews ({visibleAllCount})
@@ -120,7 +119,7 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
               onChange={(e) =>
                 setSentimentFilter(e.target.value as 'all' | 'recommended' | 'critical')
               }
-              className="rounded-xl border border-slate-200 bg-[#F7F9FC] px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-white focus:border-blue-600 focus:bg-white focus:outline-none"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface)] focus:border-[var(--ring)] focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-soft)]"
             >
               <option value="all">All Perspectives</option>
               <option value="recommended">Recommended Only</option>
@@ -130,15 +129,15 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
         </div>
 
         {/* Status Summary & How Trust Lens Works Disclosure */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3.5 border-t border-slate-100 text-xs">
-          <span className="text-slate-600 tabular-nums">
-            Showing <strong className="font-semibold text-slate-900">{displayedReviews.length}</strong>{' '}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3.5 border-t border-[var(--border)] text-xs">
+          <span className="text-[var(--text-secondary)] tabular-nums">
+            Showing <strong className="font-semibold text-[var(--text-primary)]">{displayedReviews.length}</strong>{' '}
             review{displayedReviews.length === 1 ? '' : 's'}
             {hiddenLowInfoCount > 0 && sentimentFilter === 'all' && (
-              <span className="text-slate-500">
+              <span className="text-[var(--text-muted)]">
                 {' '}
-                · {hiddenLowInfoCount} low-specificity or duplicate{' '}
-                {hiddenLowInfoCount === 1 ? 'entry' : 'entries'} filtered out (switch to All Reviews to inspect)
+                · {hiddenLowInfoCount} brief or duplicate{' '}
+                {hiddenLowInfoCount === 1 ? 'entry' : 'entries'} hidden (switch to All Reviews to view)
               </span>
             )}
           </span>
@@ -147,7 +146,7 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
             type="button"
             aria-expanded={showHowItWorks}
             onClick={() => setShowHowItWorks((v) => !v)}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-blue-700 transition-colors hover:bg-blue-50/80 hover:text-blue-800"
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-[var(--accent-text)] transition-colors hover:bg-[var(--surface-accent)]"
           >
             <span>How Trust Lens works</span>
             {showHowItWorks ? (
@@ -159,15 +158,15 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
         </div>
 
         {showHowItWorks && (
-          <div className="mt-3 rounded-xl border border-blue-200/65 bg-[#F4F8FD] p-4 text-xs leading-relaxed text-slate-700 space-y-2">
+          <div className="mt-3 rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/75 p-4 text-xs leading-relaxed text-[var(--text-secondary)] space-y-2">
             <p>
-              <strong className="font-semibold text-slate-900">Transparent signal evaluation:</strong>{' '}
+              <strong className="font-semibold text-[var(--text-primary)]">Transparent signal evaluation:</strong>{' '}
               Trust Lens scores each submission on course-specific detail (references to assessments,
               lectures, grading, or workload), concrete examples of what worked and what was challenging,
               actionable study advice, recency, community helpfulness votes, and repetition/duplicate checks.
             </p>
             <p>
-              <strong className="font-semibold text-slate-900">Fairness guarantee:</strong>{' '}
+              <strong className="font-semibold text-[var(--text-primary)]">Fairness guarantee:</strong>{' '}
               Trust Lens never assumes positive reviews are truthful or negative reviews are biased.
               Detailed criticism receives high context scores just like detailed praise. Trust Lens
               measures informational utility, not absolute truth.
@@ -177,12 +176,28 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
       </section>
 
       {/* Review List */}
-      {displayedReviews.length === 0 ? (
+      {visibleAllCount === 0 ? (
         <div className="surface-card rounded-2xl p-10 text-center">
-          <h3 className="font-display text-base font-semibold text-slate-900">
+          <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
+            No student reviews yet.
+          </h3>
+          <p className="mt-1.5 text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Share concrete insights about assessments, workload, and preparation strategies to help future students.
+          </p>
+          <button
+            type="button"
+            onClick={onOpenWriteReview}
+            className="btn-primary mt-5 rounded-xl px-5 py-2.5 text-xs font-semibold shadow-xs"
+          >
+            Be the first to review
+          </button>
+        </div>
+      ) : displayedReviews.length === 0 ? (
+        <div className="surface-card rounded-2xl p-10 text-center">
+          <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
             No reviews match this filter selection
           </h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Try switching to All Reviews or All Perspectives, or contribute your own experience.
           </p>
           <div className="mt-4 flex items-center justify-center gap-3">
@@ -192,14 +207,14 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
                 setTrustMode('all');
                 setSentimentFilter('all');
               }}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#F5F8FC]"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]"
             >
               Show all reviews
             </button>
             <button
               type="button"
               onClick={onOpenWriteReview}
-              className="rounded-xl bg-blue-700 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-800"
+              className="btn-primary rounded-xl px-4 py-2 text-xs font-semibold"
             >
               Write a review
             </button>

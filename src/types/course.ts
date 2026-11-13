@@ -12,18 +12,34 @@ export interface AssessmentComponent {
   weightPercent: number;
 }
 
+export type CatalogScheduleStatus =
+  | 'listed_in_catalog'
+  | 'scheduled_for_term'
+  | 'not_confirmed_for_term';
+
 export interface Course {
   id: string;
   code: string;
+  subjectCode?: string;
   title: string;
   universityId: Exclude<UniversityId, 'all'>;
   universityName: string;
   department: string;
-  level: 100 | 200 | 300 | 400;
+  level: 100 | 200 | 300 | 400 | 500;
   credits: string;
   description: string;
   termsOffered: string[];
   officialNote: string;
+  prerequisites?: string;
+  corequisites?: string;
+  antirequisites?: string;
+  calendarVersion?: string;
+  sourceUrl?: string;
+  lastUpdated?: string;
+  catalogPid?: string;
+  catalogStatus?: CatalogScheduleStatus;
+  termScheduleNote?: string;
+  isOfficialCatalog?: boolean;
   assessmentBreakdown?: AssessmentComponent[];
 }
 
@@ -203,10 +219,39 @@ export interface ModerationReport {
 export interface CourseFilters {
   universityId: UniversityId;
   department: string;
-  level: 'all' | 100 | 200 | 300 | 400;
+  level: 'all' | 100 | 200 | 300 | 400 | 500;
   maxDifficulty: 'all' | 2 | 3 | 4 | 5;
   maxHours: 'all' | 6 | 10 | 14;
-  sortBy: 'relevance' | 'recommended' | 'reviews' | 'workload_asc' | 'workload_desc';
+  hasReviews?: 'all' | 'with_reviews' | 'without_reviews';
+  sortBy: 'relevance' | 'recommended' | 'reviews' | 'workload_asc' | 'workload_desc' | 'code';
+}
+
+export interface CatalogueSubject {
+  code: string;
+  department: string;
+  count: number;
+  universityId: Exclude<UniversityId, 'all'>;
+}
+
+export interface CatalogueMetadata {
+  totalCourses: number;
+  waterlooCourseCount: number;
+  uottawaCourseCount: number;
+  waterlooCalendarVersion: string;
+  waterlooSourceUrl: string;
+  waterlooLastSyncedAt: string;
+  openDataConfigured: boolean;
+  subjectCount: number;
+}
+
+export interface PaginatedCoursesResponse {
+  courses: Course[];
+  statsMap: Record<string, CourseStats>;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  subjects: CatalogueSubject[];
 }
 
 export interface StudyFitInsight {

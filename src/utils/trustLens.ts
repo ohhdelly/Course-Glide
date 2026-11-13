@@ -359,14 +359,7 @@ export function computeCourseStats(reviews: Review[]): CourseStats {
         percentage: 0,
       })),
       termTrends: [],
-      studyStrategyStats: Object.entries(STUDY_METHOD_CATALOG).map(([key, meta]) => ({
-        key: key as StudyMethodKey,
-        label: meta.label,
-        preferenceCategory: meta.preferenceCategory,
-        usedCount: 0,
-        helpfulCount: 0,
-        helpfulPercentage: 0,
-      })),
+      studyStrategyStats: [],
     };
   }
 
@@ -609,17 +602,21 @@ export function scoreCourseSearchMatch(
     .split(/\s+/)
     .filter((t) => t.length >= 3);
 
+  // Fast exact/prefix/substring scoring first; only compute Levenshtein when needed
+  const fuzzyHitsLimit = queryTokens.length;
   let fuzzyHits = 0;
   for (const qt of queryTokens) {
     const matched = targetTokens.some((tt) => {
       if (tt.includes(qt)) return true;
-      if (Math.abs(tt.length - qt.length) <= 2 && levenshtein(qt, tt) <= 2) return true;
+      if (qt.length >= 5 && Math.abs(tt.length - qt.length) <= 2 && levenshtein(qt, tt) <= 2) {
+        return true;
+      }
       return false;
     });
     if (matched) fuzzyHits++;
   }
 
-  if (queryTokens.length > 0 && fuzzyHits === queryTokens.length) {
+  if (fuzzyHitsLimit > 0 && fuzzyHits === fuzzyHitsLimit) {
     return 45;
   }
   if (fuzzyHits > 0) {
@@ -650,44 +647,58 @@ export function filterAndSearchCourses(
       if (filters.universityId !== 'all' && course.universityId !== filters.universityId) {
         return false;
       }
-      if (filters.department !== 'all' && course.department !== filters.department) {
-        return false;
+      if (filters.department !== 'all') {
+        const matchesDeptOrSubject =
+          course.department === filters.department ||
+          course.subjectCode === filters.department;
+        if (!matchesDeptOrSubject) return false;
       }
       if (filters.level !== 'all' && course.level !== filters.level) {
         return false;
       }
-      if (
-        filters.maxDifficulty !== 'all' &&
-        stats &&
-        stats.avgDifficulty > filters.maxDifficulty
-      ) {
-        return false;
+      const hasReviews = (stats?.responseCount ?? 0) > 0;
+      if (filters.hasReviews === 'with_reviews' && !hasReviews) return false;
+      if (filters.hasReviews === 'without_reviews' && hasReviews) return false;
+
+      if (filters.maxDifficulty !== 'all') {
+        if (!hasReviews || !stats || stats.avgDifficulty > filters.maxDifficulty) {
+          return false;
+        }
       }
-      if (
-        filters.maxHours !== 'all' &&
-        stats &&
-        stats.avgWeeklyHours > filters.maxHours
-      ) {
-        return false;
+      if (filters.maxHours !== 'all') {
+        if (!hasReviews || !stats || stats.avgWeeklyHours > filters.maxHours) {
+          return false;
+        }
       }
       return true;
     });
 
   scored.sort((a, b) => {
+    const aCount = a.stats?.responseCount ?? 0;
+    const bCount = b.stats?.responseCount ?? 0;
+
+    if (filters.sortBy === 'code') {
+      return a.course.code.localeCompare(b.course.code, 'en', { numeric: true });
+    }
     if (filters.sortBy === 'relevance') {
       if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
-      return (b.stats?.responseCount ?? 0) - (a.stats?.responseCount ?? 0);
+      if (bCount !== aCount) return bCount - aCount;
+      return a.course.code.localeCompare(b.course.code, 'en', { numeric: true });
     }
     if (filters.sortBy === 'recommended') {
+      if ((aCount > 0) !== (bCount > 0)) return bCount > 0 ? 1 : -1;
       return (b.stats?.recommendationRate ?? 0) - (a.stats?.recommendationRate ?? 0);
     }
     if (filters.sortBy === 'reviews') {
-      return (b.stats?.responseCount ?? 0) - (a.stats?.responseCount ?? 0);
+      if (bCount !== aCount) return bCount - aCount;
+      return a.course.code.localeCompare(b.course.code, 'en', { numeric: true });
     }
     if (filters.sortBy === 'workload_asc') {
+      if ((aCount > 0) !== (bCount > 0)) return bCount > 0 ? 1 : -1;
       return (a.stats?.avgWeeklyHours ?? 0) - (b.stats?.avgWeeklyHours ?? 0);
     }
     if (filters.sortBy === 'workload_desc') {
+      if ((aCount > 0) !== (bCount > 0)) return bCount > 0 ? 1 : -1;
       return (b.stats?.avgWeeklyHours ?? 0) - (a.stats?.avgWeeklyHours ?? 0);
     }
     return 0;
@@ -744,3 +755,104 @@ export function computeStudyFit(
       'Self-reported correlations reflect student perceptions rather than guaranteed grade outcomes.',
   };
 }
+
+export type ReviewHighlightCategory = 'assessment' | 'workload' | 'teaching' | 'strategy';
+
+export interface ReviewTextSegment {
+  text: string;
+  category?: ReviewHighlightCategory;
+}
+
+const HIGHLIGHT_RULES: Array<{ category: ReviewHighlightCategory; pattern: RegExp }> = [
+  {
+    category: 'workload',
+    pattern:
+      /\b(?:\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?)?\s*\+?\s*(?:hrs?|hours?)(?:\s*\/\s*wk|\s+per\s+week|\s+a\s+week)?|weekly\s+(?:problem\s+sets?|assignments?|labs?|quizzes?|readings?)(?:\s+workload)?|workload(?:\s+spike[sd]?)?|weeks?\s+\d+(?:\s*[-–to]+\s*\d+)?)\b/gi,
+  },
+  {
+    category: 'assessment',
+    pattern:
+      /\b(?:midterm(?:\s*\d+)?|final\s+exam|past\s+exams?|grading\s+rubrics?|rubrics?|partial\s+credit|lab\s+exams?|assignments?\s*\d+|problem\s+sets?)\b/gi,
+  },
+  {
+    category: 'teaching',
+    pattern:
+      /\b(?:TA\s+office\s+hours|office\s+hours|tutorial\s+sessions?|tutorials?|recorded\s+lectures?|lecture\s+notes?)\b/gi,
+  },
+  {
+    category: 'strategy',
+    pattern:
+      /\b(?:practice\s+(?:problems?|questions?|exams?)|timed\s+conditions|workbook\s+proofs?|spaced\s+repetition|flashcards?|study\s+groups?|start(?:ing)?\s+early)\b/gi,
+  },
+];
+
+/**
+ * Splits review text into verbatim segments, tagging up to 3 concrete, non-overlapping
+ * references to workload, assessments, teaching support, or study strategies.
+ * Never invents words or alters original characters.
+ */
+export function extractReviewHighlightSegments(
+  input: string,
+  maxHighlights = 3
+): ReviewTextSegment[] {
+  if (!input) return [];
+
+  interface MatchSpan {
+    start: number;
+    end: number;
+    category: ReviewHighlightCategory;
+  }
+
+  const candidates: MatchSpan[] = [];
+  for (const rule of HIGHLIGHT_RULES) {
+    const regex = new RegExp(rule.pattern.source, rule.pattern.flags);
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(input)) !== null) {
+      if (match[0].length === 0) {
+        regex.lastIndex++;
+        continue;
+      }
+      candidates.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        category: rule.category,
+      });
+    }
+  }
+
+  if (candidates.length === 0) {
+    return [{ text: input }];
+  }
+
+  // Sort earliest first, prefer longer span on tie
+  candidates.sort((a, b) => a.start - b.start || b.end - a.end);
+
+  const chosen: MatchSpan[] = [];
+  let cursor = 0;
+  for (const span of candidates) {
+    if (chosen.length >= maxHighlights) break;
+    if (span.start >= cursor) {
+      chosen.push(span);
+      cursor = span.end;
+    }
+  }
+
+  const segments: ReviewTextSegment[] = [];
+  let pos = 0;
+  for (const span of chosen) {
+    if (span.start > pos) {
+      segments.push({ text: input.slice(pos, span.start) });
+    }
+    segments.push({
+      text: input.slice(span.start, span.end),
+      category: span.category,
+    });
+    pos = span.end;
+  }
+  if (pos < input.length) {
+    segments.push({ text: input.slice(pos) });
+  }
+
+  return segments;
+}
+

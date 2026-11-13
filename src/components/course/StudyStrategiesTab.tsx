@@ -8,6 +8,7 @@ interface StudyStrategiesTabProps {
   stats: CourseStats;
   reviews: Review[];
   onJumpToReview: (reviewId: string) => void;
+  onOpenWriteReview?: () => void;
 }
 
 const PREFERENCE_OPTIONS: Array<{ id: StudyPreference; label: string }> = [
@@ -23,6 +24,7 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
   stats,
   reviews,
   onJumpToReview,
+  onOpenWriteReview,
 }) => {
   const [preference, setPreference] = useState<StudyPreference>('all');
 
@@ -41,6 +43,32 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
       ? stats.studyStrategyStats
       : stats.studyStrategyStats.filter((s) => s.preferenceCategory === preference);
 
+  if (stats.responseCount === 0) {
+    return (
+      <section className="surface-card rounded-2xl p-10 text-center space-y-3">
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--surface-accent)] text-[var(--accent-text)]">
+          <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+          No study strategy reports yet for {courseCode}
+        </h2>
+        <p className="mx-auto max-w-md text-sm text-[var(--text-secondary)]">
+          Once students share which study habits helped them succeed in {courseCode}, exact
+          respondent counts and advice excerpts will appear here.
+        </p>
+        {onOpenWriteReview && (
+          <button
+            type="button"
+            onClick={onOpenWriteReview}
+            className="btn-primary mt-2 inline-flex items-center rounded-xl px-5 py-2.5 text-xs font-semibold"
+          >
+            Be the first to review
+          </button>
+        )}
+      </section>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Study Preference Filter + Study Fit Panel */}
@@ -48,14 +76,14 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-accent)] text-[var(--accent-text)]">
                 <BookOpenCheck className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h2 className="font-display text-lg font-bold text-slate-900">
+              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
                 Study Strategies & Preparation Fit
               </h2>
             </div>
-            <p className="mt-1 text-xs text-slate-600">
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
               Filter student-reported preparation habits for {courseCode} by your preferred way of
               studying.
             </p>
@@ -73,8 +101,8 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
                 onClick={() => setPreference(opt.id)}
                 className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                   preference === opt.id
-                    ? 'border-blue-700 bg-blue-700 text-white shadow-xs'
-                    : 'border-slate-200/85 bg-[#F4F7FB] text-slate-700 hover:bg-white hover:border-slate-300'
+                    ? 'btn-primary border-transparent shadow-xs'
+                    : 'border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {opt.label}
@@ -84,26 +112,26 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
         </div>
 
         {/* Study Fit Insight Box */}
-        <div className="rounded-xl border border-blue-200/70 bg-gradient-to-br from-[#EFF5FD] to-[#F7FAFE] p-5 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-blue-900">
-            <Compass className="h-4 w-4 text-blue-700" aria-hidden="true" />
+        <div className="rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/65 p-5 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent-code)]">
+            <Compass className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
             <span>Study Fit Insight</span>
           </div>
-          <p className="text-sm font-medium text-slate-900">{studyFit.headline}</p>
+          <p className="text-sm font-medium text-[var(--text-primary)]">{studyFit.headline}</p>
 
           {studyFit.supportingExcerpts.length > 0 && (
-            <div className="space-y-2 pt-3 border-t border-blue-200/60">
-              <div className="text-xs font-semibold text-slate-700">
+            <div className="space-y-2 pt-3 border-t border-[var(--border)]">
+              <div className="text-xs font-semibold text-[var(--text-secondary)]">
                 Relevant advice from matching student reviews:
               </div>
               <ul className="space-y-2">
                 {studyFit.supportingExcerpts.map((ex) => (
-                  <li key={ex.reviewId} className="rounded-lg bg-white/85 border border-slate-200/60 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700">
+                  <li key={ex.reviewId} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-3.5 py-2.5 text-xs leading-relaxed text-[var(--text-secondary)]">
                     “{ex.advice}”{' '}
                     <button
                       type="button"
                       onClick={() => onJumpToReview(ex.reviewId)}
-                      className="font-semibold text-blue-700 hover:underline ml-1"
+                      className="font-semibold text-[var(--accent-text)] hover:underline ml-1"
                     >
                       ({ex.authorAlias} · {ex.term})
                     </button>
@@ -113,7 +141,7 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-1">
+          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] pt-1">
             <Info className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>{studyFit.disclaimer}</span>
           </div>
@@ -124,20 +152,20 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
       <section className="surface-card rounded-2xl p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2 mb-5">
           <div>
-            <h3 className="font-display text-base font-bold text-slate-900">
+            <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
               Reported Strategy Usage & Helpfulness
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--text-muted)]">
               Every figure reports exact respondent counts alongside the share who found it helpful.
             </p>
           </div>
-          <span className="rounded-md bg-[#F4F7FB] px-2.5 py-1 font-mono text-xs text-slate-600 tabular-nums">
+          <span className="rounded-md border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 font-mono text-xs text-[var(--text-secondary)] tabular-nums">
             {displayedStrategies.length} strategies tracked
           </span>
         </div>
 
         {displayedStrategies.length === 0 ? (
-          <p className="text-sm text-slate-600 py-6 text-center">
+          <p className="text-sm text-[var(--text-secondary)] py-6 text-center">
             No respondents have logged this specific study category for {courseCode} yet.
           </p>
         ) : (
@@ -145,25 +173,25 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
             {displayedStrategies.map((stat) => (
               <div
                 key={stat.key}
-                className="rounded-xl border border-slate-200/65 bg-[#F7F9FC] p-3.5 space-y-2"
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5 space-y-2"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-sm font-medium text-slate-900">{stat.label}</span>
-                  <span className="text-xs text-slate-600 tabular-nums">
-                    <strong className="font-mono font-semibold text-teal-700">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{stat.label}</span>
+                  <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+                    <strong className="font-mono font-semibold text-[var(--accent-text)]">
                       {stat.helpfulPercentage}%
                     </strong>{' '}
                     of{' '}
-                    <strong className="font-mono font-semibold text-slate-900">
+                    <strong className="font-mono font-semibold text-[var(--text-primary)]">
                       {stat.usedCount}
                     </strong>{' '}
                     respondent{stat.usedCount === 1 ? '' : 's'} who used this reported finding it
                     helpful
                   </span>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#E3EAF4]">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
                   <div
-                    className="h-full rounded-full bg-teal-600 transition-all duration-300"
+                    className="h-full rounded-full bg-[var(--chart-primary)] transition-all duration-300"
                     style={{ width: `${stat.helpfulPercentage}%` }}
                   />
                 </div>

@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Info, X } from 'lucide-react';
 import type {
+  CatalogueMetadata,
+  CatalogueSubject,
   Course,
   CourseStats,
   DemoUser,
@@ -30,6 +32,8 @@ import { HowItWorksPage } from './components/HowItWorksPage';
 import { WriteReviewModal } from './components/WriteReviewModal';
 import { ReportReviewModal } from './components/ReportReviewModal';
 import { ProfileModal } from './components/ProfileModal';
+import { ThemeProvider } from './theme/ThemeContext';
+import { resolveActiveThemeId } from './theme/universityTheme';
 
 const DEMO_STUDENT_PROFILE: DemoUser = {
   id: 'demo-student',
@@ -83,6 +87,8 @@ export default function App() {
 
   const [universities, setUniversities] = useState<University[]>(DEMO_UNIVERSITIES);
   const [courses, setCourses] = useState<Course[]>(DEMO_COURSES);
+  const [subjects, setSubjects] = useState<CatalogueSubject[]>([]);
+  const [catalogueMeta, setCatalogueMeta] = useState<CatalogueMetadata | null>(null);
   const [instructors, setInstructors] = useState<InstructorProfile[]>(DEMO_INSTRUCTORS);
   const [reviews, setReviews] = useState<Review[]>(DEMO_REVIEWS);
   const [facultyResponses, setFacultyResponses] =
@@ -92,6 +98,9 @@ export default function App() {
 
   const [selectedUniversity, setSelectedUniversity] = useState<UniversityId>('all');
   const [exploreQuery, setExploreQuery] = useState('');
+  const [reviewRevision, setReviewRevision] = useState(0);
+  const [courseDetailLoading, setCourseDetailLoading] = useState(false);
+  const [courseNotFoundId, setCourseNotFoundId] = useState<string | null>(null);
   const [savedCourseIds, setSavedCourseIds] = useState<string[]>(['math-137', 'cs-135']);
   const [userVotes, setUserVotes] = useState<Record<string, 'helpful' | 'not_helpful'>>({});
 
@@ -142,7 +151,17 @@ export default function App() {
       .then((data) => {
         if (!active) return;
         if (Array.isArray(data.universities)) setUniversities(data.universities);
-        if (Array.isArray(data.courses)) setCourses(data.courses);
+        if (Array.isArray(data.courses)) {
+          setCourses((prev) => {
+            const byId = new Map(prev.map((c) => [c.id, c]));
+            for (const c of data.courses as Course[]) {
+              byId.set(c.id, { ...byId.get(c.id), ...c });
+            }
+            return Array.from(byId.values());
+          });
+        }
+        if (Array.isArray(data.subjects)) setSubjects(data.subjects);
+        if (data.catalogueMeta) setCatalogueMeta(data.catalogueMeta);
         if (Array.isArray(data.instructors)) setInstructors(data.instructors);
         if (Array.isArray(data.reviews)) setReviews(data.reviews);
         if (Array.isArray(data.facultyResponses)) setFacultyResponses(data.facultyResponses);
@@ -160,6 +179,58 @@ export default function App() {
       active = false;
     };
   }, [currentUser?.id]);
+
+  // Fetch full official catalogue record + term schedule status when opening any course route
+  useEffect(() => {
+    if (route.page !== 'course') {
+      setCourseNotFoundId(null);
+      setCourseDetailLoading(false);
+      return;
+    }
+
+    const targetId = route.courseId;
+    const alreadyCached = courses.some((c) => c.id === targetId);
+    if (!alreadyCached) {
+      setCourseDetailLoading(true);
+    }
+    setCourseNotFoundId(null);
+
+    let active = true;
+    fetch(`/api/courses/${encodeURIComponent(targetId)}`)
+      .then(async (res) => {
+        if (res.status === 404) {
+          throw new Error('NOT_FOUND');
+        }
+        if (!res.ok) {
+          throw new Error('FETCH_FAILED');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (!active || !data?.course) return;
+        const fetchedCourse = data.course as Course;
+        setCourses((prev) => {
+          const exists = prev.some((c) => c.id === fetchedCourse.id);
+          if (exists) {
+            return prev.map((c) => (c.id === fetchedCourse.id ? { ...c, ...fetchedCourse } : c));
+          }
+          return [...prev, fetchedCourse];
+        });
+      })
+      .catch((err) => {
+        if (!active) return;
+        if (err instanceof Error && err.message === 'NOT_FOUND') {
+          setCourseNotFoundId(targetId);
+        }
+      })
+      .finally(() => {
+        if (active) setCourseDetailLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [route.page === 'course' ? route.courseId : null]);
 
   // Derived stats per course
   const statsMap = useMemo<Record<string, CourseStats>>(() => {
@@ -180,11 +251,29 @@ export default function App() {
   }, [instructors]);
 
   const handleToggleSave = async (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId);
+    let course = courses.find((c) => c.id === courseId);
     const wasSaved = savedCourseIds.includes(courseId);
     setSavedCourseIds((prev) =>
       wasSaved ? prev.filter((id) => id !== courseId) : [...prev, courseId]
     );
+
+    if (!course) {
+      try {
+        const courseRes = await fetch(`/api/courses/${encodeURIComponent(courseId)}`);
+        if (courseRes.ok) {
+          const courseData = await courseRes.json();
+          if (courseData?.course) {
+            const hydrated = courseData.course as Course;
+            course = hydrated;
+            setCourses((prev) =>
+              prev.some((c) => c.id === hydrated.id) ? prev : [...prev, hydrated]
+            );
+          }
+        }
+      } catch {
+        // ignore hydration error
+      }
+    }
 
     try {
       const res = await fetch('/api/saved-courses', {
@@ -237,6 +326,7 @@ export default function App() {
       throw new Error(data.error || 'Could not submit review.');
     }
     setReviews((prev) => [data.review, ...prev]);
+    setReviewRevision((v) => v + 1);
     pushToast('Review submitted and scored by CourseGlide Trust Lens.');
   };
 
@@ -307,6 +397,7 @@ export default function App() {
           prev.map((r) => (r.id === data.review.id ? data.review : r))
         );
       }
+      setReviewRevision((v) => v + 1);
       pushToast(
         action === 'remove'
           ? 'Review hidden by moderation.'
@@ -360,21 +451,46 @@ export default function App() {
 
   const activeCourse =
     route.page === 'course'
-      ? courses.find((c) => c.id === route.courseId) ?? courses[0]
+      ? courses.find((c) => c.id === route.courseId) ?? null
       : null;
+
+  const activeThemeId = useMemo(
+    () =>
+      resolveActiveThemeId({
+        routePage: route.page,
+        selectedUniversity,
+        activeCourseUniversityId: activeCourse?.universityId ?? null,
+      }),
+    [route.page, selectedUniversity, activeCourse?.universityId]
+  );
+
+  const handleSelectUniversity = useCallback(
+    (nextUniversity: UniversityId) => {
+      setSelectedUniversity(nextUniversity);
+      if (
+        route.page === 'course' &&
+        activeCourse &&
+        nextUniversity !== 'all' &&
+        nextUniversity !== activeCourse.universityId
+      ) {
+        navigate({ page: 'explore' });
+      }
+    },
+    [route.page, activeCourse, navigate]
+  );
 
   const writeReviewCourse = writeReviewCourseId
     ? courses.find((c) => c.id === writeReviewCourseId) ?? null
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F1F4F9] text-[#0F172A]">
+    <ThemeProvider themeId={activeThemeId}>
       <Navbar
         route={route}
         onNavigate={navigate}
         universities={universities}
         selectedUniversity={selectedUniversity}
-        onSelectUniversity={setSelectedUniversity}
+        onSelectUniversity={handleSelectUniversity}
         savedCount={savedCourseIds.length}
         currentUser={currentUser}
         onOpenProfileModal={() => setProfileModalOpen(true)}
@@ -383,11 +499,11 @@ export default function App() {
       {loading ? (
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-12 sm:px-6 lg:px-8" aria-busy="true">
           <div className="space-y-6">
-            <div className="h-10 w-2/3 max-w-lg animate-pulse rounded-lg bg-slate-200/80" />
-            <div className="h-5 w-1/2 max-w-md animate-pulse rounded bg-slate-200/80" />
+            <div className="h-10 w-2/3 max-w-lg animate-pulse rounded-lg bg-[var(--surface-muted)]" />
+            <div className="h-5 w-1/2 max-w-md animate-pulse rounded bg-[var(--surface-muted)]" />
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 pt-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-56 animate-pulse rounded-xl border border-slate-200/80 bg-white/80" />
+                <div key={i} className="h-56 animate-pulse rounded-xl border border-[var(--border)] bg-[var(--surface)]/80" />
               ))}
             </div>
           </div>
@@ -397,6 +513,7 @@ export default function App() {
           {route.page === 'landing' && (
             <LandingPage
               courses={courses}
+              catalogueMeta={catalogueMeta}
               statsMap={statsMap}
               instructorsByCourse={instructorsByCourse}
               selectedUniversity={selectedUniversity}
@@ -418,11 +535,14 @@ export default function App() {
             <ExplorePage
               courses={courses}
               universities={universities}
+              subjects={subjects}
+              catalogueMeta={catalogueMeta}
               statsMap={statsMap}
               instructorsByCourse={instructorsByCourse}
               selectedUniversity={selectedUniversity}
-              onSelectUniversity={setSelectedUniversity}
+              onSelectUniversity={handleSelectUniversity}
               initialQuery={exploreQuery}
+              reviewRevision={reviewRevision}
               savedCourseIds={savedCourseIds}
               onToggleSave={handleToggleSave}
               onOpenCourse={(courseId) =>
@@ -431,24 +551,52 @@ export default function App() {
             />
           )}
 
-          {route.page === 'course' && activeCourse && (
-            <CourseDetailPage
-              course={activeCourse}
-              stats={statsMap[activeCourse.id]}
-              reviews={reviews.filter((r) => r.courseId === activeCourse.id)}
-              instructors={instructors.filter((i) => i.courseId === activeCourse.id)}
-              facultyResponses={facultyResponses.filter((f) => f.courseId === activeCourse.id)}
-              initialTab={route.initialTab}
-              initialHighlightReviewId={route.highlightReviewId}
-              isSaved={savedCourseIds.includes(activeCourse.id)}
-              userVotes={userVotes}
-              onBackToExplore={() => navigate({ page: 'explore' })}
-              onToggleSave={handleToggleSave}
-              onOpenWriteReview={() => setWriteReviewCourseId(activeCourse.id)}
-              onVote={handleVote}
-              onReportReview={(reviewId) => setReportReviewId(reviewId)}
-              onSubmitFacultyResponse={handleSubmitFacultyResponse}
-            />
+          {route.page === 'course' && (
+            activeCourse ? (
+              <CourseDetailPage
+                course={activeCourse}
+                stats={statsMap[activeCourse.id] ?? computeCourseStats([])}
+                reviews={reviews.filter((r) => r.courseId === activeCourse.id)}
+                instructors={instructors.filter((i) => i.courseId === activeCourse.id)}
+                facultyResponses={facultyResponses.filter((f) => f.courseId === activeCourse.id)}
+                initialTab={route.initialTab}
+                initialHighlightReviewId={route.highlightReviewId}
+                isSaved={savedCourseIds.includes(activeCourse.id)}
+                userVotes={userVotes}
+                onBackToExplore={() => navigate({ page: 'explore' })}
+                onToggleSave={handleToggleSave}
+                onOpenWriteReview={() => setWriteReviewCourseId(activeCourse.id)}
+                onVote={handleVote}
+                onReportReview={(reviewId) => setReportReviewId(reviewId)}
+                onSubmitFacultyResponse={handleSubmitFacultyResponse}
+              />
+            ) : courseDetailLoading ? (
+              <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8" aria-busy="true">
+                <div className="surface-card rounded-2xl p-8 space-y-4">
+                  <div className="h-6 w-32 animate-pulse rounded bg-slate-200" />
+                  <div className="h-9 w-2/3 animate-pulse rounded bg-slate-200" />
+                  <div className="h-20 w-full animate-pulse rounded bg-slate-100" />
+                </div>
+              </main>
+            ) : (
+              <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8 text-center">
+                <div className="surface-card rounded-2xl p-10 space-y-3">
+                  <h1 className="font-display text-2xl font-bold text-slate-900">
+                    Course not found
+                  </h1>
+                  <p className="text-sm text-slate-600">
+                    We couldn’t find a catalogue record matching “{courseNotFoundId ?? route.courseId}”.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate({ page: 'explore' })}
+                    className="btn-primary mt-3 inline-flex items-center rounded-xl px-5 py-2.5 text-sm font-semibold"
+                  >
+                    Browse Course Catalogue
+                  </button>
+                </div>
+              </main>
+            )
           )}
 
           {route.page === 'saved' && (
@@ -473,27 +621,31 @@ export default function App() {
               onOpenCourse={(courseId, tab) =>
                 navigate({ page: 'course', courseId, initialTab: tab ?? 'overview' })
               }
+              onGoExplore={() => navigate({ page: 'explore' })}
+              waterlooCourseCount={catalogueMeta?.waterlooCourseCount}
             />
           )}
         </div>
       )}
 
       {/* Quiet Footer */}
-      <footer className="border-t border-slate-200/80 bg-[#F7F9FC]">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+      <footer className="border-t border-[var(--border)] bg-[var(--surface-subtle)]">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-6 text-xs text-[var(--text-secondary)] sm:flex-row sm:items-center sm:px-6 lg:px-8">
           <div>
-            <strong className="font-display font-semibold text-slate-800">CourseGlide</strong>
+            <strong className="font-display font-semibold text-[var(--text-primary)]">CourseGlide</strong>
             <span className="mx-2" aria-hidden="true">·</span>
             <span>Better feedback. Smarter course decisions.</span>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-            <span>Demonstration dataset (Waterloo &amp; uOttawa)</span>
+            <span>
+              Waterloo {catalogueMeta?.waterlooCalendarVersion ?? '2026–2027 Academic Calendar'} · uOttawa Demo
+            </span>
             <button
               type="button"
               onClick={() => navigate({ page: 'how-it-works' })}
-              className="font-medium text-slate-700 hover:text-blue-700"
+              className="font-semibold text-[var(--accent-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded"
             >
-              Methodology &amp; Moderation
+              How CourseGlide Works
             </button>
           </div>
         </div>
@@ -558,6 +710,6 @@ export default function App() {
           </div>
         ))}
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
