@@ -136,21 +136,52 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     : localAutocompleteMatches;
 
   const curatedCourses = useMemo(() => {
-    const priorityIds = ['math-137', 'cs-135', 'econ-101', 'mat-1320', 'gng-1105'];
+    const priorityIds = ['math-137', 'cs-135', 'econ-101', 'mat-1320', 'gng-1105', 'csi-2110'];
     const pool = universityFiltered;
     const ordered = priorityIds
       .map((id) => pool.find((c) => c.id === id))
       .filter((c): c is Course => Boolean(c));
-    if (ordered.length >= 3) return ordered.slice(0, 5);
-    return pool.slice(0, 5);
+    if (ordered.length >= 3) return ordered.slice(0, 3);
+    return pool.slice(0, 3);
   }, [universityFiltered]);
 
+  const getCourseContextNote = (course: Course): string => {
+    const notesById: Record<string, string> = {
+      'math-137': 'Proof-heavy honours core · 25% weekly assignments, 75% exams',
+      'cs-135': 'Functional programming labs · Weekly Racket problem sets',
+      'econ-101': 'Lighter breadth elective · 20% online quizzes, open to all faculties',
+      'mat-1320': 'Engineering & science calculus · Weekly discussion groups (DGDs)',
+      'gng-1105': 'First-year engineering mechanics · Weekly problem-solving DGDs',
+      'csi-2110': 'Algorithms & data structures in Java · 30% labs and assignments',
+    };
+    if (notesById[course.id]) return notesById[course.id];
+    const terms = course.termsOffered.length > 0 ? course.termsOffered.join(', ') : 'Calendar listing';
+    return `${course.department} · ${terms}`;
+  };
+
   const totalCatalogueCount = useMemo(() => {
-    if (!catalogueMeta) return universityFiltered.length;
+    if (!catalogueMeta) return null;
     if (selectedUniversity === 'uwaterloo') return catalogueMeta.waterlooCourseCount;
     if (selectedUniversity === 'uottawa') return catalogueMeta.uottawaCourseCount;
     return catalogueMeta.totalCourses;
-  }, [catalogueMeta, selectedUniversity, universityFiltered.length]);
+  }, [catalogueMeta, selectedUniversity]);
+
+  const heroSourceLabel = useMemo(() => {
+    const calendarVersion = catalogueMeta?.waterlooCalendarVersion ?? '2026–2027 Academic Calendar';
+    if (selectedUniversity === 'uottawa') {
+      return catalogueMeta
+        ? `University of Ottawa · ${catalogueMeta.uottawaCourseCount} demo courses`
+        : 'University of Ottawa · Seeded demo courses';
+    }
+    if (selectedUniversity === 'uwaterloo') {
+      return catalogueMeta
+        ? `Waterloo ${calendarVersion} (${catalogueMeta.waterlooCourseCount.toLocaleString()} courses)`
+        : `Waterloo ${calendarVersion}`;
+    }
+    return catalogueMeta
+      ? `Waterloo ${calendarVersion} (${catalogueMeta.waterlooCourseCount.toLocaleString()} courses) · uOttawa (${catalogueMeta.uottawaCourseCount} demo courses)`
+      : `Waterloo ${calendarVersion} · uOttawa demo courses`;
+  }, [catalogueMeta, selectedUniversity]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,16 +221,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-1 type-caption text-[var(--text-muted)] shadow-surface text-balance tabular-nums">
-              Waterloo 2026–2027 Academic Calendar (
-              {(catalogueMeta?.waterlooCourseCount ?? courses.length).toLocaleString()} courses) ·
-              uOttawa Demo
+              {heroSourceLabel}
             </span>
             <h1 className="mt-4 type-h1 sm:type-display text-[var(--text)] text-balance">
-              Choose your courses with clarity, not chaos.
+              See real course workload and student advice before you enroll.
             </h1>
-            <p className="mt-4 type-body text-[var(--text-muted)]">
-              Discover trustworthy student feedback, transparent course insights, and study
-              strategies that help you make smarter academic decisions.
+            <p className="mt-4 type-body text-[var(--text-muted)] text-pretty">
+              Compare weekly hours, grading breakdowns, and detailed student reviews across
+              Waterloo’s 2026–2027 calendar.
             </p>
 
             {/* Elevated Search Bar with Autocomplete */}
@@ -329,15 +358,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Curated Courses Section */}
+      {/* Sample Course Comparisons */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end mb-8">
           <div>
             <h2 className="type-h1 text-[var(--text)]">
-              Curated Course Profiles
+              Compare sample courses
             </h2>
-            <p className="mt-1 type-small text-[var(--text-muted)]">
-              Explore self-reported workload benchmarks, Trust Lens review analysis, and teaching-team insights.
+            <p className="mt-1 type-small text-[var(--text-muted)] text-pretty">
+              See how weekly hours, difficulty, and student recommendations differ before you enroll.
             </p>
           </div>
           <button
@@ -345,7 +374,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             onClick={onGoExplore}
             className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 type-caption font-semibold shadow-surface whitespace-nowrap self-start sm:self-auto tabular-nums"
           >
-            <span>Browse all {totalCatalogueCount.toLocaleString()} courses</span>
+            <span>
+              {totalCatalogueCount !== null
+                ? `Browse all ${totalCatalogueCount.toLocaleString()} courses`
+                : 'Browse all courses'}
+            </span>
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
@@ -356,6 +389,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               key={course.id}
               course={course}
               stats={statsMap[course.id]}
+              contextNote={getCourseContextNote(course)}
               isSaved={savedCourseIds.includes(course.id)}
               onToggleSave={onToggleSave}
               onOpenCourse={(id) => onOpenCourse(id)}
@@ -510,18 +544,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
-          {/* Compact three-line summary list (no icons, numbers, borders, or containers) */}
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <ul className="space-y-1.5 type-small text-[var(--text-muted)] text-pretty">
-              <li>Reviews ranked by how specific and useful they are.</li>
-              <li>Difficulty, weekly hours and TA feedback in one place.</li>
-              <li>Study tips from students who took the course.</li>
-            </ul>
-
+          <div className="mt-4 flex justify-end">
             <button
               type="button"
               onClick={onGoHowItWorks}
-              className="inline-flex min-h-[44px] items-center gap-1 self-start rounded-control px-2 py-2 type-caption font-semibold text-[var(--text)] underline-offset-4 hover:underline sm:self-auto whitespace-nowrap"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-control px-2 py-2 type-caption font-semibold text-[var(--text)] underline-offset-4 hover:underline whitespace-nowrap"
             >
               <span>Read our methodology</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

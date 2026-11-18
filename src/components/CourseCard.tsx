@@ -10,6 +10,7 @@ interface CourseCardProps {
   onOpenCourse: (courseId: string) => void;
   layout?: 'grid' | 'list';
   variant?: 'default' | 'explore';
+  contextNote?: string;
   index?: number;
   registerItemRef?: (index: number, el: HTMLButtonElement | null) => void;
   onItemKeyDown?: (index: number, e: React.KeyboardEvent<HTMLButtonElement>) => void;
@@ -200,6 +201,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   onOpenCourse,
   layout = 'grid',
   variant = 'default',
+  contextNote,
   index = 0,
   registerItemRef,
   onItemKeyDown,
@@ -472,6 +474,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 {course.title}
               </h3>
             </button>
+            {contextNote && (
+              <p className="mt-1 type-caption text-[var(--text-muted)] text-pretty">
+                {contextNote}
+              </p>
+            )}
           </div>
 
           <button

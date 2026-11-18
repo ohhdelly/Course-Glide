@@ -678,7 +678,7 @@ export default function App() {
           <div>
             <strong className="font-semibold text-[var(--text)]">CourseGlide</strong>
             <span className="mx-2" aria-hidden="true">·</span>
-            <span>Better feedback. Smarter course decisions.</span>
+            <span>Seeded demo reviews and teaching-team responses.</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span>
