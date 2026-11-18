@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
-  BarChart3,
-  BookOpenCheck,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
 } from 'lucide-react';
 import type {
   CatalogueMetadata,
@@ -16,6 +13,7 @@ import type {
 } from '../types/course';
 import { scoreCourseSearchMatch } from '../utils/trustLens';
 import { CourseCard } from './CourseCard';
+import { CollapsibleText } from './course/CollapsibleText';
 
 interface LandingPageProps {
   courses: Course[];
@@ -187,19 +185,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <main>
-      {/* Hero Section with Restrained Adaptive Gradient */}
-      <section className="border-b border-[var(--border)] bg-gradient-to-b from-[var(--surface-hero-start)] via-[var(--surface-hero-mid)] to-[var(--background)]">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+      {/* Hero Section */}
+      <section className="border-b border-[var(--border)] bg-[var(--bg)]">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center rounded-full border border-[var(--accent-subtle-border)] bg-[var(--surface)]/90 px-3.5 py-1 text-xs font-medium text-[var(--accent-text)] shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+            <span className="inline-flex items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-1 type-caption text-[var(--text-muted)] shadow-surface text-balance tabular-nums">
               Waterloo 2026–2027 Academic Calendar (
               {(catalogueMeta?.waterlooCourseCount ?? courses.length).toLocaleString()} courses) ·
               uOttawa Demo
             </span>
-            <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance sm:text-5xl">
+            <h1 className="mt-4 type-h1 sm:type-display text-[var(--text)] text-balance">
               Choose your courses with clarity, not chaos.
             </h1>
-            <p className="mt-5 text-base leading-relaxed text-[var(--text-secondary)] sm:text-lg">
+            <p className="mt-4 type-body text-[var(--text-muted)]">
               Discover trustworthy student feedback, transparent course insights, and study
               strategies that help you make smarter academic decisions.
             </p>
@@ -211,9 +209,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               role="search"
               aria-label="Course search"
             >
-              <div className="flex items-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-[0_10px_30px_-12px_var(--accent-soft),0_2px_6px_rgba(15,23,42,0.05)] transition-all focus-within:border-[var(--ring)] focus-within:ring-4 focus-within:ring-[var(--ring-soft)]">
+              <div className="flex items-center rounded-card border border-[var(--border)] bg-[var(--surface)] p-2 shadow-surface transition-colors hover:border-[var(--accent-strong)] focus-within:border-[var(--accent-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[var(--accent-strong)]">
                 <Search
-                  className="ml-3.5 h-5 w-5 shrink-0 text-[var(--text-muted)]"
+                  className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--text-muted)]"
                   aria-hidden="true"
                 />
                 <input
@@ -226,15 +224,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   onKeyDown={handleInputKeyDown}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
-                  placeholder="Search courses, course codes, or instructors..."
+                  placeholder="Search courses, codes, or instructors..."
                   aria-label="Search courses, course codes, or instructors"
                   aria-expanded={searchFocused && (autocompleteMatches.length > 0 || remoteLoading)}
                   aria-autocomplete="list"
-                  className="w-full bg-transparent px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none sm:text-base"
+                  className="min-h-[44px] min-w-0 w-full bg-transparent px-2 sm:px-3 py-2 type-small sm:type-body text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="btn-primary inline-flex shrink-0 items-center gap-1.5 rounded-xl px-4.5 py-2.5 text-sm font-semibold shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] whitespace-nowrap"
+                  className="btn-primary inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap"
                 >
                   <span>Search</span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -245,9 +243,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div
                   role="listbox"
                   aria-label="Course suggestions"
-                  className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_16px_36px_-12px_rgba(15,23,42,0.14)]"
+                  className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog"
                 >
-                  <div className="border-b border-[var(--border)] bg-[var(--surface-subtle)] px-4 py-2 text-[11px] font-medium text-[var(--text-muted)]">
+                  <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 type-caption text-[var(--text-muted)]">
                     {trimmedQuery
                       ? remoteLoading && !hasFreshRemote
                         ? 'Searching catalogue...'
@@ -272,26 +270,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                                 e.preventDefault();
                                 onOpenCourse(course.id);
                               }}
-                              className={`flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors focus-visible:outline-none ${
+                              className={`flex min-h-[44px] w-full flex-col items-start justify-between gap-1 px-4 py-3 text-left transition-colors sm:flex-row sm:items-center sm:gap-4 ${
                                 isActive
-                                  ? 'bg-[var(--surface-accent)]'
-                                  : 'hover:bg-[var(--surface-subtle)] focus-visible:bg-[var(--surface-subtle)]'
+                                  ? 'bg-[var(--surface-2)]'
+                                  : 'hover:bg-[var(--surface-2)]'
                               }`}
                             >
-                              <div className="min-w-0">
+                              <div className="min-w-0 w-full sm:w-auto">
                                 <div className="flex items-center gap-2">
-                                  <span className="rounded bg-[var(--surface-accent)] px-1.5 py-0.5 font-mono text-xs font-semibold text-[var(--accent-code)]">
+                                  <span className="shrink-0 rounded-control bg-[var(--surface-2)] border border-[var(--border)] px-2 py-1 type-caption font-semibold text-[var(--text)] tabular-nums">
                                     {course.code}
                                   </span>
-                                  <span className="truncate text-sm font-medium text-[var(--text-primary)]">
+                                  <span className="truncate type-small font-medium text-[var(--text)]">
                                     {course.title}
                                   </span>
                                 </div>
-                                <div className="mt-0.5 text-xs text-[var(--text-muted)]">
+                                <div className="mt-1 truncate type-caption text-[var(--text-muted)]">
                                   {course.universityName} · {course.department}
                                 </div>
                               </div>
-                              <div className="shrink-0 text-right font-mono text-xs text-[var(--text-secondary)] tabular-nums">
+                              <div className="shrink-0 text-left sm:text-right type-caption text-[var(--text-muted)] tabular-nums">
                                 {hasReviews && s
                                   ? `${s.avgWeeklyHours.toFixed(1)} hrs/wk · ${s.recommendationRate}% rec`
                                   : 'No reviews yet'}
@@ -302,14 +300,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       })}
                     </ul>
                   ) : (
-                    <div className="px-4 py-3 text-xs text-[var(--text-muted)]">
+                    <div className="px-4 py-3 type-caption text-[var(--text-muted)]">
                       Finding matching courses across Waterloo &amp; uOttawa...
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 type-caption text-[var(--text-muted)]">
                 <span>Try searching:</span>
                 {['MATH 137', 'CS 135', 'ECON 101', 'MAT 1320', 'GNG 1105'].map((sample) => (
                   <button
@@ -320,7 +318,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       if (found) onOpenCourse(found.id);
                       else onSearchSubmit(sample);
                     }}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)]/95 px-2.5 py-1 font-mono font-medium text-[var(--text-primary)] shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-all hover:border-[var(--accent-subtle-border)] hover:bg-[var(--surface-accent)] hover:text-[var(--accent-code)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                    className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums shadow-surface"
                   >
                     {sample}
                   </button>
@@ -332,27 +330,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* Curated Courses Section */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end mb-8">
           <div>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="type-h1 text-[var(--text)]">
               Curated Course Profiles
             </h2>
-            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+            <p className="mt-1 type-small text-[var(--text-muted)]">
               Explore self-reported workload benchmarks, Trust Lens review analysis, and teaching-team insights.
             </p>
           </div>
           <button
             type="button"
             onClick={onGoExplore}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-xs font-semibold text-[var(--accent-text)] shadow-xs transition-all hover:border-[var(--accent-subtle-border)] hover:bg-[var(--surface-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] whitespace-nowrap self-start sm:self-auto"
+            className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 type-caption font-semibold shadow-surface whitespace-nowrap self-start sm:self-auto tabular-nums"
           >
             <span>Browse all {totalCatalogueCount.toLocaleString()} courses</span>
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {curatedCourses.map((course) => (
             <CourseCard
               key={course.id}
@@ -366,205 +364,168 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Interactive Product Preview & Three Pillars */}
-      <section className="border-t border-[var(--border)] bg-[var(--surface-muted)]/65 py-16">
+      {/* Trust Lens Preview Section */}
+      <section className="border-t border-[var(--border)] bg-[var(--surface-2)] py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-10">
-            <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl text-balance">
-              Built to answer what actually matters before enrollment.
+          <div className="max-w-3xl mb-6">
+            <h2 className="type-h1 text-[var(--text)] text-balance">
+              What students actually need to know before enrolling.
             </h2>
-            <p className="mt-2.5 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base">
-              Instead of scrolling through unverified hot takes, CourseGlide structures student
-              experience into three connected layers of academic intelligence.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-stretch">
-            {/* Left: Interactive Trust Lens Preview Card (7 cols) */}
-            <div className="surface-card lg:col-span-7 flex flex-col justify-between rounded-2xl p-6">
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border)]">
-                  <div>
-                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--status-positive-bg)] text-[var(--status-positive)]">
-                        <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
-                      <span>Interactive Preview: CourseGlide Trust Lens on MATH 137</span>
-                    </div>
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      Toggle modes to see how Trust Lens prioritizes specificity while preserving legitimate criticism.
-                    </p>
-                  </div>
-
-                  <div
-                    role="group"
-                    aria-label="Trust Lens preview toggle"
-                    className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setPreviewTrustMode('most_informative')}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                        previewTrustMode === 'most_informative'
-                          ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      Most Informative
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewTrustMode('all')}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                        previewTrustMode === 'all'
-                          ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                    >
-                      All Reviews
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {previewTrustMode === 'most_informative' ? (
-                    <>
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
-                          <span className="font-semibold text-[var(--text-primary)]">
-                            Fall 2025 · 11 hrs/wk · Recommended
-                          </span>
-                          <span className="font-semibold text-[var(--status-positive)]">
-                            Detailed · Course-Specific
-                          </span>
-                        </div>
-                        <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                          “Weeks 3–6 moved rapidly through formal limit proofs. Draft assignment
-                          proofs in rough form by Tuesday so you can bring specific questions to
-                          Wednesday tutorial or TA office hours.”
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
-                          <span className="font-semibold text-[var(--text-primary)]">
-                            Fall 2025 · 15 hrs/wk · Not Recommended
-                          </span>
-                          <span className="font-semibold text-[var(--accent-text)]">
-                            Balanced Critique · Detailed
-                          </span>
-                        </div>
-                        <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                          “Assignment 4 and the midterm tested inequality bounding never drilled in
-                          lecture. TA Devon Brooks explained counterexamples clearly during office
-                          hours—solve workbook proofs under timed conditions.”
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 opacity-90">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
-                          <span className="font-medium text-[var(--text-primary)]">
-                            Fall 2025 · 20 hrs/wk · Not Recommended
-                          </span>
-                          <span className="font-semibold text-[var(--status-warning)]">
-                            Limited Context
-                          </span>
-                        </div>
-                        <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                          “Worst class ever lol, totally impossible. Drop it.”
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 opacity-90">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
-                          <span className="font-medium text-[var(--text-primary)]">
-                            Fall 2025 · 2 hrs/wk · Recommended
-                          </span>
-                          <span className="font-semibold text-[var(--status-warning)]">
-                            Limited Context
-                          </span>
-                        </div>
-                        <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                          “Super easy A+, barely showed up. Just wing it.”
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs text-[var(--text-muted)]">
-                  Fairness rule: Critical reviews with concrete evidence rank equally with positive reviews.
+          {/* Full-width interactive Trust Lens preview */}
+          <div className="surface-card rounded-card p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2 type-small font-semibold text-[var(--text)]">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]">
+                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 </span>
+                <span>Interactive preview: CourseGlide Trust Lens on MATH 137</span>
+              </div>
+
+              <div
+                role="group"
+                aria-label="Trust Lens preview toggle"
+                className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto rounded-control border border-[var(--border)] bg-[var(--surface)] p-1 gap-1 shrink-0"
+              >
                 <button
                   type="button"
-                  onClick={() => onOpenCourse('math-137', 'reviews')}
-                  className="btn-soft inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap"
+                  onClick={() => setPreviewTrustMode('most_informative')}
+                  aria-pressed={previewTrustMode === 'most_informative'}
+                  className={`min-h-[44px] rounded-control border-b-2 px-3 py-2 type-caption transition-colors whitespace-nowrap ${
+                    previewTrustMode === 'most_informative'
+                      ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                      : 'border-transparent text-[var(--text-muted)] font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+                  }`}
                 >
-                  <span>Test Trust Lens on MATH 137</span>
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  Most informative
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewTrustMode('all')}
+                  aria-pressed={previewTrustMode === 'all'}
+                  className={`min-h-[44px] rounded-control border-b-2 px-3 py-2 type-caption transition-colors whitespace-nowrap ${
+                    previewTrustMode === 'all'
+                      ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                      : 'border-transparent text-[var(--text-muted)] font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+                  }`}
+                >
+                  All reviews
                 </button>
               </div>
             </div>
 
-            {/* Right: Three Pillars Stack (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-              <div className="surface-card rounded-2xl p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-accent)] text-[var(--accent-text)]">
-                    <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  </span>
-                  <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
-                    01. Trustworthy Feedback
-                  </h3>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                  Evaluate the context and usefulness of student reviews using transparent
-                  course-specificity signals, term context, and duplicate detection—without silencing
-                  strong criticism.
-                </p>
-              </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {previewTrustMode === 'most_informative' ? (
+                <>
+                  <div className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="type-caption text-[var(--text-muted)] tabular-nums">
+                        Fall 2025 · 11 hrs/wk · Recommended
+                      </span>
+                      <span className="rounded-control border border-[var(--accent-strong)] px-2 py-0.5 type-caption font-medium text-[var(--text)]">
+                        Course-specific
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <CollapsibleText
+                        maxLines={2}
+                        text="“Weeks 3–6 moved rapidly through formal limit proofs. Draft assignment proofs in rough form by Tuesday so you can bring specific questions to Wednesday tutorial or TA office hours.”"
+                        className="type-small text-[var(--text)] text-pretty"
+                      />
+                    </div>
+                  </div>
 
-              <div className="surface-card rounded-2xl p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-subtle)] text-[var(--text-primary)]">
-                    <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  </span>
-                  <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
-                    02. Course Intelligence
-                  </h3>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                  See clear difficulty distributions, weekly study hours, teaching-team feedback by
-                  professor and TA, and sample-size confidence notes before you register.
-                </p>
-              </div>
+                  <div className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="type-caption text-[var(--text-muted)] tabular-nums">
+                        Fall 2025 · 15 hrs/wk · Not recommended
+                      </span>
+                      <span className="rounded-control border border-[var(--accent-strong)] px-2 py-0.5 type-caption font-medium text-[var(--text)]">
+                        Balanced critique
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <CollapsibleText
+                        maxLines={2}
+                        text="“Assignment 4 and the midterm tested inequality bounding never drilled in lecture. TA Devon Brooks explained counterexamples clearly during office hours—solve workbook proofs under timed conditions.”"
+                        className="type-small text-[var(--text)] text-pretty"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="type-caption text-[var(--text-muted)] tabular-nums">
+                        Fall 2025 · 20 hrs/wk · Not recommended
+                      </span>
+                      <span className="rounded-control border border-[var(--border)] px-2 py-0.5 type-caption font-medium text-[var(--text-muted)]">
+                        Limited context
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <CollapsibleText
+                        maxLines={2}
+                        text="“Worst class ever lol, totally impossible. Drop it.”"
+                        className="type-small text-[var(--text)] text-pretty"
+                      />
+                    </div>
+                  </div>
 
-              <div className="surface-card rounded-2xl p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--status-positive-bg)] text-[var(--status-positive)]">
-                    <BookOpenCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  </span>
-                  <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
-                    03. Study Smarter
-                  </h3>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                  Learn which preparation strategies past students actually found useful, matched to
-                  your learning preferences and grounded in real respondent counts.
-                </p>
-                <button
-                  type="button"
-                  onClick={onGoHowItWorks}
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent-text)] hover:underline"
-                >
-                  <span>Read our methodology</span>
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
+                  <div className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="type-caption text-[var(--text-muted)] tabular-nums">
+                        Fall 2025 · 2 hrs/wk · Recommended
+                      </span>
+                      <span className="rounded-control border border-[var(--border)] px-2 py-0.5 type-caption font-medium text-[var(--text-muted)]">
+                        Limited context
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <CollapsibleText
+                        maxLines={2}
+                        text="“Super easy A+, barely showed up. Just wing it.”"
+                        className="type-small text-[var(--text)] text-pretty"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
+
+            <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+              <span className="type-caption text-[var(--text-muted)] text-pretty">
+                Fairness rule: Critical reviews with concrete evidence rank equally with positive reviews.
+              </span>
+              <button
+                type="button"
+                onClick={() => onOpenCourse('math-137', 'reviews')}
+                className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-3 py-2 type-caption font-semibold whitespace-nowrap"
+              >
+                <span>Test Trust Lens on MATH 137</span>
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          {/* Compact three-line summary list (no icons, numbers, borders, or containers) */}
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <ul className="space-y-1.5 type-small text-[var(--text-muted)] text-pretty">
+              <li>Reviews ranked by how specific and useful they are.</li>
+              <li>Difficulty, weekly hours and TA feedback in one place.</li>
+              <li>Study tips from students who took the course.</li>
+            </ul>
+
+            <button
+              type="button"
+              onClick={onGoHowItWorks}
+              className="inline-flex min-h-[44px] items-center gap-1 self-start rounded-control px-2 py-2 type-caption font-semibold text-[var(--text)] underline-offset-4 hover:underline sm:self-auto whitespace-nowrap"
+            >
+              <span>Read our methodology</span>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </section>

@@ -1,236 +1,184 @@
-import type { UniversityId } from '../types/course';
+import type { University, UniversityId } from '../types/course';
 
-export type UniversityThemeId = 'neutral' | 'uwaterloo' | 'uottawa';
+export type UniversityThemeId = 'neutral' | (string & {});
 
 export interface UniversityThemePalette {
   id: UniversityThemeId;
   label: string;
-  background: string;
+  bg: string;
   surface: string;
-  surfaceSubtle: string;
-  surfaceMuted: string;
-  surfaceAccent: string;
-  surfaceHeroStart: string;
-  surfaceHeroMid: string;
-  headerBg: string;
-  textPrimary: string;
-  textSecondary: string;
+  surface2: string;
+  text: string;
   textMuted: string;
-  accent: string;
-  accentHover: string;
-  accentForeground: string;
-  accentText: string;
-  accentCode: string;
-  accentSubtleBorder: string;
-  accentSoft: string;
   border: string;
-  borderStrong: string;
-  ring: string;
-  ringSoft: string;
+  accent: string;
+  onAccent: string;
+  accentStrong: string;
+  chart: string;
+  // Derived chart tokens strictly mapped from the theme palette
   chartPrimary: string;
   chartSecondary: string;
-  chartTertiary: string;
   chartGrid: string;
   chartAxis: string;
   chartCursor: string;
-  highlightBg: string;
-  highlightText: string;
-  positive: string;
-  positiveBg: string;
-  positiveBorder: string;
-  warning: string;
-  warningBg: string;
 }
 
 export interface UniversityThemeConfig {
   id: UniversityThemeId;
   name: string;
   shortName: string;
+  location?: string;
   palette: UniversityThemePalette;
-  cssVars: Record<string, string>;
+  darkPalette: UniversityThemePalette;
 }
 
 const NEUTRAL_PALETTE: UniversityThemePalette = {
   id: 'neutral',
   label: 'CourseGlide Default',
-  background: '#F1F4F9',
+  bg: '#F7F8FA',
   surface: '#FFFFFF',
-  surfaceSubtle: '#F7F9FC',
-  surfaceMuted: '#E9EEF6',
-  surfaceAccent: '#EFF5FD',
-  surfaceHeroStart: '#E8EFFA',
-  surfaceHeroMid: '#F2F6FC',
-  headerBg: 'rgba(250, 252, 255, 0.92)',
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  textMuted: '#64748B',
+  surface2: '#EEF0F4',
+  text: '#141619',
+  textMuted: '#555963',
+  border: '#DFE2E8',
   accent: '#1D4ED8',
-  accentHover: '#1E40AF',
-  accentForeground: '#FFFFFF',
-  accentText: '#1E40AF',
-  accentCode: '#1E3A8A',
-  accentSubtleBorder: 'rgba(147, 197, 253, 0.85)',
-  accentSoft: 'rgba(29, 78, 216, 0.08)',
-  border: 'rgba(203, 213, 225, 0.8)',
-  borderStrong: 'rgba(148, 163, 184, 0.65)',
-  ring: '#2563EB',
-  ringSoft: 'rgba(37, 99, 235, 0.14)',
+  onAccent: '#FFFFFF',
+  accentStrong: '#1D4ED8',
+  chart: '#1D4ED8',
   chartPrimary: '#1D4ED8',
-  chartSecondary: '#0D9488',
-  chartTertiary: '#334155',
-  chartGrid: '#E2E8F0',
-  chartAxis: '#475569',
-  chartCursor: '#F1F5F9',
-  highlightBg: '#DBEAFE',
-  highlightText: '#1E3A8A',
-  positive: '#0F766E',
-  positiveBg: '#F0FDFA',
-  positiveBorder: 'rgba(153, 246, 228, 0.85)',
-  warning: '#B45309',
-  warningBg: '#FFFBEB',
+  chartSecondary: '#555963',
+  chartGrid: '#DFE2E8',
+  chartAxis: '#555963',
+  chartCursor: '#EEF0F4',
+};
+
+const NEUTRAL_DARK_PALETTE: UniversityThemePalette = {
+  id: 'neutral',
+  label: 'CourseGlide Default (Dark)',
+  bg: '#1C1B1A',
+  surface: '#262523',
+  surface2: '#2F2D2B',
+  text: '#F2EFEA',
+  textMuted: '#B8B4AC',
+  border: '#3D3A37',
+  accent: '#2563EB',
+  onAccent: '#FFFFFF',
+  accentStrong: '#93C5FD',
+  chart: '#93C5FD',
+  chartPrimary: '#93C5FD',
+  chartSecondary: '#B8B4AC',
+  chartGrid: '#3D3A37',
+  chartAxis: '#B8B4AC',
+  chartCursor: '#2F2D2B',
 };
 
 const UWATERLOO_PALETTE: UniversityThemePalette = {
   id: 'uwaterloo',
   label: 'University of Waterloo',
-  background: '#F8F7F2',
+  bg: '#FAF8F3',
   surface: '#FFFFFF',
-  surfaceSubtle: '#F4F1E8',
-  surfaceMuted: '#ECE7D9',
-  surfaceAccent: '#FFF5D9',
-  surfaceHeroStart: '#FAF2D7',
-  surfaceHeroMid: '#F9F6EB',
-  headerBg: 'rgba(253, 252, 248, 0.92)',
-  textPrimary: '#181818',
-  textSecondary: '#52514D',
-  textMuted: '#6B6962',
-  accent: '#FED34C',
-  accentHover: '#EAAB00',
-  accentForeground: '#111111',
-  accentText: '#7A5200',
-  accentCode: '#181818',
-  accentSubtleBorder: 'rgba(234, 171, 0, 0.58)',
-  accentSoft: 'rgba(254, 211, 76, 0.28)',
-  border: 'rgba(212, 206, 190, 0.88)',
-  borderStrong: 'rgba(166, 158, 138, 0.8)',
-  ring: '#EAAB00',
-  ringSoft: 'rgba(234, 171, 0, 0.24)',
-  chartPrimary: '#B88000',
-  chartSecondary: '#181818',
-  chartTertiary: '#52514D',
-  chartGrid: '#EAE4D4',
-  chartAxis: '#52514D',
-  chartCursor: '#F6F0DF',
-  highlightBg: '#FFF0C2',
-  highlightText: '#181818',
-  positive: '#0F766E',
-  positiveBg: '#F0FDFA',
-  positiveBorder: 'rgba(153, 246, 228, 0.85)',
-  warning: '#9A5B00',
-  warningBg: '#FFFBEB',
+  surface2: '#F3F0E8',
+  text: '#141414',
+  textMuted: '#5C5A55',
+  border: '#E4E0D5',
+  accent: '#FFD54F',
+  onAccent: '#141414',
+  accentStrong: '#141414',
+  chart: '#A67C00',
+  chartPrimary: '#A67C00',
+  chartSecondary: '#141414',
+  chartGrid: '#E4E0D5',
+  chartAxis: '#5C5A55',
+  chartCursor: '#F3F0E8',
+};
+
+const UWATERLOO_DARK_PALETTE: UniversityThemePalette = {
+  id: 'uwaterloo',
+  label: 'University of Waterloo (Dark)',
+  bg: '#1C1B1A',
+  surface: '#262523',
+  surface2: '#2F2D2B',
+  text: '#F2EFEA',
+  textMuted: '#B8B4AC',
+  border: '#3D3A37',
+  accent: '#FFD54F',
+  onAccent: '#141414',
+  accentStrong: '#FFD54F',
+  chart: '#FFD54F',
+  chartPrimary: '#FFD54F',
+  chartSecondary: '#F2EFEA',
+  chartGrid: '#3D3A37',
+  chartAxis: '#B8B4AC',
+  chartCursor: '#2F2D2B',
 };
 
 const UOTTAWA_PALETTE: UniversityThemePalette = {
   id: 'uottawa',
   label: 'University of Ottawa',
-  background: '#FAF8F8',
+  bg: '#FAF9F8',
   surface: '#FFFFFF',
-  surfaceSubtle: '#F5EFF0',
-  surfaceMuted: '#ECE3E5',
-  surfaceAccent: '#F9ECEE',
-  surfaceHeroStart: '#F6E8EB',
-  surfaceHeroMid: '#FAF3F4',
-  headerBg: 'rgba(253, 251, 251, 0.92)',
-  textPrimary: '#2D2D2C',
-  textSecondary: '#5D5858',
-  textMuted: '#756F70',
+  surface2: '#F2EFEE',
+  text: '#1E1E1F',
+  textMuted: '#5E5B5C',
+  border: '#E3DFDE',
   accent: '#8F001A',
-  accentHover: '#750015',
-  accentForeground: '#FFFFFF',
-  accentText: '#8F001A',
-  accentCode: '#8F001A',
-  accentSubtleBorder: 'rgba(143, 0, 26, 0.30)',
-  accentSoft: 'rgba(143, 0, 26, 0.09)',
-  border: 'rgba(220, 209, 211, 0.88)',
-  borderStrong: 'rgba(176, 160, 163, 0.78)',
-  ring: '#8F001A',
-  ringSoft: 'rgba(143, 0, 26, 0.16)',
+  onAccent: '#FFFFFF',
+  accentStrong: '#8F001A',
+  chart: '#8F001A',
   chartPrimary: '#8F001A',
-  chartSecondary: '#2D2D2C',
-  chartTertiary: '#9C1C30',
-  chartGrid: '#ECE2E4',
-  chartAxis: '#5D5858',
-  chartCursor: '#F8EEF0',
-  highlightBg: '#F9E4E8',
-  highlightText: '#5C0011',
-  positive: '#0F766E',
-  positiveBg: '#F0FDFA',
-  positiveBorder: 'rgba(153, 246, 228, 0.85)',
-  warning: '#B45309',
-  warningBg: '#FFFBEB',
+  chartSecondary: '#1E1E1F',
+  chartGrid: '#E3DFDE',
+  chartAxis: '#5E5B5C',
+  chartCursor: '#F2EFEE',
 };
 
-function paletteToCssVars(p: UniversityThemePalette): Record<string, string> {
-  return {
-    '--background': p.background,
-    '--surface': p.surface,
-    '--surface-subtle': p.surfaceSubtle,
-    '--surface-muted': p.surfaceMuted,
-    '--surface-accent': p.surfaceAccent,
-    '--surface-hero-start': p.surfaceHeroStart,
-    '--surface-hero-mid': p.surfaceHeroMid,
-    '--header-bg': p.headerBg,
-    '--text-primary': p.textPrimary,
-    '--text-secondary': p.textSecondary,
-    '--text-muted': p.textMuted,
-    '--accent': p.accent,
-    '--accent-hover': p.accentHover,
-    '--accent-foreground': p.accentForeground,
-    '--accent-text': p.accentText,
-    '--accent-code': p.accentCode,
-    '--accent-subtle-border': p.accentSubtleBorder,
-    '--accent-soft': p.accentSoft,
-    '--border': p.border,
-    '--border-strong': p.borderStrong,
-    '--ring': p.ring,
-    '--ring-soft': p.ringSoft,
-    '--chart-primary': p.chartPrimary,
-    '--chart-secondary': p.chartSecondary,
-    '--chart-tertiary': p.chartTertiary,
-    '--chart-grid': p.chartGrid,
-    '--chart-axis': p.chartAxis,
-    '--chart-cursor': p.chartCursor,
-    '--highlight-bg': p.highlightBg,
-    '--highlight-text': p.highlightText,
-    '--status-positive': p.positive,
-    '--status-positive-bg': p.positiveBg,
-    '--status-positive-border': p.positiveBorder,
-    '--status-warning': p.warning,
-    '--status-warning-bg': p.warningBg,
-  };
-}
+const UOTTAWA_DARK_PALETTE: UniversityThemePalette = {
+  id: 'uottawa',
+  label: 'University of Ottawa (Dark)',
+  bg: '#1C1B1A',
+  surface: '#262523',
+  surface2: '#2F2D2B',
+  text: '#F2EFEA',
+  textMuted: '#B8B4AC',
+  border: '#3D3A37',
+  accent: '#8F001A',
+  onAccent: '#FFFFFF',
+  accentStrong: '#E5566D',
+  chart: '#E5566D',
+  chartPrimary: '#E5566D',
+  chartSecondary: '#B8B4AC',
+  chartGrid: '#3D3A37',
+  chartAxis: '#B8B4AC',
+  chartCursor: '#2F2D2B',
+};
 
-export const UNIVERSITY_THEMES: Record<UniversityThemeId, UniversityThemeConfig> = {
+/**
+ * Single theme config registry.
+ * Adding a new university requires only adding ONE entry here and ONE `[data-theme='<id>']` block in `src/index.css`.
+ */
+export const UNIVERSITY_THEMES: Record<string, UniversityThemeConfig> = {
   neutral: {
     id: 'neutral',
     name: 'CourseGlide Standard',
     shortName: 'All Universities',
     palette: NEUTRAL_PALETTE,
-    cssVars: paletteToCssVars(NEUTRAL_PALETTE),
+    darkPalette: NEUTRAL_DARK_PALETTE,
   },
   uwaterloo: {
     id: 'uwaterloo',
     name: 'University of Waterloo',
     shortName: 'Waterloo',
+    location: 'Waterloo, ON',
     palette: UWATERLOO_PALETTE,
-    cssVars: paletteToCssVars(UWATERLOO_PALETTE),
+    darkPalette: UWATERLOO_DARK_PALETTE,
   },
   uottawa: {
     id: 'uottawa',
     name: 'University of Ottawa',
     shortName: 'uOttawa',
+    location: 'Ottawa, ON',
     palette: UOTTAWA_PALETTE,
-    cssVars: paletteToCssVars(UOTTAWA_PALETTE),
+    darkPalette: UOTTAWA_DARK_PALETTE,
   },
 };
 
@@ -240,12 +188,6 @@ export interface ThemeResolutionInput {
   activeCourseUniversityId?: Exclude<UniversityId, 'all'> | null;
 }
 
-/**
- * Resolves the active CourseGlide theme from route context and university selection:
- * - Course detail views always adopt that course's university palette.
- * - Navigating back restores the student's selected university context.
- * - Multi-university browsing ('all') uses the neutral CourseGlide theme.
- */
 export function resolveActiveThemeId(input: ThemeResolutionInput): UniversityThemeId {
   if (input.routePage === 'course' && input.activeCourseUniversityId) {
     return input.activeCourseUniversityId in UNIVERSITY_THEMES
@@ -264,36 +206,26 @@ export function getThemeConfig(themeId: UniversityThemeId): UniversityThemeConfi
   return UNIVERSITY_THEMES[themeId] ?? UNIVERSITY_THEMES.neutral;
 }
 
-/**
- * Subtle per-university card styling tokens used when browsing multiple universities
- * simultaneously in the neutral CourseGlide theme.
- */
-export function getUniversityCardAccent(
-  universityId: Exclude<UniversityId, 'all'>
-): {
-  codeClass: string;
-  hoverBorderClass: string;
-  stripeColor: string;
-} {
-  if (universityId === 'uwaterloo') {
-    return {
-      codeClass: 'text-[#7A5200]',
-      hoverBorderClass: 'hover:border-[#EAAB00]/65',
-      stripeColor: '#EAAB00',
-    };
+export function getConfiguredUniversities(
+  backendUniversities: University[] = [],
+  themes: Record<string, UniversityThemeConfig> = UNIVERSITY_THEMES
+): University[] {
+  const byId = new Map<string, University>();
+  for (const uni of backendUniversities) {
+    byId.set(uni.id, uni);
   }
-  if (universityId === 'uottawa') {
-    return {
-      codeClass: 'text-[#8F001A]',
-      hoverBorderClass: 'hover:border-[#8F001A]/45',
-      stripeColor: '#8F001A',
-    };
+  for (const cfg of Object.values(themes)) {
+    if (cfg.id === 'neutral') continue;
+    if (!byId.has(cfg.id)) {
+      byId.set(cfg.id, {
+        id: cfg.id,
+        name: cfg.name,
+        shortName: cfg.shortName,
+        location: cfg.location ?? '',
+      });
+    }
   }
-  return {
-    codeClass: 'text-[var(--accent-code)]',
-    hoverBorderClass: 'hover:border-[var(--accent-subtle-border)]',
-    stripeColor: 'var(--accent)',
-  };
+  return Array.from(byId.values());
 }
 
 function relativeLuminance(hex: string): number {

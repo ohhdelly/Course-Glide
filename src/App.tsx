@@ -33,7 +33,7 @@ import { WriteReviewModal } from './components/WriteReviewModal';
 import { ReportReviewModal } from './components/ReportReviewModal';
 import { ProfileModal } from './components/ProfileModal';
 import { ThemeProvider } from './theme/ThemeContext';
-import { resolveActiveThemeId } from './theme/universityTheme';
+import { getConfiguredUniversities, resolveActiveThemeId, UNIVERSITY_THEMES } from './theme/universityTheme';
 
 const DEMO_STUDENT_PROFILE: DemoUser = {
   id: 'demo-student',
@@ -48,6 +48,10 @@ interface ToastMessage {
   id: number;
   text: string;
   tone: 'success' | 'info';
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 function parseRouteFromHash(): AppRoute {
@@ -96,7 +100,17 @@ export default function App() {
   const [moderationReports, setModerationReports] =
     useState<ModerationReport[]>(DEMO_MODERATION_REPORTS);
 
-  const [selectedUniversity, setSelectedUniversity] = useState<UniversityId>('all');
+  const [selectedUniversity, setSelectedUniversity] = useState<UniversityId>(() => {
+    try {
+      const stored = window.localStorage.getItem('courseglide_selected_university');
+      if (stored === 'all' || (stored && stored in UNIVERSITY_THEMES)) {
+        return stored;
+      }
+    } catch {
+      // Ignore storage access failures
+    }
+    return 'all';
+  });
   const [exploreQuery, setExploreQuery] = useState('');
   const [reviewRevision, setReviewRevision] = useState(0);
   const [courseDetailLoading, setCourseDetailLoading] = useState(false);
@@ -118,13 +132,20 @@ export default function App() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const pushToast = useCallback((text: string, tone: 'success' | 'info' = 'success') => {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    setToasts((prev) => [...prev, { id, text, tone }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3600);
-  }, []);
+  const pushToast = useCallback(
+    (
+      text: string,
+      tone: 'success' | 'info' = 'success',
+      action?: ToastMessage['action']
+    ) => {
+      const id = Date.now() + Math.floor(Math.random() * 1000);
+      setToasts((prev) => [...prev, { id, text, tone, action }]);
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 4000);
+    },
+    []
+  );
 
   const navigate = useCallback((next: AppRoute) => {
     setRoute(next);
@@ -132,7 +153,10 @@ export default function App() {
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -250,7 +274,10 @@ export default function App() {
     return map;
   }, [instructors]);
 
-  const handleToggleSave = async (courseId: string) => {
+  const handleToggleSave = async (
+    courseId: string,
+    options?: { silent?: boolean }
+  ) => {
     let course = courses.find((c) => c.id === courseId);
     const wasSaved = savedCourseIds.includes(courseId);
     setSavedCourseIds((prev) =>
@@ -292,11 +319,18 @@ export default function App() {
       // Keep optimistic state if offline
     }
 
-    pushToast(
-      wasSaved
-        ? `Removed ${course?.code ?? 'course'} from Saved Courses.`
-        : `Saved ${course?.code ?? 'course'} to your Saved Courses list.`
-    );
+    if (!options?.silent) {
+      pushToast(
+        wasSaved ? 'Removed from saved' : 'Saved',
+        wasSaved ? 'info' : 'success',
+        {
+          label: 'Undo',
+          onClick: () => {
+            void handleToggleSave(courseId, { silent: true });
+          },
+        }
+      );
+    }
   };
 
   const handleSubmitReview = async (payload: {
@@ -464,9 +498,19 @@ export default function App() {
     [route.page, selectedUniversity, activeCourse?.universityId]
   );
 
+  const configuredUniversities = useMemo(
+    () => getConfiguredUniversities(universities),
+    [universities]
+  );
+
   const handleSelectUniversity = useCallback(
     (nextUniversity: UniversityId) => {
       setSelectedUniversity(nextUniversity);
+      try {
+        window.localStorage.setItem('courseglide_selected_university', nextUniversity);
+      } catch {
+        // Ignore storage access failures
+      }
       if (
         route.page === 'course' &&
         activeCourse &&
@@ -488,7 +532,7 @@ export default function App() {
       <Navbar
         route={route}
         onNavigate={navigate}
-        universities={universities}
+        universities={configuredUniversities}
         selectedUniversity={selectedUniversity}
         onSelectUniversity={handleSelectUniversity}
         savedCount={savedCourseIds.length}
@@ -497,13 +541,13 @@ export default function App() {
       />
 
       {loading ? (
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-12 sm:px-6 lg:px-8" aria-busy="true">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8" aria-busy="true">
           <div className="space-y-6">
-            <div className="h-10 w-2/3 max-w-lg animate-pulse rounded-lg bg-[var(--surface-muted)]" />
-            <div className="h-5 w-1/2 max-w-md animate-pulse rounded bg-[var(--surface-muted)]" />
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3 pt-4">
+            <div className="h-8 w-2/3 max-w-lg animate-pulse rounded-control bg-[var(--surface-2)]" />
+            <div className="h-6 w-1/2 max-w-md animate-pulse rounded-control bg-[var(--surface-2)]" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 pt-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-56 animate-pulse rounded-xl border border-[var(--border)] bg-[var(--surface)]/80" />
+                <div key={i} className="h-56 animate-pulse rounded-card border border-[var(--border)] bg-[var(--surface)]" />
               ))}
             </div>
           </div>
@@ -571,26 +615,26 @@ export default function App() {
                 onSubmitFacultyResponse={handleSubmitFacultyResponse}
               />
             ) : courseDetailLoading ? (
-              <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8" aria-busy="true">
-                <div className="surface-card rounded-2xl p-8 space-y-4">
-                  <div className="h-6 w-32 animate-pulse rounded bg-slate-200" />
-                  <div className="h-9 w-2/3 animate-pulse rounded bg-slate-200" />
-                  <div className="h-20 w-full animate-pulse rounded bg-slate-100" />
+              <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" aria-busy="true">
+                <div className="surface-card rounded-card p-6 sm:p-8 space-y-4">
+                  <div className="h-6 w-32 animate-pulse rounded-control bg-[var(--surface-2)]" />
+                  <div className="h-8 w-2/3 animate-pulse rounded-control bg-[var(--surface-2)]" />
+                  <div className="h-20 w-full animate-pulse rounded-control bg-[var(--surface-2)]" />
                 </div>
               </main>
             ) : (
-              <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-                <div className="surface-card rounded-2xl p-10 space-y-3">
-                  <h1 className="font-display text-2xl font-bold text-slate-900">
+              <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 text-center">
+                <div className="surface-card rounded-card p-6 sm:p-8 space-y-3">
+                  <h1 className="type-h1 text-[var(--text)]">
                     Course not found
                   </h1>
-                  <p className="text-sm text-slate-600">
+                  <p className="type-small text-[var(--text-muted)]">
                     We couldn’t find a catalogue record matching “{courseNotFoundId ?? route.courseId}”.
                   </p>
                   <button
                     type="button"
                     onClick={() => navigate({ page: 'explore' })}
-                    className="btn-primary mt-3 inline-flex items-center rounded-xl px-5 py-2.5 text-sm font-semibold"
+                    className="btn-primary mt-3 inline-flex min-h-[44px] items-center rounded-control px-4 py-2 type-small font-medium"
                   >
                     Browse Course Catalogue
                   </button>
@@ -629,21 +673,21 @@ export default function App() {
       )}
 
       {/* Quiet Footer */}
-      <footer className="border-t border-[var(--border)] bg-[var(--surface-subtle)]">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-6 text-xs text-[var(--text-secondary)] sm:flex-row sm:items-center sm:px-6 lg:px-8">
+      <footer className="border-t border-[var(--border)] bg-[var(--surface-2)]">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-6 type-caption text-[var(--text-muted)] sm:flex-row sm:items-center sm:px-6 lg:px-8">
           <div>
-            <strong className="font-display font-semibold text-[var(--text-primary)]">CourseGlide</strong>
+            <strong className="font-semibold text-[var(--text)]">CourseGlide</strong>
             <span className="mx-2" aria-hidden="true">·</span>
             <span>Better feedback. Smarter course decisions.</span>
           </div>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span>
               Waterloo {catalogueMeta?.waterlooCalendarVersion ?? '2026–2027 Academic Calendar'} · uOttawa Demo
             </span>
             <button
               type="button"
               onClick={() => navigate({ page: 'how-it-works' })}
-              className="font-semibold text-[var(--accent-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded"
+              className="inline-flex min-h-[44px] items-center rounded-control px-2 font-medium text-[var(--text)] underline-offset-4 hover:underline"
             >
               How CourseGlide Works
             </button>
@@ -685,28 +729,44 @@ export default function App() {
       {/* Toast Stack */}
       <div
         aria-live="polite"
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"
+        className="pointer-events-none fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-full sm:max-w-sm"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="status"
-            className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-900 px-4 py-3 text-xs font-medium text-white shadow-lg"
+            className="pointer-events-auto flex items-center justify-between gap-2 rounded-card border border-[var(--border)] bg-[var(--surface)] px-4 py-2 type-caption text-[var(--text)] shadow-dialog"
           >
-            {toast.tone === 'success' ? (
-              <CheckCircle2 className="h-4 w-4 text-teal-400 shrink-0" aria-hidden="true" />
-            ) : (
-              <Info className="h-4 w-4 text-blue-400 shrink-0" aria-hidden="true" />
-            )}
-            <span>{toast.text}</span>
-            <button
-              type="button"
-              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-              aria-label="Dismiss notification"
-              className="ml-2 text-slate-400 hover:text-white"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-2 min-w-0">
+              {toast.tone === 'success' ? (
+                <CheckCircle2 className="h-4 w-4 text-[var(--text)] shrink-0" aria-hidden="true" />
+              ) : (
+                <Info className="h-4 w-4 text-[var(--text-muted)] shrink-0" aria-hidden="true" />
+              )}
+              <span className="font-medium">{toast.text}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              {toast.action && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.action?.onClick();
+                    setToasts((prev) => prev.filter((t) => t.id !== toast.id));
+                  }}
+                  className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-1 type-caption font-semibold"
+                >
+                  {toast.action.label}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                aria-label="Dismiss notification"
+                className="btn-secondary flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-control"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

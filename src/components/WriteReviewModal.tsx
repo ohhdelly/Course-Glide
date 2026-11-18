@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Lock, X } from 'lucide-react';
 import type { Course, InstructorProfile, Review, StudyMethodKey } from '../types/course';
 import { STUDY_METHOD_CATALOG } from '../utils/trustLens';
@@ -28,6 +28,13 @@ interface WriteReviewModalProps {
 
 const TERMS = ['Fall 2025', 'Winter 2025', 'Spring 2025', 'Fall 2024', 'Winter 2024'];
 
+type FieldErrorMap = Partial<
+  Record<'term' | 'instructorName' | 'weeklyHours' | 'overallExperience' | 'submit', string>
+>;
+
+const CONTROL_FOCUS_CLASS =
+  'border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-strong)]';
+
 export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   course,
   instructors,
@@ -45,7 +52,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   const [authorAlias, setAuthorAlias] = useState('');
 
   const [difficulty, setDifficulty] = useState<Review['difficulty']>(3);
-  const [weeklyHours, setWeeklyHours] = useState<number>(9);
+  const [weeklyHours, setWeeklyHours] = useState<string>('9');
   const [recommended, setRecommended] = useState<boolean>(true);
   const [usefulness, setUsefulness] = useState<Review['usefulness']>(4);
 
@@ -55,8 +62,16 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   const [practicalAdvice, setPracticalAdvice] = useState('');
 
   const [studyMethods, setStudyMethods] = useState<StudyMethodKey[]>(['practice_problems']);
-  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>({});
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
 
   const toggleMethod = (key: StudyMethodKey) => {
     setStudyMethods((prev) =>
@@ -64,28 +79,90 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
     );
   };
 
+  const parsedHours = Number(weeklyHours);
+
+  const validateField = (field: 'term' | 'instructorName' | 'weeklyHours' | 'overallExperience', value: string): string | undefined => {
+    if (field === 'term' && !value.trim()) {
+      return 'Select the academic term you took this course.';
+    }
+    if (field === 'instructorName' && !value.trim()) {
+      return 'Enter your professor or instructor name.';
+    }
+    if (field === 'weeklyHours') {
+      const n = Number(value);
+      if (!value.trim() || Number.isNaN(n) || n < 1 || n > 40) {
+        return 'Enter weekly study hours between 1 and 40.';
+      }
+    }
+    if (field === 'overallExperience' && value.trim().length < 15) {
+      return 'Write at least 15 characters summarizing your overall experience.';
+    }
+    return undefined;
+  };
+
+  const handleFieldChange = (
+    field: 'term' | 'instructorName' | 'weeklyHours' | 'overallExperience',
+    value: string
+  ) => {
+    if (field === 'term') setTerm(value);
+    if (field === 'instructorName') setInstructorName(value);
+    if (field === 'weeklyHours') setWeeklyHours(value);
+    if (field === 'overallExperience') setOverallExperience(value);
+
+    if (fieldErrors[field]) {
+      const msg = validateField(field, value);
+      setFieldErrors((prev) => ({ ...prev, [field]: msg }));
+    }
+  };
+
+  const handleFieldBlur = (
+    field: 'term' | 'instructorName' | 'weeklyHours' | 'overallExperience',
+    value: string
+  ) => {
+    const msg = validateField(field, value);
+    setFieldErrors((prev) => ({ ...prev, [field]: msg }));
+  };
+
   const validateStep = (): boolean => {
-    setError('');
+    const nextErrors: FieldErrorMap = {};
+
     if (step === 1) {
-      if (!term.trim() || !instructorName.trim()) {
-        setError('Please choose an academic term and instructor.');
+      const termErr = validateField('term', term);
+      const instErr = validateField('instructorName', instructorName);
+      if (termErr) nextErrors.term = termErr;
+      if (instErr) nextErrors.instructorName = instErr;
+      setFieldErrors(nextErrors);
+      if (termErr) {
+        document.getElementById('rev-term')?.focus();
+        return false;
+      }
+      if (instErr) {
+        document.getElementById('rev-inst')?.focus();
         return false;
       }
     }
+
     if (step === 2) {
-      if (weeklyHours < 1 || weeklyHours > 40) {
-        setError('Please enter weekly study hours between 1 and 40.');
+      const hoursErr = validateField('weeklyHours', weeklyHours);
+      if (hoursErr) nextErrors.weeklyHours = hoursErr;
+      setFieldErrors(nextErrors);
+      if (hoursErr) {
+        document.getElementById('rev-hours')?.focus();
         return false;
       }
     }
+
     if (step === 3) {
-      if (overallExperience.trim().length < 15) {
-        setError(
-          'Please share at least 15 characters describing your overall course experience.'
-        );
+      const expErr = validateField('overallExperience', overallExperience);
+      if (expErr) nextErrors.overallExperience = expErr;
+      setFieldErrors(nextErrors);
+      if (expErr) {
+        document.getElementById('rev-overall')?.focus();
         return false;
       }
     }
+
+    setFieldErrors({});
     return true;
   };
 
@@ -98,7 +175,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
     e.preventDefault();
     if (!validateStep()) return;
     setSubmitting(true);
-    setError('');
+    setFieldErrors({});
     try {
       await onSubmit({
         courseId: course.id,
@@ -110,7 +187,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
           : authorAlias.trim() || 'Demo Student',
         isAnonymous,
         difficulty,
-        weeklyHours,
+        weeklyHours: parsedHours,
         recommended,
         usefulness,
         overallExperience: overallExperience.trim(),
@@ -121,25 +198,32 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to submit review.');
+      setFieldErrors({
+        submit: err instanceof Error ? err.message : 'Unable to submit review.',
+      });
     } finally {
       setSubmitting(false);
     }
   };
+
+  const selectedTileClass =
+    'border-2 border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold shadow-surface';
+  const unselectedTileClass =
+    'border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]';
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="write-review-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--scrim)] p-4"
     >
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-4">
           <div>
-            <div className="font-mono text-xs font-semibold text-[var(--accent-code)]">{course.code}</div>
-            <h2 id="write-review-title" className="font-display text-lg font-bold text-[var(--text-primary)]">
+            <div className="text-xs font-semibold text-[var(--text-muted)]">{course.code}</div>
+            <h2 id="write-review-title" className="type-h2 text-[var(--text)]">
               Write a Course Review
             </h2>
           </div>
@@ -147,49 +231,56 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close review modal"
-            className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-control text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Step Progress Indicator */}
-        <div className="border-b border-[var(--border)] bg-[var(--surface-subtle)] px-6 py-3">
-          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-secondary)] mb-2">
+        <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-6 py-3">
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)] mb-2">
             <span>Step {step} of 4</span>
             <span>
               {step === 1 && 'Course Context & Term'}
               {step === 2 && 'Workload & Rating'}
-              {step === 3 && 'Structured Feedback'}
+              {step === 3 && 'Written Feedback'}
               {step === 4 && 'Study Methods & Submit'}
             </span>
           </div>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-4 gap-2">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className={`h-1.5 rounded-full transition-colors ${
-                  i <= step ? 'bg-[var(--accent-hover)]' : 'bg-[var(--surface-muted)]'
+                className={`h-1.5 rounded-control transition-colors ${
+                  i <= step ? 'bg-[var(--chart)]' : 'bg-[var(--border)]'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="p-6 space-y-6">
           {/* Step 1: Course Context & Term */}
           {step === 1 && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="rev-term" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    Academic Term
+                  <label
+                    htmlFor="rev-term"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    Academic Term <span aria-hidden="true">*</span>
                   </label>
                   <select
                     id="rev-term"
                     value={term}
-                    onChange={(e) => setTerm(e.target.value)}
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    aria-invalid={Boolean(fieldErrors.term)}
+                    aria-describedby={fieldErrors.term ? 'err-rev-term' : undefined}
+                    onChange={(e) => handleFieldChange('term', e.target.value)}
+                    className={`min-h-[44px] w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS} ${
+                      fieldErrors.term ? 'border-[var(--accent-strong)]' : ''
+                    }`}
                   >
                     {TERMS.map((t) => (
                       <option key={t} value={t}>
@@ -197,31 +288,52 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.term && (
+                    <p id="err-rev-term" role="alert" className="mt-1 text-xs font-semibold text-[var(--text)]">
+                      {fieldErrors.term}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="rev-inst" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    Professor / Instructor
+                  <label
+                    htmlFor="rev-inst"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    Professor / Instructor <span aria-hidden="true">*</span>
                   </label>
                   <input
                     id="rev-inst"
                     type="text"
                     list="course-prof-list"
                     value={instructorName}
-                    onChange={(e) => setInstructorName(e.target.value)}
-                    placeholder="Enter instructor name (e.g. Prof. Smith)"
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                    aria-invalid={Boolean(fieldErrors.instructorName)}
+                    aria-describedby={fieldErrors.instructorName ? 'err-rev-inst' : undefined}
+                    onChange={(e) => handleFieldChange('instructorName', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('instructorName', e.target.value)}
+                    placeholder="e.g. Prof. Smith"
+                    className={`min-h-[44px] w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS} ${
+                      fieldErrors.instructorName ? 'border-[var(--accent-strong)]' : ''
+                    }`}
                   />
                   <datalist id="course-prof-list">
                     {profOptions.map((p) => (
                       <option key={p} value={p} />
                     ))}
                   </datalist>
+                  {fieldErrors.instructorName && (
+                    <p id="err-rev-inst" role="alert" className="mt-1 text-xs font-semibold text-[var(--text)]">
+                      {fieldErrors.instructorName}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="rev-ta" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
+                <label
+                  htmlFor="rev-ta"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                >
                   Teaching Assistant (optional)
                 </label>
                 <input
@@ -231,7 +343,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                   value={taName}
                   onChange={(e) => setTaName(e.target.value)}
                   placeholder="Optional TA name from your tutorial or lab"
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                  className={`min-h-[44px] w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS}`}
                 />
                 <datalist id="course-ta-list">
                   {taOptions.map((ta) => (
@@ -240,34 +352,37 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                 </datalist>
               </div>
 
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
-                    <Lock className="h-3.5 w-3.5 text-[var(--status-positive)]" aria-hidden="true" />
+              <div className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text)]">
+                    <Lock className="h-4 w-4 text-[var(--text)]" aria-hidden="true" />
                     <span>Privacy-preserving identity</span>
                   </div>
-                  <label className="inline-flex items-center gap-2 text-xs text-[var(--text-secondary)] cursor-pointer">
+                  <label className="inline-flex min-h-[44px] items-center gap-2 text-xs font-medium text-[var(--text)] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isAnonymous}
                       onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="rounded border-[var(--border-strong)] accent-[var(--accent-hover)] focus:ring-[var(--ring)]"
+                      className="h-4 w-4 rounded-[4px] border border-[var(--border)] accent-[var(--accent-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-strong)]"
                     />
                     <span>Post anonymously</span>
                   </label>
                 </div>
                 <div>
-                  <label htmlFor="rev-alias" className="block text-[11px] text-[var(--text-secondary)] mb-1">
-                    Optional display context (e.g., “2A Honours Math Student” — never include student ID or email)
+                  <label
+                    htmlFor="rev-alias"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    Display context (optional)
                   </label>
                   <input
                     id="rev-alias"
                     type="text"
                     value={authorAlias}
                     onChange={(e) => setAuthorAlias(e.target.value)}
-                    placeholder="Anonymous Student"
+                    placeholder="e.g. 2A Honours Math Student (no student ID or email)"
                     maxLength={48}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    className={`min-h-[44px] w-full rounded-[4px] px-3 py-2 text-xs ${CONTROL_FOCUS_CLASS}`}
                   />
                 </div>
               </div>
@@ -276,21 +391,28 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
 
           {/* Step 2: Difficulty, Workload, Recommendation & Usefulness */}
           {step === 2 && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div>
-                <span className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
-                  Overall Difficulty (1 = Very manageable, 5 = Highly demanding)
+                <span
+                  id="lbl-difficulty"
+                  className="block text-xs font-semibold text-[var(--text)] mb-2"
+                >
+                  Overall Difficulty (1 = Manageable, 5 = Demanding) <span aria-hidden="true">*</span>
                 </span>
-                <div className="grid grid-cols-5 gap-2">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="lbl-difficulty"
+                  className="grid grid-cols-5 gap-2"
+                >
                   {([1, 2, 3, 4, 5] as const).map((val) => (
                     <button
                       key={val}
                       type="button"
+                      role="radio"
+                      aria-checked={difficulty === val}
                       onClick={() => setDifficulty(val)}
-                      className={`rounded-lg border py-2.5 font-mono text-sm font-semibold transition-colors ${
-                        difficulty === val
-                          ? 'btn-primary border-transparent'
-                          : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                      className={`min-h-[44px] rounded-control py-2 text-sm tabular-nums transition-colors ${
+                        difficulty === val ? selectedTileClass : unselectedTileClass
                       }`}
                     >
                       {val}
@@ -301,8 +423,11 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="rev-hours" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    Estimated Weekly Study Hours
+                  <label
+                    htmlFor="rev-hours"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    Estimated Weekly Study Hours <span aria-hidden="true">*</span>
                   </label>
                   <input
                     id="rev-hours"
@@ -310,37 +435,55 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                     min={1}
                     max={40}
                     value={weeklyHours}
-                    onChange={(e) => setWeeklyHours(Number(e.target.value))}
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 font-mono text-sm text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    aria-invalid={Boolean(fieldErrors.weeklyHours)}
+                    aria-describedby={fieldErrors.weeklyHours ? 'err-rev-hours' : 'hint-rev-hours'}
+                    onChange={(e) => handleFieldChange('weeklyHours', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('weeklyHours', e.target.value)}
+                    className={`min-h-[44px] w-full rounded-control px-3 py-2 text-sm tabular-nums ${CONTROL_FOCUS_CLASS} ${
+                      fieldErrors.weeklyHours ? 'border-[var(--accent-strong)]' : ''
+                    }`}
                   />
-                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
-                    Include assignments, readings, tutorials, and exam prep.
-                  </p>
+                  {fieldErrors.weeklyHours ? (
+                    <p id="err-rev-hours" role="alert" className="mt-1 text-xs font-semibold text-[var(--text)]">
+                      {fieldErrors.weeklyHours}
+                    </p>
+                  ) : (
+                    <p id="hint-rev-hours" className="mt-1 text-xs text-[var(--text-muted)]">
+                      Outside-of-class study, assignments, and exam prep (1–40).
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <span className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    Would you recommend this course?
+                  <span
+                    id="lbl-recommend"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    Would you recommend this course? <span aria-hidden="true">*</span>
                   </span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="lbl-recommend"
+                    className="grid grid-cols-2 gap-2"
+                  >
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={recommended}
                       onClick={() => setRecommended(true)}
-                      className={`rounded-lg border py-2 text-xs font-semibold transition-colors ${
-                        recommended
-                          ? 'border-[var(--status-positive-border)] bg-[var(--status-positive-bg)] text-[var(--status-positive)]'
-                          : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                      className={`min-h-[44px] rounded-control py-2 text-xs transition-colors ${
+                        recommended ? selectedTileClass : unselectedTileClass
                       }`}
                     >
                       Yes, recommend
                     </button>
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={!recommended}
                       onClick={() => setRecommended(false)}
-                      className={`rounded-lg border py-2 text-xs font-semibold transition-colors ${
-                        !recommended
-                          ? 'border-amber-700 bg-[var(--status-warning-bg)] text-[var(--status-warning)]'
-                          : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                      className={`min-h-[44px] rounded-control py-2 text-xs transition-colors ${
+                        !recommended ? selectedTileClass : unselectedTileClass
                       }`}
                     >
                       Not recommended
@@ -350,19 +493,26 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
               </div>
 
               <div>
-                <span className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
-                  Perceived Course Usefulness (1 = Low, 5 = Highly valuable)
+                <span
+                  id="lbl-usefulness"
+                  className="block text-xs font-semibold text-[var(--text)] mb-2"
+                >
+                  Course Usefulness (1 = Low, 5 = High) <span aria-hidden="true">*</span>
                 </span>
-                <div className="grid grid-cols-5 gap-2">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="lbl-usefulness"
+                  className="grid grid-cols-5 gap-2"
+                >
                   {([1, 2, 3, 4, 5] as const).map((val) => (
                     <button
                       key={val}
                       type="button"
+                      role="radio"
+                      aria-checked={usefulness === val}
                       onClick={() => setUsefulness(val)}
-                      className={`rounded-lg border py-2.5 font-mono text-sm font-semibold transition-colors ${
-                        usefulness === val
-                          ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--surface)]'
-                          : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                      className={`min-h-[44px] rounded-control py-2 text-sm tabular-nums transition-colors ${
+                        usefulness === val ? selectedTileClass : unselectedTileClass
                       }`}
                     >
                       {val}
@@ -376,29 +526,46 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
           {/* Step 3: Structured Written Feedback */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-xs text-[var(--text-secondary)]">
-                Specific observations about midterms, assignments, tutorials, or pacing help Trust
-                Lens highlight your review for future students.
-              </p>
-
               <div>
-                <label htmlFor="rev-overall" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                  Concise overall experience <span className="text-red-600">*</span>
+                <label
+                  htmlFor="rev-overall"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                >
+                  Overall course experience <span aria-hidden="true">*</span>
                 </label>
                 <textarea
                   id="rev-overall"
-                  rows={2}
+                  rows={3}
                   value={overallExperience}
-                  onChange={(e) => setOverallExperience(e.target.value)}
-                  placeholder="Summarize how the course felt overall, including assessment pacing and expectations..."
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                  aria-invalid={Boolean(fieldErrors.overallExperience)}
+                  aria-describedby={
+                    fieldErrors.overallExperience ? 'err-rev-overall' : 'hint-rev-overall'
+                  }
+                  onChange={(e) => handleFieldChange('overallExperience', e.target.value)}
+                  onBlur={(e) => handleFieldBlur('overallExperience', e.target.value)}
+                  placeholder="Summarize pacing, exams, and overall workload..."
+                  className={`w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS} ${
+                    fieldErrors.overallExperience ? 'border-[var(--accent-strong)]' : ''
+                  }`}
                 />
+                {fieldErrors.overallExperience ? (
+                  <p id="err-rev-overall" role="alert" className="mt-1 text-xs font-semibold text-[var(--text)]">
+                    {fieldErrors.overallExperience}
+                  </p>
+                ) : (
+                  <p id="hint-rev-overall" className="mt-1 text-xs text-[var(--text-muted)]">
+                    Minimum 15 characters. Mentioning midterms, assignments, or tutorials helps Trust Lens rank your review.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="rev-well" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    What worked well
+                  <label
+                    htmlFor="rev-well"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    What worked well (optional)
                   </label>
                   <textarea
                     id="rev-well"
@@ -406,13 +573,16 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                     value={whatWorkedWell}
                     onChange={(e) => setWhatWorkedWell(e.target.value)}
                     placeholder="Lectures, tutorials, TA office hours, or rubrics..."
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                    className={`w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS}`}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="rev-challenge" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                    What was challenging
+                  <label
+                    htmlFor="rev-challenge"
+                    className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                  >
+                    What was challenging (optional)
                   </label>
                   <textarea
                     id="rev-challenge"
@@ -420,22 +590,25 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                     value={whatWasChallenging}
                     onChange={(e) => setWhatWasChallenging(e.target.value)}
                     placeholder="Tough exam topics, assignment spikes, or prerequisites..."
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                    className={`w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS}`}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="rev-advice" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                  Practical advice for future students
+                <label
+                  htmlFor="rev-advice"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                >
+                  Practical advice for future students (optional)
                 </label>
                 <textarea
                   id="rev-advice"
                   rows={2}
                   value={practicalAdvice}
                   onChange={(e) => setPracticalAdvice(e.target.value)}
-                  placeholder="Concrete preparation tips before or during the term..."
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                  placeholder="Preparation tips before or during the term..."
+                  className={`w-full rounded-control px-3 py-2 text-sm ${CONTROL_FOCUS_CLASS}`}
                 />
               </div>
             </div>
@@ -445,14 +618,18 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
           {step === 4 && (
             <div className="space-y-4">
               <div>
-                <span className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                  Which study approaches did you use in {course.code}? (Optional)
+                <span
+                  id="lbl-study-methods"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1.5"
+                >
+                  Study methods used in {course.code} (optional)
                 </span>
-                <p className="text-xs text-[var(--text-muted)] mb-3">
-                  Helps build transparent Study Strategy statistics for future students.
-                </p>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div
+                  role="group"
+                  aria-labelledby="lbl-study-methods"
+                  className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                >
                   {(Object.keys(STUDY_METHOD_CATALOG) as StudyMethodKey[]).map((key) => {
                     const selected = studyMethods.includes(key);
                     return (
@@ -461,52 +638,53 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                         type="button"
                         onClick={() => toggleMethod(key)}
                         aria-pressed={selected}
-                        className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-left text-xs font-medium transition-colors ${
-                          selected
-                            ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)]'
-                            : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                        className={`flex min-h-[44px] items-center justify-between rounded-control px-3 py-2 text-left text-xs transition-colors ${
+                          selected ? selectedTileClass : unselectedTileClass
                         }`}
                       >
                         <span>{STUDY_METHOD_CATALOG[key].label}</span>
-                        {selected && <Check className="h-4 w-4 text-[var(--accent-text)] shrink-0" />}
+                        {selected && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-xs text-[var(--text-secondary)] space-y-1">
-                <div className="font-semibold text-[var(--text-primary)]">Review Summary</div>
+              <div className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--text-muted)] space-y-1">
+                <div className="font-semibold text-[var(--text)]">Review Summary</div>
                 <div>
-                  {term} · {instructorName} · Difficulty {difficulty}/5 · {weeklyHours} hrs/wk ·{' '}
+                  {term} · {instructorName} · Difficulty {difficulty}/5 · {parsedHours} hrs/wk ·{' '}
                   {recommended ? 'Recommended' : 'Not recommended'}
                 </div>
               </div>
+
+              {fieldErrors.submit && (
+                <p role="alert" className="text-xs font-semibold text-[var(--text)]">
+                  {fieldErrors.submit}
+                </p>
+              )}
             </div>
           )}
 
-          {error && (
-            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs text-red-800">
-              {error}
-            </div>
-          )}
-
-          {/* Footer Navigation */}
+          {/* Footer Navigation — Strictly ONE Primary CTA Button */}
           <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
             {step > 1 ? (
               <button
                 type="button"
-                onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4) : s))}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]"
+                onClick={() => {
+                  setFieldErrors({});
+                  setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4) : s));
+                }}
+                className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 text-xs font-semibold"
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 <span>Back</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]"
+                className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-4 py-2 text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -517,20 +695,20 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                 key="next-step-btn"
                 type="button"
                 onClick={handleNext}
-                className="btn-primary inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold"
+                className="btn-primary inline-flex min-h-[44px] items-center gap-2 rounded-control px-6 py-2 text-xs font-semibold"
               >
                 <span>Continue</span>
-                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             ) : (
               <button
                 key="submit-review-btn"
                 type="submit"
                 disabled={submitting}
-                className="btn-primary inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold disabled:opacity-50"
+                className="btn-primary inline-flex min-h-[44px] items-center gap-2 rounded-control px-6 py-2 text-xs font-semibold"
               >
                 <span>{submitting ? 'Submitting...' : 'Submit Review'}</span>
-                <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                <Check className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -539,3 +717,4 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
     </div>
   );
 };
+

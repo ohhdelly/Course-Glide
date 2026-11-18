@@ -3,9 +3,6 @@ import {
   CheckCircle2,
   GraduationCap,
   Lock,
-  MessageSquarePlus,
-  Shield,
-  Users,
 } from 'lucide-react';
 import type {
   CourseStats,
@@ -13,6 +10,7 @@ import type {
   InstructorProfile,
   Review,
 } from '../../types/course';
+import { CollapsibleText } from './CollapsibleText';
 
 interface TeachingTeamTabProps {
   courseId: string;
@@ -45,7 +43,6 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
   const [selectedTerm, setSelectedTerm] = useState<string>('all');
   const [facultyDemoOpen, setFacultyDemoOpen] = useState(false);
 
-  // Faculty demo response form state
   const [respInstructor, setRespInstructor] = useState(
     instructors[0]?.name ?? 'Course Instructor (Demo)'
   );
@@ -69,10 +66,9 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
   const professors = visibleInstructors.filter((i) => i.role === 'professor');
   const tas = visibleInstructors.filter((i) => i.role === 'ta');
 
-  // Aggregated theme counts for Faculty Demo Dashboard (never exposes student identities)
   const aggregatedThemes = useMemo(() => {
     const visible = reviews.filter((r) => r.moderationStatus !== 'hidden');
-    const themes = [
+    return [
       {
         label: 'Midterm / exam calibration & rubric clarity',
         count: visible.filter((r) =>
@@ -98,7 +94,6 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
         ).length,
       },
     ];
-    return themes;
   }, [reviews]);
 
   const handleFacultySubmit = async (e: React.FormEvent) => {
@@ -131,20 +126,19 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header + Term Filter + Faculty Demo Mode Switch */}
-      <section className="surface-card rounded-2xl p-5 sm:p-6">
+      {/* Header + Term Filter + Faculty Demo Switch */}
+      <section className="surface-card rounded-card p-4 sm:p-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
-              Teaching Team Profiles & Two-Way Feedback
+            <h2 className="type-h2 text-[var(--text)]">
+              Teaching Team &amp; TA Feedback
             </h2>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Constructive category breakdowns for professors and teaching assistants (demonstration profiles).
-              Small samples are labeled without ranking individuals.
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Category breakdowns for professors and teaching assistants (demo profiles). Small samples are shown without ranking.
             </p>
           </div>
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
             <div>
               <label htmlFor="teaching-term-filter" className="sr-only">
                 Filter by academic term
@@ -153,7 +147,7 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                 id="teaching-term-filter"
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface)] focus:border-[var(--ring)] focus:bg-[var(--surface)] focus:outline-none"
+                className="min-h-[44px] rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] focus:border-[var(--accent-strong)]"
               >
                 <option value="all">All Terms</option>
                 {terms.map((t) => (
@@ -168,66 +162,57 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
               type="button"
               onClick={() => setFacultyDemoOpen((v) => !v)}
               aria-expanded={facultyDemoOpen}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-xs transition-all whitespace-nowrap ${
-                facultyDemoOpen
-                  ? 'btn-primary border-transparent'
-                  : 'btn-soft'
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 text-xs font-semibold shadow-surface whitespace-nowrap ${
+                facultyDemoOpen ? 'btn-primary' : 'btn-secondary'
               }`}
             >
-              <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+              <GraduationCap className="h-4 w-4" aria-hidden="true" />
               <span>{facultyDemoOpen ? 'Hide Faculty Demo' : 'Faculty Demo View'}</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* Faculty Demonstration Dashboard (Strictly Labeled Demo Mode) */}
+      {/* Faculty Demonstration Dashboard */}
       {facultyDemoOpen && (
         <section
           aria-label="Faculty Demonstration Dashboard"
-          className="rounded-2xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] p-6 shadow-xs space-y-5"
+          className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-6 shadow-surface space-y-6"
         >
           <div className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-[var(--border)]">
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent-text)]">
-                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Demonstration Mode Only · No real faculty privileges granted</span>
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text)]">
+                <Lock className="h-4 w-4" aria-hidden="true" />
+                <span>Demonstration Mode · Aggregated anonymous feedback only</span>
               </div>
-              <h3 className="mt-1 font-display text-lg font-bold text-[var(--text-primary)]">
-                Instructor & TA Aggregate Feedback Console — {courseCode}
+              <h3 className="mt-1 type-h2 text-[var(--text)]">
+                Instructor &amp; TA Feedback Console — {courseCode}
               </h3>
-              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                In production, verified faculty authentication restricts access to anonymized,
-                aggregated trends—individual student identities are never exposed.
-              </p>
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-right font-mono text-xs text-[var(--text-secondary)] tabular-nums">
-              <div>{stats.responseCount} aggregate responses</div>
-              <div className="text-[var(--status-positive)] font-semibold">{stats.recommendationRate}% course recommendation</div>
+            <div className="rounded-control border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-right text-xs text-[var(--text-muted)] tabular-nums">
+              <div>{stats.responseCount} responses</div>
+              <div className="text-[var(--text)] font-semibold">{stats.recommendationRate}% recommend</div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             {/* Left: Aggregated Recurring Themes */}
-            <div className="lg:col-span-5 surface-card rounded-xl p-5">
-              <h4 className="text-sm font-semibold text-[var(--text-primary)]">
-                Recurring Aggregated Themes
+            <div className="lg:col-span-5 surface-card rounded-control p-4 sm:p-6">
+              <h4 className="text-sm font-semibold text-[var(--text)]">
+                Recurring Themes
               </h4>
-              <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                Theme frequencies surfaced from anonymous submissions
-              </p>
               <ul className="mt-4 space-y-3">
                 {aggregatedThemes.map((t) => (
                   <li key={t.label} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[var(--text-primary)]">{t.label}</span>
-                      <span className="font-mono text-[var(--text-secondary)] tabular-nums">
+                    <div className="flex items-center justify-between text-xs gap-2">
+                      <span className="font-medium text-[var(--text)]">{t.label}</span>
+                      <span className="text-[var(--text-muted)] tabular-nums shrink-0">
                         {t.count} mentions
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                    <div className="h-2 w-full overflow-hidden rounded-[4px] bg-[var(--surface-2)]">
                       <div
-                        className="h-full rounded-full bg-[var(--chart-primary)]"
+                        className="h-full rounded-[4px] bg-[var(--chart)]"
                         style={{
                           width: `${
                             stats.responseCount > 0
@@ -245,18 +230,15 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
             {/* Right: Publish Aggregate Clarification Response */}
             <form
               onSubmit={handleFacultySubmit}
-              className="lg:col-span-7 surface-card rounded-xl p-5 space-y-3"
+              className="lg:col-span-7 surface-card rounded-control p-4 sm:p-6 space-y-3"
             >
-              <div className="flex items-center gap-2">
-                <MessageSquarePlus className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-                <h4 className="text-sm font-semibold text-[var(--text-primary)]">
-                  Publish Response to Aggregate Theme (Demo)
-                </h4>
-              </div>
+              <h4 className="text-sm font-semibold text-[var(--text)]">
+                Publish Response to Aggregate Theme (Demo)
+              </h4>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
-                  <label htmlFor="fac-name" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="fac-name" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
                     Instructor / TA Name
                   </label>
                   <input
@@ -264,25 +246,25 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                     type="text"
                     value={respInstructor}
                     onChange={(e) => setRespInstructor(e.target.value)}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    className="min-h-[44px] w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] focus:border-[var(--accent-strong)]"
                   />
                 </div>
                 <div>
-                  <label htmlFor="fac-role" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="fac-role" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
                     Role
                   </label>
                   <select
                     id="fac-role"
                     value={respRole}
                     onChange={(e) => setRespRole(e.target.value as 'professor' | 'ta')}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    className="min-h-[44px] w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] focus:border-[var(--accent-strong)]"
                   >
                     <option value="professor">Professor</option>
                     <option value="ta">Teaching Assistant</option>
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="fac-term" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="fac-term" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
                     Term Context
                   </label>
                   <input
@@ -290,13 +272,13 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                     type="text"
                     value={respTerm}
                     onChange={(e) => setRespTerm(e.target.value)}
-                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                    className="min-h-[44px] w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] focus:border-[var(--accent-strong)]"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="fac-theme" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                <label htmlFor="fac-theme" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
                   Aggregate Theme Addressed
                 </label>
                 <input
@@ -305,12 +287,12 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   value={respTheme}
                   onChange={(e) => setRespTheme(e.target.value)}
                   placeholder="e.g. Midterm 1 partial-credit rubric & weekly workload pacing"
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-strong)]"
                 />
               </div>
 
               <div>
-                <label htmlFor="fac-response" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                <label htmlFor="fac-response" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
                   Teaching Team Clarification / Adjustment
                 </label>
                 <textarea
@@ -318,18 +300,22 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   rows={3}
                   value={respText}
                   onChange={(e) => setRespText(e.target.value)}
-                  placeholder="Share planned syllabus adjustments, extra tutorial resources, or clarifications for incoming students..."
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+                  placeholder="Share planned syllabus adjustments, extra tutorial resources, or clarifications..."
+                  className="w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-strong)]"
                 />
               </div>
 
-              {formError && <p className="text-xs text-red-600">{formError}</p>}
+              {formError && (
+                <p role="alert" className="rounded-control border border-[var(--accent-strong)] bg-[var(--surface-2)] px-3 py-2 text-xs font-medium text-[var(--text)]">
+                  {formError}
+                </p>
+              )}
 
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-50"
+                  className="btn-primary inline-flex min-h-[44px] items-center rounded-control px-4 py-2 text-xs font-semibold"
                 >
                   {submitting ? 'Publishing...' : 'Publish Demo Response'}
                 </button>
@@ -342,34 +328,34 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
       {/* Published Faculty Responses */}
       {facultyResponses.length > 0 && (
         <section className="space-y-3" aria-label="Published teaching team responses">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-            <Shield className="h-4 w-4 text-[var(--status-positive)]" aria-hidden="true" />
-            <span>Teaching Team Responses to Aggregate Feedback</span>
-          </div>
+          <h3 className="text-sm font-semibold text-[var(--text)]">
+            Teaching Team Responses
+          </h3>
           {facultyResponses.map((resp) => (
             <article
               key={resp.id}
-              className="rounded-2xl border border-[var(--status-positive-border)] bg-[var(--status-positive-bg)]/55 p-5 shadow-xs"
+              className="rounded-card border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-6 shadow-surface"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
                 <div className="flex flex-wrap items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-[var(--status-positive)]" aria-hidden="true" />
-                  <span className="font-semibold text-[var(--text-primary)]">{resp.instructorName}</span>
+                  <CheckCircle2 className="h-4 w-4 text-[var(--text)]" aria-hidden="true" />
+                  <span className="font-semibold text-[var(--text)]">{resp.instructorName}</span>
                   <span aria-hidden="true">·</span>
                   <span>{resp.role === 'professor' ? 'Professor' : 'Teaching Assistant'}</span>
                   <span aria-hidden="true">·</span>
                   <span>{resp.term}</span>
                 </div>
-                <span className="rounded-md bg-[var(--surface)] px-2 py-0.5 text-[11px] font-medium text-[var(--status-positive)] border border-[var(--status-positive-border)]">
+                <span className="rounded-control border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs font-medium text-[var(--text)]">
                   Demo faculty response
                 </span>
               </div>
-              <div className="mt-2 text-xs font-semibold text-[var(--text-primary)]">
+              <div className="mt-2 text-xs font-semibold text-[var(--text)]">
                 Theme addressed: {resp.themeAddressed}
               </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-secondary)]">
-                {resp.responseText}
-              </p>
+              <CollapsibleText
+                text={resp.responseText}
+                className="mt-2 text-sm text-[var(--text-muted)]"
+              />
             </article>
           ))}
         </section>
@@ -378,18 +364,18 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
       {/* Professors Section */}
       {professors.length > 0 && (
         <section className="space-y-4">
-          <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
+          <h3 className="text-base font-semibold text-[var(--text)]">
             Professors ({professors.length})
           </h3>
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
             {professors.map((prof) => (
               <article
                 key={prof.id}
-                className="surface-card-interactive rounded-2xl p-5 sm:p-6 space-y-4"
+                className="surface-card-interactive rounded-card p-4 sm:p-6 space-y-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="font-display text-base font-semibold text-[var(--text-primary)]">
+                    <h4 className="text-base font-semibold text-[var(--text)]">
                       {prof.name}
                     </h4>
                     <p className="text-xs text-[var(--text-muted)]">
@@ -398,18 +384,18 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+                <div className="space-y-3 rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4">
                   {prof.categories.map((cat) => (
                     <div key={cat.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--text-secondary)]">{cat.category}</span>
-                        <span className="font-mono font-semibold text-[var(--text-primary)] tabular-nums">
+                        <span className="text-[var(--text-muted)]">{cat.category}</span>
+                        <span className="font-semibold text-[var(--text)] tabular-nums">
                           {cat.score.toFixed(1)} / 5.0
                         </span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                      <div className="h-2 w-full overflow-hidden rounded-[4px] bg-[var(--surface)]">
                         <div
-                          className="h-full rounded-full bg-[var(--chart-primary)]"
+                          className="h-full rounded-[4px] bg-[var(--chart)]"
                           style={{ width: `${(cat.score / 5) * 100}%` }}
                         />
                       </div>
@@ -417,9 +403,10 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   ))}
                 </div>
 
-                <p className="pt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
-                  {prof.constructiveSummary}
-                </p>
+                <CollapsibleText
+                  text={prof.constructiveSummary}
+                  className="pt-1 text-xs text-[var(--text-muted)]"
+                />
               </article>
             ))}
           </div>
@@ -429,20 +416,17 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
       {/* Teaching Assistants Section */}
       {tas.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-            <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
-              Teaching Assistants ({tas.length})
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <h3 className="text-base font-semibold text-[var(--text)]">
+            Teaching Assistants ({tas.length})
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
             {tas.map((ta) => (
               <article
                 key={ta.id}
-                className="surface-card-interactive rounded-2xl p-5 sm:p-6 space-y-4"
+                className="surface-card-interactive rounded-card p-4 sm:p-6 space-y-4"
               >
                 <div>
-                  <h4 className="font-display text-base font-semibold text-[var(--text-primary)]">
+                  <h4 className="text-base font-semibold text-[var(--text)]">
                     {ta.name}
                   </h4>
                   <p className="text-xs text-[var(--text-muted)]">
@@ -450,18 +434,18 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   </p>
                 </div>
 
-                <div className="space-y-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+                <div className="space-y-3 rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4">
                   {ta.categories.map((cat) => (
                     <div key={cat.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--text-secondary)]">{cat.category}</span>
-                        <span className="font-mono font-semibold text-[var(--text-primary)] tabular-nums">
+                        <span className="text-[var(--text-muted)]">{cat.category}</span>
+                        <span className="font-semibold text-[var(--text)] tabular-nums">
                           {cat.score.toFixed(1)} / 5.0
                         </span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                      <div className="h-2 w-full overflow-hidden rounded-[4px] bg-[var(--surface)]">
                         <div
-                          className="h-full rounded-full bg-[var(--chart-secondary)]"
+                          className="h-full rounded-[4px] bg-[var(--chart)]"
                           style={{ width: `${(cat.score / 5) * 100}%` }}
                         />
                       </div>
@@ -469,9 +453,10 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   ))}
                 </div>
 
-                <p className="pt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
-                  {ta.constructiveSummary}
-                </p>
+                <CollapsibleText
+                  text={ta.constructiveSummary}
+                  className="pt-1 text-xs text-[var(--text-muted)]"
+                />
               </article>
             ))}
           </div>
@@ -479,18 +464,18 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
       )}
 
       {visibleInstructors.length === 0 && (
-        <div className="surface-card rounded-2xl p-10 text-center space-y-3">
-          <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
+        <div className="surface-card rounded-card p-8 text-center space-y-3">
+          <h3 className="text-base font-semibold text-[var(--text)]">
             No instructor or TA feedback logged for {courseCode} yet
           </h3>
-          <p className="mx-auto max-w-md text-xs text-[var(--text-secondary)] leading-relaxed">
-            CourseGlide does not invent instructor profiles or term assignments when none have been reported or confirmed via an official term schedule feed.
+          <p className="mx-auto max-w-md text-xs text-[var(--text-muted)]">
+            Submit a course review to share feedback on lectures, labs, or TA support.
           </p>
           {onOpenWriteReview && (
             <button
               type="button"
               onClick={onOpenWriteReview}
-              className="btn-primary mt-2 inline-flex items-center rounded-xl px-4 py-2 text-xs font-semibold"
+              className="btn-primary mt-2 inline-flex min-h-[44px] items-center rounded-control px-4 py-2 text-xs font-semibold"
             >
               Be the first to review
             </button>
@@ -500,3 +485,4 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
     </div>
   );
 };
+

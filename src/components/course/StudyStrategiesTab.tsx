@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { BookOpenCheck, Compass, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import type { CourseStats, Review, StudyPreference } from '../../types/course';
 import { computeStudyFit, rankAndFilterReviews } from '../../utils/trustLens';
+import { CollapsibleText } from './CollapsibleText';
 
 interface StudyStrategiesTabProps {
   courseCode: string;
@@ -45,22 +46,18 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
 
   if (stats.responseCount === 0) {
     return (
-      <section className="surface-card rounded-2xl p-10 text-center space-y-3">
-        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--surface-accent)] text-[var(--accent-text)]">
-          <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
-        </div>
-        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+      <section className="surface-card rounded-card p-8 text-center space-y-3">
+        <h2 className="type-h2 text-[var(--text)]">
           No study strategy reports yet for {courseCode}
         </h2>
-        <p className="mx-auto max-w-md text-sm text-[var(--text-secondary)]">
-          Once students share which study habits helped them succeed in {courseCode}, exact
-          respondent counts and advice excerpts will appear here.
+        <p className="mx-auto max-w-md text-sm text-[var(--text-muted)]">
+          Share which study habits helped you succeed in {courseCode}.
         </p>
         {onOpenWriteReview && (
           <button
             type="button"
             onClick={onOpenWriteReview}
-            className="btn-primary mt-2 inline-flex items-center rounded-xl px-5 py-2.5 text-xs font-semibold"
+            className="btn-primary mt-2 inline-flex min-h-[44px] items-center rounded-control px-6 py-2 text-xs font-semibold"
           >
             Be the first to review
           </button>
@@ -72,20 +69,14 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Study Preference Filter + Study Fit Panel */}
-      <section className="surface-card rounded-2xl p-6 space-y-5">
+      <section className="surface-card rounded-card p-4 sm:p-6 space-y-6">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-accent)] text-[var(--accent-text)]">
-                <BookOpenCheck className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
-                Study Strategies & Preparation Fit
-              </h2>
-            </div>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Filter student-reported preparation habits for {courseCode} by your preferred way of
-              studying.
+            <h2 className="type-h2 text-[var(--text)]">
+              Study Strategies &amp; Preparation Fit
+            </h2>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Filter reported preparation habits for {courseCode} by study approach.
             </p>
           </div>
 
@@ -98,11 +89,12 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
               <button
                 key={opt.id}
                 type="button"
+                aria-pressed={preference === opt.id}
                 onClick={() => setPreference(opt.id)}
-                className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`inline-flex min-h-[44px] items-center rounded-control border px-3 py-2 text-xs font-semibold transition-colors whitespace-nowrap ${
                   preference === opt.id
-                    ? 'btn-primary border-transparent shadow-xs'
-                    : 'border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]'
+                    ? 'btn-primary shadow-surface'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:border-[var(--accent-strong)] hover:text-[var(--text)]'
                 }`}
               >
                 {opt.label}
@@ -112,28 +104,33 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
         </div>
 
         {/* Study Fit Insight Box */}
-        <div className="rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/65 p-5 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent-code)]">
-            <Compass className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-            <span>Study Fit Insight</span>
+        <div className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-6 space-y-3">
+          <div className="text-xs font-semibold text-[var(--text)]">
+            Study Fit Insight
           </div>
-          <p className="text-sm font-medium text-[var(--text-primary)]">{studyFit.headline}</p>
+          <p className="text-sm font-medium text-[var(--text)]">{studyFit.headline}</p>
 
           {studyFit.supportingExcerpts.length > 0 && (
             <div className="space-y-2 pt-3 border-t border-[var(--border)]">
-              <div className="text-xs font-semibold text-[var(--text-secondary)]">
-                Relevant advice from matching student reviews:
+              <div className="text-xs font-semibold text-[var(--text-muted)]">
+                Advice from matching student reviews:
               </div>
               <ul className="space-y-2">
                 {studyFit.supportingExcerpts.map((ex) => (
-                  <li key={ex.reviewId} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-3.5 py-2.5 text-xs leading-relaxed text-[var(--text-secondary)]">
-                    “{ex.advice}”{' '}
+                  <li
+                    key={ex.reviewId}
+                    className="rounded-[4px] bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-xs text-[var(--text-muted)]"
+                  >
+                    <CollapsibleText
+                      text={`“${ex.advice}”`}
+                      className="text-xs text-[var(--text-muted)]"
+                    />
                     <button
                       type="button"
                       onClick={() => onJumpToReview(ex.reviewId)}
-                      className="font-semibold text-[var(--accent-text)] hover:underline ml-1"
+                      className="mt-1 inline-flex min-h-[36px] items-center rounded-[2px] px-1 font-semibold text-[var(--text)] hover:underline"
                     >
-                      ({ex.authorAlias} · {ex.term})
+                      Source: {ex.authorAlias} · {ex.term}
                     </button>
                   </li>
                 ))}
@@ -141,57 +138,57 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] pt-1">
-            <Info className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] pt-1">
+            <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>{studyFit.disclaimer}</span>
           </div>
         </div>
       </section>
 
       {/* Quantitative Helpfulness Breakdown */}
-      <section className="surface-card rounded-2xl p-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-2 mb-5">
+      <section className="surface-card rounded-card p-4 sm:p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 mb-6">
           <div>
-            <h3 className="font-display text-base font-bold text-[var(--text-primary)]">
-              Reported Strategy Usage & Helpfulness
+            <h3 className="text-base font-semibold text-[var(--text)]">
+              Reported Strategy Usage &amp; Helpfulness
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
-              Every figure reports exact respondent counts alongside the share who found it helpful.
+              Exact respondent counts alongside the share who found each strategy helpful.
             </p>
           </div>
-          <span className="rounded-md border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 font-mono text-xs text-[var(--text-secondary)] tabular-nums">
+          <span className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs text-[var(--text-muted)] tabular-nums">
             {displayedStrategies.length} strategies tracked
           </span>
         </div>
 
         {displayedStrategies.length === 0 ? (
-          <p className="text-sm text-[var(--text-secondary)] py-6 text-center">
+          <p className="text-sm text-[var(--text-muted)] py-6 text-center">
             No respondents have logged this specific study category for {courseCode} yet.
           </p>
         ) : (
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             {displayedStrategies.map((stat) => (
               <div
                 key={stat.key}
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5 space-y-2"
+                className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 space-y-2"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-sm font-medium text-[var(--text-primary)]">{stat.label}</span>
-                  <span className="text-xs text-[var(--text-secondary)] tabular-nums">
-                    <strong className="font-mono font-semibold text-[var(--accent-text)]">
+                  <span className="text-sm font-medium text-[var(--text)]">{stat.label}</span>
+                  <span className="text-xs text-[var(--text-muted)] tabular-nums">
+                    <strong className="font-semibold text-[var(--text)]">
                       {stat.helpfulPercentage}%
                     </strong>{' '}
                     of{' '}
-                    <strong className="font-mono font-semibold text-[var(--text-primary)]">
+                    <strong className="font-semibold text-[var(--text)]">
                       {stat.usedCount}
                     </strong>{' '}
                     respondent{stat.usedCount === 1 ? '' : 's'} who used this reported finding it
                     helpful
                   </span>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                <div className="h-2.5 w-full overflow-hidden rounded-[4px] bg-[var(--surface)]">
                   <div
-                    className="h-full rounded-full bg-[var(--chart-primary)] transition-all duration-300"
+                    className="h-full rounded-[2px] bg-[var(--chart)] transition-all duration-300"
                     style={{ width: `${stat.helpfulPercentage}%` }}
                   />
                 </div>
@@ -203,3 +200,4 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
     </div>
   );
 };
+
