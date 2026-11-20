@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, Lock, X } from 'lucide-react';
-import type { Course, InstructorProfile, Review, StudyMethodKey } from '../types/course';
-import { STUDY_METHOD_CATALOG } from '../utils/trustLens';
+import React, { useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, CircleDashed, Lock, Sparkles, X } from 'lucide-react';
+import type {
+  Course,
+  GradeBand,
+  InstructorProfile,
+  Review,
+  StudyMethodKey,
+} from '../types/course';
+import {
+  GRADE_BANDS,
+  GRADE_BAND_LABELS,
+  STUDY_METHOD_CATALOG,
+  evaluateReviewQuality,
+} from '../utils/trustLens';
 
 interface WriteReviewModalProps {
   course: Course;
   instructors: InstructorProfile[];
+  /** Visible reviews already submitted for this course, used by the live linter. */
+  existingReviews: Review[];
   onClose: () => void;
   onSubmit: (payload: {
     courseId: string;
@@ -16,6 +29,9 @@ interface WriteReviewModalProps {
     isAnonymous: boolean;
     difficulty: 1 | 2 | 3 | 4 | 5;
     weeklyHours: number;
+    mentalEffort: 1 | 2 | 3 | 4 | 5;
+    stress: 1 | 2 | 3 | 4 | 5;
+    targetGrade?: GradeBand;
     recommended: boolean;
     usefulness: 1 | 2 | 3 | 4 | 5;
     overallExperience: string;
@@ -31,6 +47,7 @@ const TERMS = ['Fall 2025', 'Winter 2025', 'Spring 2025', 'Fall 2024', 'Winter 2
 export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   course,
   instructors,
+  existingReviews,
   onClose,
   onSubmit,
 }) => {
@@ -40,12 +57,17 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [term, setTerm] = useState(TERMS[0]);
   const [instructorName, setInstructorName] = useState(profOptions[0] ?? '');
-  const [taName, setTaName] = useState(taOptions[0] ?? '');
+  // Optional: starting empty keeps an unnamed TA from being credited automatically,
+  // which would fabricate a "named mention" in the TA section view.
+  const [taName, setTaName] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [authorAlias, setAuthorAlias] = useState('');
 
   const [difficulty, setDifficulty] = useState<Review['difficulty']>(3);
   const [weeklyHours, setWeeklyHours] = useState<number>(9);
+  const [mentalEffort, setMentalEffort] = useState<1 | 2 | 3 | 4 | 5>(3);
+  const [stress, setStress] = useState<1 | 2 | 3 | 4 | 5>(3);
+  const [targetGrade, setTargetGrade] = useState<GradeBand | ''>('');
   const [recommended, setRecommended] = useState<boolean>(true);
   const [usefulness, setUsefulness] = useState<Review['usefulness']>(4);
 
@@ -63,6 +85,83 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
+
+  // Live linter: scores the draft with the exact same function the Trust Lens uses,
+  // so the writing prompt and the published score can never disagree.
+  const linter = useMemo(() => {
+    const draft: Review = {
+      id: 'draft-review',
+      courseId: course.id,
+      universityId: course.universityId,
+      term,
+      instructorName: instructorName.trim() || 'Unknown instructor',
+      ...(taName.trim() ? { taName: taName.trim() } : {}),
+      authorAlias: 'Draft entry',
+      isAnonymous,
+      verifiedEnrollment: false,
+      difficulty,
+      weeklyHours,
+      mentalEffort,
+      stress,
+      ...(targetGrade ? { targetGrade } : {}),
+      recommended,
+      usefulness,
+      overallExperience: overallExperience || 'Not specified.',
+      whatWorkedWell: whatWorkedWell || 'Not specified.',
+      whatWasChallenging: whatWasChallenging || 'Not specified.',
+      // Must mirror the server's stored default, otherwise a blank advice field
+      // previews a lower score than the review actually receives on submit.
+      practicalAdvice: practicalAdvice || 'Stay consistent with weekly coursework.',
+      studyMethods,
+      helpfulMethods: recommended ? studyMethods : [],
+      helpfulVotes: 0,
+      notHelpfulVotes: 0,
+      createdAt: new Date().toISOString(),
+      moderationStatus: 'visible',
+      reportCount: 0,
+      isDemoData: true,
+    };
+    return evaluateReviewQuality(draft, [...existingReviews, draft]);
+  }, [
+    course.id,
+    course.universityId,
+    term,
+    instructorName,
+    taName,
+    isAnonymous,
+    difficulty,
+    weeklyHours,
+    mentalEffort,
+    stress,
+    targetGrade,
+    recommended,
+    usefulness,
+    overallExperience,
+    whatWorkedWell,
+    whatWasChallenging,
+    practicalAdvice,
+    studyMethods,
+    existingReviews,
+  ]);
+
+  const linterChecks = [
+    {
+      label: 'Name the assessment that mattered — midterm, lab, problem set, final.',
+      done: linter.signals.hasAssessmentOrWorkloadContext,
+    },
+    {
+      label: 'Reference something course-specific — topics, rubrics, tutorials.',
+      done: linter.signals.hasCourseSpecificDetails,
+    },
+    {
+      label: 'Say what you actually did to study (and what you would skip).',
+      done: linter.signals.hasActionableAdvice,
+    },
+    {
+      label: 'Give it a few sentences — detail is what reaches the next student.',
+      done: !linter.signals.isLowInformation,
+    },
+  ];
 
   const validateStep = (): boolean => {
     setError('');
@@ -111,6 +210,9 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
         isAnonymous,
         difficulty,
         weeklyHours,
+        mentalEffort,
+        stress,
+        ...(targetGrade ? { targetGrade } : {}),
         recommended,
         usefulness,
         overallExperience: overallExperience.trim(),
@@ -349,6 +451,83 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <span className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
+                    Mental effort (1 = light, 5 = draining)
+                  </span>
+                  <div className="grid grid-cols-5 gap-2">
+                    {([1, 2, 3, 4, 5] as const).map((val) => (
+                      <button
+                        key={`effort-${val}`}
+                        type="button"
+                        onClick={() => setMentalEffort(val)}
+                        aria-pressed={mentalEffort === val}
+                        className={`rounded-lg border py-2 font-mono text-xs font-semibold transition-colors ${
+                          mentalEffort === val
+                            ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)]'
+                            : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                        }`}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                    How draining the work felt, separate from how long it took.
+                  </p>
+                </div>
+
+                <div>
+                  <span className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
+                    Stress (1 = calm, 5 = overwhelming)
+                  </span>
+                  <div className="grid grid-cols-5 gap-2">
+                    {([1, 2, 3, 4, 5] as const).map((val) => (
+                      <button
+                        key={`stress-${val}`}
+                        type="button"
+                        onClick={() => setStress(val)}
+                        aria-pressed={stress === val}
+                        className={`rounded-lg border py-2 font-mono text-xs font-semibold transition-colors ${
+                          stress === val
+                            ? 'border-amber-700 bg-[var(--status-warning-bg)] text-[var(--status-warning)]'
+                            : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                        }`}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                    How the term felt week to week, not just at the exam.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="rev-grade" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
+                  What grade were you working toward? (optional)
+                </label>
+                <select
+                  id="rev-grade"
+                  value={targetGrade}
+                  onChange={(e) => setTargetGrade(e.target.value as GradeBand | '')}
+                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                >
+                  <option value="">Prefer not to say</option>
+                  {GRADE_BANDS.map((band) => (
+                    <option key={band} value={band}>
+                      {GRADE_BAND_LABELS[band]}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                  Used only to group study-hour bands for future students. Never shown as a grade
+                  distribution or a ranking.
+                </p>
+              </div>
+
               <div>
                 <span className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
                   Perceived Course Usefulness (1 = Low, 5 = Highly valuable)
@@ -438,6 +617,43 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                   className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
                 />
               </div>
+
+              {/* Live Trust Lens linter — a nudge, never a blocker */}
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
+                    <Sparkles className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+                    <span>Live Trust Lens score</span>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-[var(--accent-code)] tabular-nums">
+                    {linter.score}/100 · {linter.tier === 'most_informative' ? 'most informative' : linter.tier}
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                  <div
+                    className="h-full rounded-full bg-[var(--accent-hover)] transition-all"
+                    style={{ width: `${linter.score}%` }}
+                  />
+                </div>
+                <ul className="space-y-1.5">
+                  {linterChecks.map((check) => (
+                    <li key={check.label} className="flex items-start gap-2 text-[11px] leading-relaxed">
+                      {check.done ? (
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--status-positive)]" aria-hidden="true" />
+                      ) : (
+                        <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+                      )}
+                      <span className={check.done ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'}>
+                        {check.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  This is the same score reviewers see after submitting — there is no separate
+                  hidden grade, and nothing here blocks you from posting.
+                </p>
+              </div>
             </div>
           )}
 
@@ -479,6 +695,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                 <div className="font-semibold text-[var(--text-primary)]">Review Summary</div>
                 <div>
                   {term} · {instructorName} · Difficulty {difficulty}/5 · {weeklyHours} hrs/wk ·{' '}
+                  effort {mentalEffort}/5 · stress {stress}/5 ·{' '}
                   {recommended ? 'Recommended' : 'Not recommended'}
                 </div>
               </div>

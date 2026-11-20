@@ -7,12 +7,13 @@ import {
   Info,
   PenSquare,
 } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import type {
   Course,
   CourseInsightReport,
   CourseStats,
   FacultyResponse,
+  FacultyResponseStatus,
   InstructorProfile,
   Review,
 } from '../types/course';
@@ -20,8 +21,9 @@ import { CourseOverviewTab } from './course/CourseOverviewTab';
 import { StudentReviewsTab } from './course/StudentReviewsTab';
 import { TeachingTeamTab } from './course/TeachingTeamTab';
 import { StudyStrategiesTab } from './course/StudyStrategiesTab';
+import { FeedbackLoopTab } from './course/FeedbackLoopTab';
 
-export type CourseDetailTab = 'overview' | 'reviews' | 'teaching' | 'strategies';
+export type CourseDetailTab = 'overview' | 'reviews' | 'teaching' | 'feedback' | 'strategies';
 
 interface CourseDetailPageProps {
   course: Course;
@@ -45,6 +47,7 @@ interface CourseDetailPageProps {
     term: string;
     themeAddressed: string;
     responseText: string;
+    status: FacultyResponseStatus;
   }) => Promise<void>;
 }
 
@@ -131,6 +134,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       count: reviews.filter((r) => r.moderationStatus !== 'hidden').length,
     },
     { id: 'teaching', label: 'Teaching Team', count: instructors.length },
+    { id: 'feedback', label: 'Feedback Loop', count: facultyResponses.length },
     { id: 'strategies', label: 'Study Strategies' },
   ];
 
@@ -250,16 +254,21 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
           </div>
 
           <div className="border-l border-[var(--border)] px-4 py-3.5 sm:border-l-0 sm:px-5">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Weekly workload</div>
+            <div className="text-xs font-medium text-[var(--text-muted)]">Load index</div>
             <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
               {hasReviews ? (
                 <>
-                  {stats.avgWeeklyHours.toFixed(1)}
-                  <span className="text-sm font-normal text-[var(--text-muted)]"> hrs/wk</span>
+                  {stats.load.loadIndex}
+                  <span className="text-sm font-normal text-[var(--text-muted)]"> / 100</span>
                 </>
               ) : (
                 <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
               )}
+            </div>
+            <div className="mt-0.5 text-[10px] text-[var(--text-muted)]">
+              {hasReviews
+                ? `${stats.load.avgWeeklyHours.toFixed(1)} hrs · effort ${stats.load.avgMentalEffort.toFixed(1)}/5 · stress ${stats.load.avgStress.toFixed(1)}/5`
+                : 'Time, effort and stress'}
             </div>
           </div>
 
@@ -301,6 +310,14 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               : 'No student reviews recorded yet. Official academic calendar information is displayed below without fabricated student averages.'}
           </span>
         </div>
+
+        {hasReviews && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-5 text-[11px] text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-secondary)]">As of {stats.asOf}</span>
+            <span aria-hidden="true">·</span>
+            <span>{stats.weightingNote}</span>
+          </div>
+        )}
       </section>
 
       {/* Integrated Sub-Navigation Tabs */}
@@ -341,20 +358,21 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         })}
       </div>
 
-      {/* Active Tab Panel with Smooth Transition */}
+      {/* Active Tab Panel with Smooth Transition.
+          A keyed motion.div (no AnimatePresence) swaps panels synchronously: waiting for an
+          exit animation left the previous tab rendered after the selected tab had changed. */}
       <div role="tabpanel">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={`${course.id}-${activeTab}`}
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: 'easeOut' }}
-          >
+        <motion.div
+          key={`${course.id}-${activeTab}`}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: 'easeOut' }}
+        >
             {activeTab === 'overview' && (
               <CourseOverviewTab
                 course={course}
                 stats={stats}
+                reviews={reviews}
                 insights={insights}
                 insightsLoading={insightsLoading}
                 onRefreshInsights={() => loadInsights(true)}
@@ -387,6 +405,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               />
             )}
 
+            {activeTab === 'feedback' && (
+              <FeedbackLoopTab courseCode={course.code} facultyResponses={facultyResponses} />
+            )}
+
             {activeTab === 'strategies' && (
               <StudyStrategiesTab
                 courseCode={course.code}
@@ -396,8 +418,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 onOpenWriteReview={onOpenWriteReview}
               />
             )}
-          </motion.div>
-        </AnimatePresence>
+        </motion.div>
       </div>
     </main>
   );

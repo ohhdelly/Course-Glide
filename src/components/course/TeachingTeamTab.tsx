@@ -1,18 +1,26 @@
 import React, { useMemo, useState } from 'react';
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   GraduationCap,
+  ListChecks,
   Lock,
   MessageSquarePlus,
   Shield,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import type {
   CourseStats,
   FacultyResponse,
+  FacultyResponseStatus,
   InstructorProfile,
   Review,
+  StaffDigest,
 } from '../../types/course';
+import { computeTeachingTeamView } from '../../utils/trustLens';
+import { PulseStaffPanel } from './MidTermPulseCard';
 
 interface TeachingTeamTabProps {
   courseId: string;
@@ -28,6 +36,7 @@ interface TeachingTeamTabProps {
     term: string;
     themeAddressed: string;
     responseText: string;
+    status: FacultyResponseStatus;
   }) => Promise<void>;
   onOpenWriteReview?: () => void;
 }
@@ -53,8 +62,35 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
   const [respTerm, setRespTerm] = useState('Upcoming Term');
   const [respTheme, setRespTheme] = useState('');
   const [respText, setRespText] = useState('');
+  const [respStatus, setRespStatus] = useState<FacultyResponseStatus>('heard');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  const [digest, setDigest] = useState<StaffDigest | null>(null);
+  const [digestLoading, setDigestLoading] = useState(false);
+  const [digestError, setDigestError] = useState('');
+
+  const loadDigest = async (forceRefresh = false) => {
+    setDigestLoading(true);
+    setDigestError('');
+    try {
+      const res = await fetch('/api/staff-digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId, forceRefresh }),
+      });
+      if (!res.ok) {
+        setDigestError('Could not build the digest right now.');
+        return;
+      }
+      const data = await res.json();
+      setDigest(data.digest ?? null);
+    } catch {
+      setDigestError('Could not reach the staff digest endpoint.');
+    } finally {
+      setDigestLoading(false);
+    }
+  };
 
   const terms = useMemo(
     () => Array.from(new Set(instructors.map((i) => i.term))),
@@ -119,6 +155,7 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
         term: respTerm,
         themeAddressed: respTheme.trim(),
         responseText: respText.trim(),
+        status: respStatus,
       });
       setRespTheme('');
       setRespText('');
@@ -296,6 +333,22 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
               </div>
 
               <div>
+                <label htmlFor="fac-status" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
+                  What is the team committing to?
+                </label>
+                <select
+                  id="fac-status"
+                  value={respStatus}
+                  onChange={(e) => setRespStatus(e.target.value as FacultyResponseStatus)}
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] focus:border-[var(--ring)] focus:outline-none"
+                >
+                  <option value="heard">We heard this (acknowledged selection)</option>
+                  <option value="changed">We changed this (concrete adjustment)</option>
+                  <option value="explained">This can't change, and here's why</option>
+                </select>
+              </div>
+
+              <div>
                 <label htmlFor="fac-theme" className="block text-[11px] font-medium text-[var(--text-secondary)] mb-1">
                   Aggregate Theme Addressed
                 </label>
@@ -336,6 +389,101 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
               </div>
             </form>
           </div>
+
+          {/* Start / Stop / Continue digest */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                  <Sparkles className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+                  <span>Start / Stop / Continue digest</span>
+                </div>
+                <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                  Three buckets of anonymised quotes plus an action checklist, built from the same
+                  reviews the Trust Lens ranks highest. Deterministic by default; richer wording when
+                  an AI key is configured.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => loadDigest(Boolean(digest))}
+                disabled={digestLoading}
+                className="btn-soft inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold disabled:opacity-50"
+              >
+                <ListChecks className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>
+                  {digestLoading ? 'Building…' : digest ? 'Rebuild digest' : 'Build digest'}
+                </span>
+              </button>
+            </div>
+
+            {digestError && (
+              <p role="alert" className="text-xs text-red-700">
+                {digestError}
+              </p>
+            )}
+
+            {digest && (
+              <>
+                <div className="rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] p-4">
+                  <div className="text-xs font-semibold text-[var(--accent-text)]">
+                    Action checklist
+                  </div>
+                  {digest.checklist.length === 0 ? (
+                    <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
+                      Not enough substantive responses to derive actions yet.
+                    </p>
+                  ) : (
+                    <ul className="mt-1.5 space-y-1">
+                      {digest.checklist.map((item) => (
+                        <li key={item} className="flex gap-2 text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--status-positive)]" aria-hidden="true" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                  {([
+                    { title: 'Start doing', items: digest.start },
+                    { title: 'Stop or reduce', items: digest.stop },
+                    { title: 'Keep doing', items: digest.keep },
+                  ] as const).map((column) => (
+                    <div key={column.title} className="rounded-xl border border-[var(--border)] p-3.5">
+                      <div className="text-xs font-semibold text-[var(--text-primary)]">
+                        {column.title}
+                      </div>
+                      {column.items.length === 0 ? (
+                        <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">Nothing yet.</p>
+                      ) : (
+                        <ul className="mt-2 space-y-2">
+                          {column.items.map((item, index) => (
+                            <li
+                              key={`${column.title}-${index}`}
+                              className="rounded-lg bg-[var(--surface-subtle)] p-2.5 text-[11px] leading-relaxed text-[var(--text-secondary)]"
+                            >
+                              <p>{item.text}</p>
+                              <p className="mt-1 text-[10px] text-[var(--text-muted)]">
+                                {item.theme} · {item.term}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
+                  {digest.sampleNote} {digest.caveat} Source: {digest.source}.
+                </p>
+              </>
+            )}
+          </div>
+
+          <PulseStaffPanel courseId={courseId} />
         </section>
       )}
 
@@ -360,9 +508,26 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                   <span aria-hidden="true">·</span>
                   <span>{resp.term}</span>
                 </div>
-                <span className="rounded-md bg-[var(--surface)] px-2 py-0.5 text-[11px] font-medium text-[var(--status-positive)] border border-[var(--status-positive-border)]">
-                  Demo faculty response
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
+                      resp.status === 'changed'
+                        ? 'border-[var(--status-positive-border)] bg-[var(--status-positive-bg)] text-[var(--status-positive)]'
+                        : resp.status === 'explained'
+                        ? 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-secondary)]'
+                        : 'border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--status-warning)]'
+                    }`}
+                  >
+                    {resp.status === 'changed'
+                      ? 'Changed'
+                      : resp.status === 'explained'
+                      ? 'Explained, not changing'
+                      : 'Heard'}
+                  </span>
+                  <span className="rounded-md border border-[var(--status-positive-border)] bg-[var(--surface)] px-2 py-0.5 text-[11px] font-medium text-[var(--status-positive)]">
+                    Demo faculty response
+                  </span>
+                </div>
               </div>
               <div className="mt-2 text-xs font-semibold text-[var(--text-primary)]">
                 Theme addressed: {resp.themeAddressed}
@@ -472,6 +637,8 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                 <p className="pt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
                   {ta.constructiveSummary}
                 </p>
+
+                <TaSectionPanel ta={ta} reviews={reviews} />
               </article>
             ))}
           </div>
@@ -494,6 +661,107 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
             >
               Be the first to review
             </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Section-level view for one TA: the same aggregate themes, scoped to reviews
+ * that actually named them, plus whether the pattern predates their section.
+ */
+const TaSectionPanel: React.FC<{ ta: InstructorProfile; reviews: Review[] }> = ({
+  ta,
+  reviews,
+}) => {
+  const [open, setOpen] = useState(false);
+  const view = useMemo(() => computeTeachingTeamView(ta, reviews), [ta, reviews]);
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)]">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      >
+        <span className="text-xs font-semibold text-[var(--text-primary)]">
+          Section detail · {view.matchedReviewCount} named mention
+          {view.matchedReviewCount === 1 ? '' : 's'}
+        </span>
+        {open ? (
+          <ChevronUp className="h-3.5 w-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+        )}
+      </button>
+
+      {open && (
+        <div className="space-y-3 border-t border-[var(--border)] px-3.5 py-3">
+          <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">{view.note}</p>
+
+          {view.confusionThemes.length > 0 && (
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--text-primary)]">
+                What students found hard
+              </div>
+              <ul className="mt-1 space-y-1">
+                {view.confusionThemes.slice(0, 3).map((theme) => (
+                  <li
+                    key={`ta-hard-${theme.label}`}
+                    className="flex items-center justify-between gap-2 rounded-md bg-[var(--surface)] px-2 py-1 text-[11px] text-[var(--text-secondary)]"
+                  >
+                    <span>{theme.label}</span>
+                    <span className="font-mono tabular-nums">{theme.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {view.helpfulThemes.length > 0 && (
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--text-primary)]">
+                What helped
+              </div>
+              <ul className="mt-1 space-y-1">
+                {view.helpfulThemes.slice(0, 3).map((theme) => (
+                  <li
+                    key={`ta-help-${theme.label}`}
+                    className="flex items-center justify-between gap-2 rounded-md bg-[var(--surface)] px-2 py-1 text-[11px] text-[var(--text-secondary)]"
+                  >
+                    <span>{theme.label}</span>
+                    <span className="font-mono tabular-nums">{theme.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {view.excerpts.length > 0 && (
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--text-primary)]">In their words</div>
+              <ul className="mt-1 space-y-1.5">
+                {view.excerpts.map((excerpt) => (
+                  <li
+                    key={`${excerpt.term}-${excerpt.text.slice(0, 24)}`}
+                    className="rounded-md bg-[var(--surface)] p-2 text-[11px] italic leading-relaxed text-[var(--text-secondary)]"
+                  >
+                    “{excerpt.text}”
+                    <span className="ml-1 not-italic text-[var(--text-muted)]">· {excerpt.term}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {view.matchedReviewCount === 0 && (
+            <p className="text-[11px] text-[var(--text-muted)]">
+              This panel stays empty until a student names this TA in a review. Nothing is inferred
+              from the course average.
+            </p>
           )}
         </div>
       )}

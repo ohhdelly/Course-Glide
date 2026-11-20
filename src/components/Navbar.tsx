@@ -14,7 +14,12 @@ export type AppRoute =
   | { page: 'explore' }
   | { page: 'saved' }
   | { page: 'how-it-works' }
-  | { page: 'course'; courseId: string; initialTab?: 'overview' | 'reviews' | 'teaching' | 'strategies'; highlightReviewId?: string };
+  | {
+      page: 'course';
+      courseId: string;
+      initialTab?: 'overview' | 'reviews' | 'teaching' | 'feedback' | 'strategies';
+      highlightReviewId?: string;
+    };
 
 interface NavbarProps {
   route: AppRoute;

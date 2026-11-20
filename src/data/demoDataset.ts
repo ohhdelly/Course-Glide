@@ -3,6 +3,7 @@ import type {
   FacultyResponse,
   InstructorProfile,
   ModerationReport,
+  PulseResponse,
   Review,
   University,
 } from '../types/course.ts';
@@ -185,7 +186,7 @@ export const DEMO_COURSES: Course[] = [
   },
 ];
 
-export const DEMO_REVIEWS: Review[] = [
+const DEMO_REVIEW_SEED: Review[] = [
   // MATH 137 — Flagship demonstration narrative (8 varied reviews)
   {
     id: 'rev-math137-1',
@@ -1036,6 +1037,43 @@ export const DEMO_REVIEWS: Review[] = [
   },
 ];
 
+type DemoReviewSignals = Pick<Review, 'mentalEffort' | 'stress' | 'targetGrade'>;
+
+/**
+ * Demo self-reports for the three workload axes and the grade each student was
+ * working toward. Reviews without an entry fall back to difficulty as a stand-in
+ * effort/stress reading (labelled as an estimate in the UI) and are excluded from
+ * the effort-to-success bands rather than given an invented target grade.
+ */
+const DEMO_REVIEW_SIGNALS: Record<string, Partial<DemoReviewSignals>> = {
+  'rev-math137-1': { mentalEffort: 4, stress: 4, targetGrade: '85+' },
+  'rev-math137-2': { mentalEffort: 5, stress: 5, targetGrade: '80-84' },
+  'rev-math137-3': { mentalEffort: 4, stress: 3, targetGrade: '85+' },
+  'rev-math137-4': { mentalEffort: 3, stress: 3, targetGrade: '70-79' },
+  'rev-math137-5': { mentalEffort: 4, stress: 4, targetGrade: '80-84' },
+  'rev-math137-6': { mentalEffort: 5, stress: 4, targetGrade: '85+' },
+  'rev-math137-7': { mentalEffort: 2, stress: 2, targetGrade: '70-79' },
+  'rev-math137-8': { mentalEffort: 4, stress: 4 },
+};
+
+/**
+ * Applies the demo workload/grade signals to a review, including reviews restored
+ * from an older persisted demo store that predates these fields.
+ */
+export function withDemoReviewSignals(review: Review): Review {
+  const signals = DEMO_REVIEW_SIGNALS[review.id];
+  if (!signals) return review;
+  const targetGrade = review.targetGrade ?? signals.targetGrade;
+  return {
+    ...review,
+    mentalEffort: review.mentalEffort ?? signals.mentalEffort ?? review.difficulty,
+    stress: review.stress ?? signals.stress ?? review.difficulty,
+    ...(targetGrade ? { targetGrade } : {}),
+  };
+}
+
+export const DEMO_REVIEWS: Review[] = DEMO_REVIEW_SEED.map(withDemoReviewSignals);
+
 export const DEMO_INSTRUCTORS: InstructorProfile[] = [
   {
     id: 'inst-math137-vance',
@@ -1283,6 +1321,7 @@ export const DEMO_FACULTY_RESPONSES: FacultyResponse[] = [
     themeAddressed: 'Inequality bounding & midterm proof expectations (aggregated theme)',
     responseText:
       'Thank you for the constructive aggregate feedback on Weeks 3–5 proof transitions. For upcoming terms, our teaching team has added a dedicated 45-minute inequality-bounding workshop in Week 3 tutorials and published an annotated partial-credit rubric before Midterm 1 so students can calibrate proof rigor early.',
+    status: 'changed',
     updatedAt: '2026-01-15T10:00:00.000Z',
     isDemo: true,
   },
@@ -1295,8 +1334,67 @@ export const DEMO_FACULTY_RESPONSES: FacultyResponse[] = [
     themeAddressed: 'Design recipe style expectations on early assignments',
     responseText:
       'We reviewed aggregated comments regarding early style deductions. Starting next offering, Assignment 0 and Assignment 1 will include an interactive pre-submission design-recipe checklist in the lab environment before marks are finalized.',
+    status: 'heard',
     updatedAt: '2026-01-12T15:30:00.000Z',
     isDemo: true,
+  },
+];
+
+export const DEMO_PULSE_RESPONSES: PulseResponse[] = [
+  {
+    id: 'pulse-math137-1',
+    courseId: 'math-137',
+    term: 'Fall 2025',
+    week: 6,
+    userId: 'demo-student-2',
+    keepsWorking: 'Weekly tutorial quizzes made the marking standard obvious before the midterm.',
+    notWorking: 'Problem sets landed the same week as the midterm review, so nothing got enough time.',
+    oneChange: 'Spread the proof-heavy problem sets so week 6 is not doubled up.',
+    createdAt: '2025-10-17T15:00:00.000Z',
+  },
+  {
+    id: 'pulse-math137-2',
+    courseId: 'math-137',
+    term: 'Fall 2025',
+    week: 6,
+    userId: 'demo-student-3',
+    keepsWorking: 'TA office hours were the reason the epsilon-delta proofs clicked.',
+    notWorking: 'Lecture examples were easier than the midterm, so the difficulty jump was a surprise.',
+    oneChange: 'Work one exam-level proof in lecture before the midterm.',
+    createdAt: '2025-10-18T09:30:00.000Z',
+  },
+  {
+    id: 'pulse-math137-3',
+    courseId: 'math-137',
+    term: 'Fall 2025',
+    week: 7,
+    userId: 'demo-student-4',
+    keepsWorking: 'Structured lecture notes matched the textbook sections exactly.',
+    notWorking: 'Assignment deadlines clustered right before the second midterm.',
+    oneChange: 'Give a one-week heads up before workload spikes.',
+    createdAt: '2025-10-24T11:10:00.000Z',
+  },
+  {
+    id: 'pulse-cs135-1',
+    courseId: 'cs-135',
+    term: 'Fall 2025',
+    week: 5,
+    userId: 'demo-student-5',
+    keepsWorking: 'Live design-recipe demos in lecture made the assignment style clear.',
+    notWorking: 'Style deductions showed up only after marks were released.',
+    oneChange: 'Publish the style checklist with assignment 1.',
+    createdAt: '2025-10-10T13:45:00.000Z',
+  },
+  {
+    id: 'pulse-cs135-2',
+    courseId: 'cs-135',
+    term: 'Fall 2025',
+    week: 6,
+    userId: 'demo-student-6',
+    keepsWorking: 'Tutorial hints pushed us to find the recursion ourselves.',
+    notWorking: 'Two assignments plus the midterm in the same fortnight.',
+    oneChange: 'Shift one assignment deadline by a week.',
+    createdAt: '2025-10-16T10:00:00.000Z',
   },
 ];
 

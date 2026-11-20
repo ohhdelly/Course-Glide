@@ -7,6 +7,8 @@ import type {
   CourseStats,
   DemoUser,
   FacultyResponse,
+  FacultyResponseStatus,
+  GradeBand,
   InstructorProfile,
   ModerationReport,
   Review,
@@ -61,7 +63,11 @@ function parseRouteFromHash(): AppRoute {
     const [courseId, tab] = rest.split('/');
     if (courseId) {
       const validTab =
-        tab === 'overview' || tab === 'reviews' || tab === 'teaching' || tab === 'strategies'
+        tab === 'overview' ||
+        tab === 'reviews' ||
+        tab === 'teaching' ||
+        tab === 'feedback' ||
+        tab === 'strategies'
           ? tab
           : 'overview';
       return { page: 'course', courseId, initialTab: validTab };
@@ -234,11 +240,44 @@ export default function App() {
 
   // Derived stats per course
   const statsMap = useMemo<Record<string, CourseStats>>(() => {
+    const reviewsByCourse = new Map<string, Review[]>();
+    for (const review of reviews) {
+      const list = reviewsByCourse.get(review.courseId) ?? [];
+      list.push(review);
+      reviewsByCourse.set(review.courseId, list);
+    }
+
+    // Department rating priors, from raw review usefulness rather than the already-shrunk stats.
+    const departmentTotals = new Map<string, { sum: number; count: number; courses: number }>();
+    for (const course of courses) {
+      const visible = (reviewsByCourse.get(course.id) ?? []).filter(
+        (review) => review.moderationStatus !== 'hidden'
+      );
+      if (visible.length === 0) continue;
+      const key = `${course.universityId}::${course.department}`;
+      const entry = departmentTotals.get(key) ?? { sum: 0, count: 0, courses: 0 };
+      entry.sum += visible.reduce((sum, review) => sum + review.usefulness, 0);
+      entry.count += visible.length;
+      entry.courses += 1;
+      departmentTotals.set(key, entry);
+    }
+
+    // One stats pass per course; courses with no reviews keep the empty, unanchored shape.
     const map: Record<string, CourseStats> = {};
     for (const course of courses) {
-      const courseReviews = reviews.filter((r) => r.courseId === course.id);
-      map[course.id] = computeCourseStats(courseReviews);
+      const totals = departmentTotals.get(`${course.universityId}::${course.department}`);
+      map[course.id] = computeCourseStats(
+        reviewsByCourse.get(course.id) ?? [],
+        totals
+          ? {
+              priorRating: totals.sum / totals.count,
+              priorWeight: Math.min(8, Math.max(2, totals.courses)),
+              priorLabel: course.department,
+            }
+          : undefined
+      );
     }
+
     return map;
   }, [courses, reviews]);
 
@@ -308,6 +347,9 @@ export default function App() {
     isAnonymous: boolean;
     difficulty: 1 | 2 | 3 | 4 | 5;
     weeklyHours: number;
+    mentalEffort: 1 | 2 | 3 | 4 | 5;
+    stress: 1 | 2 | 3 | 4 | 5;
+    targetGrade?: GradeBand;
     recommended: boolean;
     usefulness: 1 | 2 | 3 | 4 | 5;
     overallExperience: string;
@@ -413,6 +455,7 @@ export default function App() {
     term: string;
     themeAddressed: string;
     responseText: string;
+    status: FacultyResponseStatus;
   }) => {
     const res = await fetch('/api/faculty-responses', {
       method: 'POST',
@@ -656,6 +699,7 @@ export default function App() {
         <WriteReviewModal
           course={writeReviewCourse}
           instructors={instructors.filter((i) => i.courseId === writeReviewCourse.id)}
+          existingReviews={reviews.filter((r) => r.courseId === writeReviewCourse.id)}
           onClose={() => setWriteReviewCourseId(null)}
           onSubmit={handleSubmitReview}
         />

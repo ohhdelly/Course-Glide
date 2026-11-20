@@ -43,6 +43,8 @@ export interface Course {
   assessmentBreakdown?: AssessmentComponent[];
 }
 
+export type GradeBand = '85+' | '80-84' | '70-79' | '60-69' | 'below-60';
+
 export type StudyMethodKey =
   | 'practice_problems'
   | 'lecture_attendance'
@@ -81,6 +83,12 @@ export interface Review {
   verifiedEnrollment: boolean;
   difficulty: 1 | 2 | 3 | 4 | 5;
   weeklyHours: number;
+  /** Self-reported mental effort (1 = light, 5 = draining). Optional for legacy entries. */
+  mentalEffort?: 1 | 2 | 3 | 4 | 5;
+  /** Self-reported stress (1 = calm, 5 = overwhelming). Optional for legacy entries. */
+  stress?: 1 | 2 | 3 | 4 | 5;
+  /** Grade the student was working toward, used only for study-hour bands. */
+  targetGrade?: GradeBand;
   recommended: boolean;
   usefulness: 1 | 2 | 3 | 4 | 5;
   overallExperience: string;
@@ -143,6 +151,47 @@ export interface TermTrendPoint {
   recommendationRate: number;
 }
 
+export interface RatingRange {
+  point: number;
+  low: number;
+  high: number;
+  sampleSize: number;
+  anchoredToDepartment: boolean;
+  priorLabel: string;
+}
+
+export interface LoadProfile {
+  avgWeeklyHours: number;
+  avgMentalEffort: number;
+  avgStress: number;
+  loadIndex: number;
+  label: 'Light' | 'Manageable' | 'Demanding' | 'Very demanding';
+}
+
+export interface EffortToSuccessBand {
+  band: GradeBand;
+  label: string;
+  reviewCount: number;
+  avgWeeklyHours: number;
+  minWeeklyHours: number;
+  maxWeeklyHours: number;
+  topMethods: string[];
+}
+
+export interface PeakWeekCell {
+  week: number;
+  label: string;
+  intensity: number;
+  drivers: string[];
+}
+
+export interface PeakWeekMap {
+  cells: PeakWeekCell[];
+  busiestWeek: number;
+  busiestLabel: string;
+  note: string;
+}
+
 export interface CourseStats {
   responseCount: number;
   informativeCount: number;
@@ -157,6 +206,11 @@ export interface CourseStats {
   usefulnessDistribution: DistributionBucket[];
   termTrends: TermTrendPoint[];
   studyStrategyStats: StudyMethodStat[];
+  rating: RatingRange;
+  load: LoadProfile;
+  effortToSuccess: EffortToSuccessBand[];
+  asOf: string;
+  weightingNote: string;
 }
 
 export interface InstructorCategoryScore {
@@ -177,6 +231,8 @@ export interface InstructorProfile {
   isDemoProfile: true;
 }
 
+export type FacultyResponseStatus = 'heard' | 'changed' | 'explained';
+
 export interface FacultyResponse {
   id: string;
   courseId: string;
@@ -185,8 +241,82 @@ export interface FacultyResponse {
   term: string;
   themeAddressed: string;
   responseText: string;
+  status: FacultyResponseStatus;
   updatedAt: string;
   isDemo: true;
+}
+
+export interface PulseResponse {
+  id: string;
+  courseId: string;
+  term: string;
+  week: number;
+  userId: string;
+  keepsWorking: string;
+  notWorking: string;
+  oneChange: string;
+  createdAt: string;
+}
+
+export interface PulseThemeCount {
+  label: string;
+  count: number;
+}
+
+export interface PulseAggregate {
+  courseId: string;
+  term: string;
+  week: number;
+  windowOpen: boolean;
+  windowNote: string;
+  responseCount: number;
+  promptsRemaining: number;
+  sealed: boolean;
+  sealedUntil: string | null;
+  themes: {
+    keepsWorking: PulseThemeCount[];
+    notWorking: PulseThemeCount[];
+    oneChange: PulseThemeCount[];
+  };
+}
+
+export interface StaffDigestItem {
+  text: string;
+  theme: string;
+  evidenceReviewIds: string[];
+  term: string;
+}
+
+export interface StaffDigest {
+  courseId: string;
+  courseCode: string;
+  source: 'gemini' | 'deterministic';
+  generatedAt: string;
+  eligibleReviewCount: number;
+  sampleNote: string;
+  start: StaffDigestItem[];
+  stop: StaffDigestItem[];
+  keep: StaffDigestItem[];
+  checklist: string[];
+  caveat: string;
+}
+
+export interface TeachingTeamTheme {
+  label: string;
+  count: number;
+}
+
+export interface TeachingTeamView {
+  instructorId: string;
+  name: string;
+  role: 'professor' | 'ta';
+  term: string;
+  matchedReviewCount: number;
+  confusionThemes: TeachingTeamTheme[];
+  helpfulThemes: TeachingTeamTheme[];
+  excerpts: Array<{ text: string; term: string; field: 'worked' | 'challenging' }>;
+  earlierTermMentions: number;
+  note: string;
 }
 
 export interface InsightItem {

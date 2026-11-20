@@ -2,10 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   computeCourseStats,
+  computeLoadIndex,
+  computePeakWeekMap,
+  computeTeachingTeamView,
   evaluateReviewQuality,
   extractReviewHighlightSegments,
   filterAndSearchCourses,
+  generateDeterministicStaffDigest,
   rankAndFilterReviews,
+  termFreshnessWeight,
 } from './trustLens.ts';
 import { DEMO_COURSES, DEMO_INSTRUCTORS, DEMO_REVIEWS } from '../data/demoDataset.ts';
 import type { CourseFilters, Review } from '../types/course.ts';
@@ -143,6 +148,131 @@ test('Course search handles partial codes, no-space codes, and minor typos', () 
   });
   assert.ok(uottawaOnly.every((c) => c.universityId === 'uottawa'));
   assert.ok(uottawaOnly.some((c) => c.id === 'mat-1320'));
+});
+
+test('Load index weights mental effort above raw hours and rises on every axis', () => {
+  const base = computeLoadIndex(10, 3, 3);
+  assert.ok(base > 0 && base < 100);
+
+  const hoursJump = computeLoadIndex(25, 3, 3) - base;
+  const effortJump = computeLoadIndex(10, 5, 3) - base;
+  const stressJump = computeLoadIndex(10, 3, 5) - base;
+
+  assert.ok(hoursJump > 0 && effortJump > 0 && stressJump > 0);
+  assert.ok(
+    effortJump > hoursJump,
+    'mental effort must move the load index more than raw hours do'
+  );
+});
+
+test('Small samples are shrunk into a range instead of a precise score', () => {
+  const one = computeCourseStats([makeReview({ id: 'only', usefulness: 5 })], {
+    priorRating: 3.6,
+    priorWeight: 4,
+    priorLabel: 'Mathematics',
+  });
+  assert.ok(one.rating.point < 5, 'a single 5/5 must not be published as a precise 5.0');
+  assert.ok(one.rating.low <= one.rating.point && one.rating.point <= one.rating.high);
+  assert.ok(one.rating.high - one.rating.low > 0.2, 'small samples need a visibly wide band');
+  assert.equal(one.rating.anchoredToDepartment, true);
+  assert.equal(one.rating.priorLabel, 'Mathematics');
+
+  const many = computeCourseStats(
+    Array.from({ length: 40 }, (_, index) => makeReview({ id: `bulk-${index}`, usefulness: 5 })),
+    { priorRating: 3.6, priorWeight: 4 }
+  );
+  assert.ok(many.rating.point > 4.8, 'large samples should converge on the observed value');
+  assert.ok(many.rating.high - many.rating.low < 0.6, 'large samples should narrow the band');
+});
+
+test('Averages are weighted toward the newest term and labelled with an as-of term', () => {
+  const reviews = [
+    makeReview({ id: 'old', term: 'Fall 2023', weeklyHours: 4, difficulty: 2 }),
+    makeReview({ id: 'new', term: 'Fall 2026', weeklyHours: 16, difficulty: 5 }),
+  ];
+  const stats = computeCourseStats(reviews);
+
+  assert.ok(
+    stats.avgWeeklyHours > 10,
+    'the recent 16-hour review should pull the average above the plain mean of 10'
+  );
+  assert.equal(stats.asOf, 'Fall 2026');
+  assert.ok(stats.weightingNote.includes('Fall 2026'));
+  assert.equal(termFreshnessWeight('Fall 2026', 'Fall 2026'), 1);
+  assert.ok(termFreshnessWeight('Fall 2023', 'Fall 2026') < 0.5);
+});
+
+test('Legacy reviews without the new axes fall back to difficulty instead of zero', () => {
+  const stats = computeCourseStats([makeReview({ id: 'legacy', difficulty: 4 })]);
+  assert.equal(stats.load.avgMentalEffort, 4);
+  assert.equal(stats.load.avgStress, 4);
+  assert.equal(stats.load.avgWeeklyHours, 12);
+  assert.ok(stats.load.loadIndex > 0);
+});
+
+test('Effort-to-success bands group hours by target grade without exposing a grade distribution', () => {
+  const stats = computeCourseStats(DEMO_REVIEWS.filter((review) => review.courseId === 'math-137'));
+  assert.ok(stats.effortToSuccess.length > 0, 'demo reviews declare target grades');
+
+  for (const band of stats.effortToSuccess) {
+    assert.ok(band.reviewCount > 0);
+    assert.ok(band.minWeeklyHours <= band.avgWeeklyHours);
+    assert.ok(band.avgWeeklyHours <= band.maxWeeklyHours);
+    assert.ok(Array.isArray(band.topMethods));
+  }
+  assert.equal(
+    (stats as unknown as Record<string, unknown>).gradeDistribution,
+    undefined,
+    'no grade distribution may be exposed on CourseStats'
+  );
+});
+
+test('Peak-week map stays inside the term and names a busiest week', () => {
+  const course = DEMO_COURSES.find((item) => item.id === 'math-137');
+  assert.ok(course);
+  const map = computePeakWeekMap(
+    course!,
+    DEMO_REVIEWS.filter((review) => review.courseId === 'math-137')
+  );
+
+  assert.equal(map.cells.length, 13);
+  assert.ok(map.busiestWeek >= 1 && map.busiestWeek <= 13);
+  assert.ok(map.cells.every((cell) => cell.intensity >= 0 && cell.intensity <= 100));
+  assert.ok(map.cells.some((cell) => cell.intensity === 100));
+  assert.ok(map.note.length > 0);
+});
+
+test('TA section view only counts reviews that name that TA', () => {
+  const ta = DEMO_INSTRUCTORS.find((instructor) => instructor.name.includes('Maya Lin'));
+  assert.ok(ta);
+  const courseReviews = DEMO_REVIEWS.filter((review) => review.courseId === 'math-137');
+  const view = computeTeachingTeamView(ta!, courseReviews);
+
+  assert.ok(view.matchedReviewCount >= 1);
+  assert.ok(view.matchedReviewCount < courseReviews.length, 'the course average must not be reused as a TA view');
+  assert.ok(view.confusionThemes.length + view.helpfulThemes.length > 0);
+  assert.ok(view.note.length > 0);
+});
+
+test('Staff digest produces three actionable buckets without an AI key', () => {
+  const course = DEMO_COURSES.find((item) => item.id === 'math-137');
+  assert.ok(course);
+  const digest = generateDeterministicStaffDigest(
+    course!,
+    DEMO_REVIEWS.filter((review) => review.courseId === 'math-137')
+  );
+
+  assert.equal(digest.source, 'deterministic');
+  assert.ok(digest.start.length > 0, 'start bucket should contain something');
+  assert.ok(digest.stop.length > 0, 'stop bucket should contain something');
+  assert.ok(digest.keep.length > 0, 'keep bucket should contain something');
+  assert.ok(digest.checklist.length > 0);
+
+  const knownIds = new Set(DEMO_REVIEWS.map((review) => review.id));
+  for (const item of [...digest.start, ...digest.stop, ...digest.keep]) {
+    assert.ok(item.evidenceReviewIds.every((id) => knownIds.has(id)));
+    assert.ok(item.text.length > 0);
+  }
 });
 
 test('Empty-review courses do not spoof zero difficulty or zero study strategy metrics', () => {

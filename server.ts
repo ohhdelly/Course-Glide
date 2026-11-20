@@ -8,21 +8,31 @@ import {
   DEMO_FACULTY_RESPONSES,
   DEMO_INSTRUCTORS,
   DEMO_MODERATION_REPORTS,
+  DEMO_PULSE_RESPONSES,
   DEMO_REVIEWS,
   DEMO_UNIVERSITIES,
+  withDemoReviewSignals,
 } from './src/data/demoDataset.ts';
 import { CatalogueService } from './server/catalogueService.ts';
 import {
+  GRADE_BANDS,
   computeCourseStats,
   generateDeterministicInsights,
+  generateDeterministicStaffDigest,
   rankAndFilterReviews,
 } from './src/utils/trustLens.ts';
 import type {
   CourseFilters,
   CourseInsightReport,
   FacultyResponse,
+  FacultyResponseStatus,
+  GradeBand,
   ModerationReport,
+  PulseAggregate,
+  PulseResponse,
+  PulseThemeCount,
   Review,
+  StaffDigest,
   StudyMethodKey,
   UniversityId,
 } from './src/types/course.ts';
@@ -35,15 +45,26 @@ interface DemoStore {
   reviews: Review[];
   facultyResponses: FacultyResponse[];
   moderationReports: ModerationReport[];
+  pulseResponses: PulseResponse[];
   votesByVoterAndReview: Record<string, 'helpful' | 'not_helpful'>;
   savedCoursesByUser: Record<string, string[]>;
+}
+
+function normalizeFacultyResponse(response: FacultyResponse): FacultyResponse {
+  const seeded = DEMO_FACULTY_RESPONSES.find((item) => item.id === response.id);
+  const status: FacultyResponseStatus =
+    response.status === 'changed' || response.status === 'explained'
+      ? response.status
+      : seeded?.status ?? 'heard';
+  return { ...response, status };
 }
 
 function createInitialStore(): DemoStore {
   return {
     reviews: structuredClone(DEMO_REVIEWS),
-    facultyResponses: structuredClone(DEMO_FACULTY_RESPONSES),
+    facultyResponses: structuredClone(DEMO_FACULTY_RESPONSES).map(normalizeFacultyResponse),
     moderationReports: structuredClone(DEMO_MODERATION_REPORTS),
+    pulseResponses: structuredClone(DEMO_PULSE_RESPONSES),
     votesByVoterAndReview: {},
     savedCoursesByUser: {
       'demo-student': ['math-137', 'cs-135'],
@@ -58,13 +79,16 @@ function loadStore(): DemoStore {
       const parsed = JSON.parse(raw) as Partial<DemoStore>;
       if (Array.isArray(parsed.reviews) && parsed.reviews.length > 0) {
         return {
-          reviews: parsed.reviews,
+          reviews: parsed.reviews.map(withDemoReviewSignals),
           facultyResponses: Array.isArray(parsed.facultyResponses)
-            ? parsed.facultyResponses
+            ? parsed.facultyResponses.map(normalizeFacultyResponse)
             : structuredClone(DEMO_FACULTY_RESPONSES),
           moderationReports: Array.isArray(parsed.moderationReports)
             ? parsed.moderationReports
             : structuredClone(DEMO_MODERATION_REPORTS),
+          pulseResponses: Array.isArray(parsed.pulseResponses)
+            ? parsed.pulseResponses
+            : structuredClone(DEMO_PULSE_RESPONSES),
           votesByVoterAndReview: parsed.votesByVoterAndReview ?? {},
           savedCoursesByUser: parsed.savedCoursesByUser ?? {
             'demo-student': ['math-137', 'cs-135'],
@@ -115,6 +139,7 @@ const catalogue = new CatalogueService(process.env.UWATERLOO_API_KEY);
 
 // Cache AI insights in memory per course + review count
 const insightsCache = new Map<string, CourseInsightReport>();
+const staffDigestCache = new Map<string, StaffDigest>();
 
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const aiClient =
@@ -128,6 +153,64 @@ const aiClient =
         },
       })
     : null;
+
+const TERM_CALENDAR: Record<string, { start: string; end: string }> = {
+  'Winter 2025': { start: '2025-01-06', end: '2025-04-18' },
+  'Fall 2025': { start: '2025-09-04', end: '2025-12-19' },
+  'Winter 2026': { start: '2026-01-05', end: '2026-04-17' },
+  'Spring 2026': { start: '2026-05-04', end: '2026-08-14' },
+  'Fall 2026': { start: '2026-09-08', end: '2026-12-18' },
+};
+
+function termCalendar(term: string): { start: string; end: string } {
+  return TERM_CALENDAR[term] ?? TERM_CALENDAR['Fall 2026'];
+}
+
+function activeTerm(now: Date = new Date()): string {
+  const starts = Object.entries(TERM_CALENDAR).sort((a, b) => a[1].start.localeCompare(b[1].start));
+  const started = starts.filter(([, range]) => new Date(range.start) <= now);
+  return started.length > 0 ? started[started.length - 1][0] : starts[0][0];
+}
+
+function termWeek(term: string, now: Date = new Date()): number {
+  const { start, end } = termCalendar(term);
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  if (now < startDate) return 1;
+  if (now > endDate) return 13;
+  const elapsedWeeks = Math.floor((now.getTime() - startDate.getTime()) / (7 * 24 * 3600 * 1000));
+  return Math.min(13, Math.max(1, elapsedWeeks + 1));
+}
+
+function termHasEnded(term: string, now: Date = new Date()): boolean {
+  return now > new Date(termCalendar(term).end);
+}
+
+/** Explicit week when it is a real teaching week, otherwise the calendar's current week. */
+function resolvePulseWeek(term: string, raw: unknown): number {
+  const week = Number(raw);
+  return Number.isFinite(week) && week >= 1 && week <= 13 ? Math.round(week) : termWeek(term);
+}
+
+const PULSE_THEME_BUCKETS: Array<{ label: string; pattern: RegExp }> = [
+  { label: 'Workload & deadline clustering', pattern: /workload|deadline|same week|spike|cluster|overlap|hours/i },
+  { label: 'Assessment & rubric clarity', pattern: /midterm|exam|quiz|rubric|grading|marks?\b|grades?\b/i },
+  { label: 'Tutorial & office-hour support', pattern: /tutorial|office hours|\bTA\b|dgd|session/i },
+  { label: 'Lecture pacing & explanation', pattern: /lecture|example|explain|pace|fast|clear/i },
+  { label: 'Notes, resources & practice', pattern: /notes|textbook|worksheet|practice|resource|recording/i },
+];
+
+function aggregatePulseField(
+  entries: PulseResponse[],
+  field: 'keepsWorking' | 'notWorking' | 'oneChange'
+): PulseThemeCount[] {
+  return PULSE_THEME_BUCKETS.map((bucket) => ({
+    label: bucket.label,
+    count: entries.filter((entry) => bucket.pattern.test(entry[field])).length,
+  }))
+    .filter((theme) => theme.count > 0)
+    .sort((a, b) => b.count - a.count);
+}
 
 const app = express();
 app.use(express.json({ limit: '256kb' }));
@@ -253,7 +336,28 @@ app.get('/api/courses/:id', async (req, res) => {
   };
 
   const courseReviews = store.reviews.filter((r) => r.courseId === course.id);
-  const stats = computeCourseStats(courseReviews);
+
+  // Same department anchor the client uses, so the API and the UI cannot disagree.
+  const departmentReviews = store.reviews.filter((review) => {
+    if (review.moderationStatus === 'hidden') return false;
+    const owner = catalogue.getCourseById(review.courseId);
+    return owner?.universityId === course.universityId && owner?.department === course.department;
+  });
+  const departmentPrior =
+    departmentReviews.length > 0
+      ? {
+          priorRating:
+            departmentReviews.reduce((sum, review) => sum + review.usefulness, 0) /
+            departmentReviews.length,
+          priorWeight: Math.min(
+            8,
+            Math.max(2, new Set(departmentReviews.map((review) => review.courseId)).size)
+          ),
+          priorLabel: course.department,
+        }
+      : undefined;
+
+  const stats = computeCourseStats(courseReviews, departmentPrior);
   const instructors = DEMO_INSTRUCTORS.filter((i) => i.courseId === course.id);
   const facultyResponses = store.facultyResponses.filter((f) => f.courseId === course.id);
 
@@ -320,6 +424,18 @@ app.post('/api/reviews', (req, res) => {
   ) as Review['usefulness'];
 
   const weeklyHours = Math.max(1, Math.min(40, Math.round(Number(body.weeklyHours) || 8)));
+  const mentalEffortNum = Number(body.mentalEffort);
+  const mentalEffort = (
+    [1, 2, 3, 4, 5].includes(mentalEffortNum) ? mentalEffortNum : difficulty
+  ) as NonNullable<Review['mentalEffort']>;
+  const stressNum = Number(body.stress);
+  const stress = (
+    [1, 2, 3, 4, 5].includes(stressNum) ? stressNum : difficulty
+  ) as NonNullable<Review['stress']>;
+  const targetGradeRaw = sanitizeText(body.targetGrade, 12);
+  const targetGrade = (GRADE_BANDS as string[]).includes(targetGradeRaw)
+    ? (targetGradeRaw as GradeBand)
+    : undefined;
   const recommended = Boolean(body.recommended);
 
   const overallExperience = sanitizeText(body.overallExperience, 600);
@@ -371,6 +487,9 @@ app.post('/api/reviews', (req, res) => {
     verifiedEnrollment: false,
     difficulty,
     weeklyHours,
+    mentalEffort,
+    stress,
+    ...(targetGrade ? { targetGrade } : {}),
     recommended,
     usefulness,
     overallExperience,
@@ -506,6 +625,8 @@ app.post('/api/faculty-responses', (req, res) => {
   const term = sanitizeText(body.term, 32) || 'Upcoming Term';
   const themeAddressed = sanitizeText(body.themeAddressed, 140);
   const responseText = sanitizeText(body.responseText, 700);
+  const status: FacultyResponseStatus =
+    body.status === 'changed' || body.status === 'explained' ? body.status : 'heard';
 
   if (themeAddressed.length < 5 || responseText.length < 20) {
     res.status(400).json({
@@ -522,6 +643,7 @@ app.post('/api/faculty-responses', (req, res) => {
     term,
     themeAddressed,
     responseText,
+    status,
     updatedAt: new Date().toISOString(),
     isDemo: true,
   };
@@ -530,6 +652,244 @@ app.post('/api/faculty-responses', (req, res) => {
   saveStore(store);
 
   res.status(201).json({ facultyResponse: newResponse });
+});
+
+app.get('/api/pulse', (req, res) => {
+  const courseId = sanitizeText(req.query.courseId, 64);
+  const course = catalogue.getCourseById(courseId);
+  if (!course) {
+    res.status(404).json({ error: 'Course not found.' });
+    return;
+  }
+
+  const userId = sanitizeText(req.query.userId, 64) || 'demo-student';
+  const term = sanitizeText(req.query.term, 32) || activeTerm();
+  const week = resolvePulseWeek(term, req.query.week);
+
+  const entries = store.pulseResponses.filter(
+    (entry) => entry.courseId === course.id && entry.term === term
+  );
+  const usedByStudent = entries.filter((entry) => entry.userId === userId).length;
+  const sealed = !termHasEnded(term);
+
+  const pulse: PulseAggregate = {
+    courseId: course.id,
+    term,
+    week,
+    windowOpen: week >= 4 && week <= 8,
+    windowNote:
+      week < 4
+        ? 'Not open yet: the pulse runs in weeks 4–8, once the term has settled.'
+        : week > 8
+        ? 'Closed for this term. The next window opens in week 4.'
+        : 'Open: three one-tap questions, no essay required.',
+    responseCount: entries.length,
+    promptsRemaining: Math.max(0, 2 - usedByStudent),
+    sealed,
+    sealedUntil: sealed ? termCalendar(term).end : null,
+    themes: sealed
+      ? { keepsWorking: [], notWorking: [], oneChange: [] }
+      : {
+          keepsWorking: aggregatePulseField(entries, 'keepsWorking'),
+          notWorking: aggregatePulseField(entries, 'notWorking'),
+          oneChange: aggregatePulseField(entries, 'oneChange'),
+        },
+  };
+
+  res.json({ pulse });
+});
+
+app.post('/api/pulse', (req, res) => {
+  const body = req.body ?? {};
+  const courseId = sanitizeText(body.courseId, 64);
+  const course = catalogue.getCourseById(courseId);
+  if (!course) {
+    res.status(404).json({ error: 'Course not found.' });
+    return;
+  }
+
+  const userId = sanitizeText(body.userId, 64) || 'demo-student';
+  const term = sanitizeText(body.term, 32) || activeTerm();
+  const week = resolvePulseWeek(term, body.week);
+
+  if (week < 4 || week > 8) {
+    res.status(400).json({
+      error:
+        'The mid-term pulse is open only in weeks 4–8. Answering outside that window produces a biased sample, so it is closed.',
+    });
+    return;
+  }
+
+  const alreadySent = store.pulseResponses.filter(
+    (entry) =>
+      entry.courseId === course.id && entry.userId === userId && entry.term === term
+  ).length;
+  if (alreadySent >= 2) {
+    res.status(409).json({
+      error:
+        'You have already sent two mid-term pulses for this course this term. That is the cap — thanks for answering.',
+      promptsRemaining: 0,
+    });
+    return;
+  }
+
+  const keepsWorking = sanitizeText(body.keepsWorking, 300);
+  const notWorking = sanitizeText(body.notWorking, 300);
+  const oneChange = sanitizeText(body.oneChange, 300);
+  const answered = [keepsWorking, notWorking, oneChange].filter((value) => value.length >= 5);
+  if (answered.length === 0) {
+    res.status(400).json({ error: 'Please answer at least one of the three questions.' });
+    return;
+  }
+
+  const violation = detectPolicyViolation(`${keepsWorking} ${notWorking} ${oneChange}`);
+  if (violation) {
+    res.status(400).json({ error: violation });
+    return;
+  }
+
+  const entry: PulseResponse = {
+    id: `pulse-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    courseId: course.id,
+    term,
+    week,
+    userId,
+    keepsWorking,
+    notWorking,
+    oneChange,
+    createdAt: new Date().toISOString(),
+  };
+
+  store.pulseResponses.unshift(entry);
+  saveStore(store);
+
+  res.status(201).json({
+    pulse: {
+      id: entry.id,
+      term,
+      week,
+      createdAt: entry.createdAt,
+      sealed: !termHasEnded(term),
+      promptsRemaining: Math.max(0, 2 - (alreadySent + 1)),
+    },
+  });
+});
+
+app.post('/api/staff-digest', async (req, res) => {
+  const courseId = sanitizeText(req.body?.courseId, 64);
+  const forceRefresh = Boolean(req.body?.forceRefresh);
+  const course = catalogue.getCourseById(courseId);
+  if (!course) {
+    res.status(404).json({ error: 'Course not found.' });
+    return;
+  }
+
+  const courseReviews = store.reviews.filter((review) => review.courseId === course.id);
+  const eligible = rankAndFilterReviews(courseReviews, 'most_informative', 'all').slice(0, 8);
+  const cacheKey = `${course.id}:${eligible.map((review) => review.id).join(',')}`;
+
+  if (!forceRefresh && staffDigestCache.has(cacheKey)) {
+    res.json({ digest: staffDigestCache.get(cacheKey) });
+    return;
+  }
+
+  const fallback = generateDeterministicStaffDigest(course, courseReviews);
+
+  if (!aiClient || eligible.length === 0) {
+    staffDigestCache.set(cacheKey, fallback);
+    res.json({ digest: fallback });
+    return;
+  }
+
+  const validIds = new Set(eligible.map((review) => review.id));
+
+  try {
+    const reviewDigest = eligible.map((review) => ({
+      id: review.id,
+      term: review.term,
+      workedWell: review.whatWorkedWell,
+      challenging: review.whatWasChallenging,
+      advice: review.practicalAdvice,
+    }));
+
+    const prompt = `Build a Start / Stop / Continue digest for the teaching team of ${course.code} using ONLY the reviews below.
+Each item must quote or closely paraphrase one review and cite its exact review id in evidenceReviewIds.
+"start" = something the team should begin doing, "stop" = something to stop or reduce, "keep" = something working that should be preserved.
+Also return up to 3 short checklist actions for the teaching team.
+Never invent statistics, grades, or student identities.
+
+Reviews JSON:
+${JSON.stringify(reviewDigest, null, 2)}`;
+
+    const itemSchema = {
+      type: Type.OBJECT,
+      properties: {
+        text: { type: Type.STRING },
+        theme: { type: Type.STRING },
+        evidenceReviewIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+      },
+      required: ['text', 'theme', 'evidenceReviewIds'],
+    };
+
+    const response = await aiClient.models.generateContent({
+      model: 'gemini-4-hydrogen',
+      contents: prompt,
+      config: {
+        systemInstruction:
+          'You are CourseGlide Staff Digest, a teaching-team assistant. Produce concrete, non-punitive actions grounded strictly in the supplied anonymised student reviews.',
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            start: { type: Type.ARRAY, items: itemSchema },
+            stop: { type: Type.ARRAY, items: itemSchema },
+            keep: { type: Type.ARRAY, items: itemSchema },
+            checklist: { type: Type.ARRAY, items: { type: Type.STRING } },
+          },
+          required: ['start', 'stop', 'keep', 'checklist'],
+        },
+      },
+    });
+
+    const parsed = JSON.parse((response.text ?? '{}').trim()) as Partial<StaffDigest>;
+    const sanitizeItems = (items: unknown, fallbackItems: StaffDigest['start']) => {
+      if (!Array.isArray(items) || items.length === 0) return fallbackItems;
+      return items.slice(0, 3).map((item: any) => {
+        const ids = Array.isArray(item?.evidenceReviewIds)
+          ? item.evidenceReviewIds.filter((id: unknown) => typeof id === 'string' && validIds.has(id))
+          : [];
+        return {
+          text: sanitizeText(item?.text, 260),
+          theme: sanitizeText(item?.theme, 80) || 'General course experience',
+          evidenceReviewIds: ids.length > 0 ? ids : [eligible[0].id],
+          term: eligible.find((review) => review.id === (ids[0] ?? eligible[0].id))?.term ?? '',
+        };
+      });
+    };
+
+    const digest: StaffDigest = {
+      ...fallback,
+      source: 'gemini',
+      generatedAt: new Date().toISOString(),
+      start: sanitizeItems(parsed.start, fallback.start),
+      stop: sanitizeItems(parsed.stop, fallback.stop),
+      keep: sanitizeItems(parsed.keep, fallback.keep),
+      checklist:
+        Array.isArray(parsed.checklist) && parsed.checklist.length > 0
+          ? parsed.checklist
+              .slice(0, 3)
+              .map((item) => sanitizeText(item, 220))
+              .filter(Boolean)
+          : fallback.checklist,
+    };
+
+    staffDigestCache.set(cacheKey, digest);
+    res.json({ digest });
+  } catch (err) {
+    console.warn('Gemini staff digest fallback triggered:', err);
+    staffDigestCache.set(cacheKey, fallback);
+    res.json({ digest: fallback });
+  }
 });
 
 app.post('/api/insights', async (req, res) => {

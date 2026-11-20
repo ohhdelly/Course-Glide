@@ -19,13 +19,21 @@ import {
   MessageSquarePlus,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import type { Course, CourseInsightReport, CourseStats } from '../../types/course';
+import type { Course, CourseInsightReport, CourseStats, Review } from '../../types/course';
 import { useUniversityTheme } from '../../theme/ThemeContext';
 import { CourseInsightsPanel } from './CourseInsightsPanel';
+import {
+  EffortToSuccessCard,
+  LoadProfileCard,
+  PeakWeekPanel,
+  RatingRangeCard,
+} from './CourseLoadPanels';
+import { MidTermPulseCard } from './MidTermPulseCard';
 
 interface CourseOverviewTabProps {
   course: Course;
   stats: CourseStats;
+  reviews: Review[];
   insights: CourseInsightReport | null;
   insightsLoading: boolean;
   onRefreshInsights: () => void;
@@ -36,6 +44,7 @@ interface CourseOverviewTabProps {
 export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
   course,
   stats,
+  reviews,
   insights,
   insightsLoading,
   onRefreshInsights,
@@ -78,6 +87,18 @@ export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
         </section>
       ) : (
         <>
+          {/* Honest headline numbers: a range, not a point; three load axes, not one */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <RatingRangeCard stats={stats} />
+            <LoadProfileCard stats={stats} />
+          </div>
+
+          {/* Effort-to-success bands by target grade (never a grade distribution) */}
+          <EffortToSuccessCard stats={stats} reviews={reviews} />
+
+          {/* Where the crunch lands during the term */}
+          <PeakWeekPanel course={course} reviews={reviews} />
+
           {/* Essential Charts Grid (Difficulty & Weekly Hours) */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* 1. Difficulty Distribution */}
@@ -169,6 +190,9 @@ export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
             onRefresh={onRefreshInsights}
             onJumpToEvidence={onJumpToEvidence}
           />
+
+          {/* Mid-term pulse (weeks 4-8, sealed until the term ends) */}
+          <MidTermPulseCard courseId={course.id} courseCode={course.code} />
         </>
       )}
 

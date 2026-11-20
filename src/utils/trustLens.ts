@@ -3,13 +3,23 @@ import type {
   CourseFilters,
   CourseInsightReport,
   CourseStats,
+  EffortToSuccessBand,
   EnrichedReview,
+  GradeBand,
   InsightItem,
+  InstructorProfile,
+  LoadProfile,
+  PeakWeekMap,
+  RatingRange,
   Review,
+  StaffDigest,
+  StaffDigestItem,
   StudyFitInsight,
   StudyMethodKey,
   StudyMethodStat,
   StudyPreference,
+  TeachingTeamTheme,
+  TeachingTeamView,
   TrustLabel,
   TrustLensEvaluation,
   TrustLensMode,
@@ -87,6 +97,73 @@ function normalizeText(input: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+function parseTermKey(term: string): { year: number; seasonRank: number } {
+  const yearMatch = term.match(/20\d{2}/);
+  const year = yearMatch ? parseInt(yearMatch[0], 10) : 2024;
+  const seasonRank = /fall/i.test(term) ? 3 : /summer/i.test(term) ? 2 : /spring/i.test(term) ? 1 : 0;
+  return { year, seasonRank };
+}
+
+/** How many academic terms `term` sits behind `reference` (0 = same term). */
+function termDistance(term: string, reference: string): number {
+  const a = parseTermKey(term);
+  const b = parseTermKey(reference);
+  return Math.max(0, (b.year - a.year) * 4 + (b.seasonRank - a.seasonRank));
+}
+
+/**
+ * Freshness weight: the newest term counts fully and each earlier term counts
+ * less, floored so older but still-relevant history contributes.
+ */
+export function termFreshnessWeight(term: string, reference: string): number {
+  return Math.max(0.3, Math.pow(0.75, termDistance(term, reference)));
+}
+
+function round1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function weightedMean(pairs: Array<{ value: number; weight: number }>): number {
+  const totalWeight = pairs.reduce((sum, pair) => sum + pair.weight, 0);
+  if (totalWeight === 0) return 0;
+  return pairs.reduce((sum, pair) => sum + pair.value * pair.weight, 0) / totalWeight;
+}
+
+/**
+ * Three-axis workload index (0-100). Raw hours are only part of the cost:
+ * mental effort is weighted above time because effort is what students price
+ * a term by, with stress as the third axis.
+ */
+export function computeLoadIndex(
+  avgWeeklyHours: number,
+  avgMentalEffort: number,
+  avgStress: number
+): number {
+  const hoursComponent = Math.min(1, Math.max(0, avgWeeklyHours / 25));
+  const effortComponent = Math.min(1, Math.max(0, (avgMentalEffort - 1) / 4));
+  const stressComponent = Math.min(1, Math.max(0, (avgStress - 1) / 4));
+  return Math.round(
+    100 * (0.3 * hoursComponent + 0.45 * effortComponent + 0.25 * stressComponent)
+  );
+}
+
+function loadIndexLabel(index: number): LoadProfile['label'] {
+  if (index < 25) return 'Light';
+  if (index < 50) return 'Manageable';
+  if (index < 75) return 'Demanding';
+  return 'Very demanding';
+}
+
+export const GRADE_BAND_LABELS: Record<GradeBand, string> = {
+  '85+': 'Working toward 85%+',
+  '80-84': 'Working toward 80–84%',
+  '70-79': 'Working toward 70–79%',
+  '60-69': 'Working toward 60–69%',
+  'below-60': 'Working toward a pass (below 60%)',
+};
+
+export const GRADE_BANDS: GradeBand[] = ['85+', '80-84', '70-79', '60-69', 'below-60'];
 
 function jaccardWordSimilarity(a: string, b: string): number {
   const tokensA = new Set(normalizeText(a).split(' ').filter((w) => w.length > 2));
@@ -327,7 +404,19 @@ export function rankAndFilterReviews(
   });
 }
 
-export function computeCourseStats(reviews: Review[]): CourseStats {
+export interface CourseStatsOptions {
+  /** Department (or university) rating prior used to shrink small samples. */
+  priorRating?: number;
+  /** Pseudo-count for that prior; higher anchors small samples harder. */
+  priorWeight?: number;
+  /** Human label for the anchor, e.g. "Mathematics". */
+  priorLabel?: string;
+}
+
+export function computeCourseStats(
+  reviews: Review[],
+  options?: CourseStatsOptions
+): CourseStats {
   const visible = reviews.filter((r) => r.moderationStatus !== 'hidden');
   const enriched = enrichReviewsWithTrustLens(visible);
   const n = visible.length;
@@ -360,6 +449,24 @@ export function computeCourseStats(reviews: Review[]): CourseStats {
       })),
       termTrends: [],
       studyStrategyStats: [],
+      rating: {
+        point: 0,
+        low: 0,
+        high: 0,
+        sampleSize: 0,
+        anchoredToDepartment: false,
+        priorLabel: options?.priorLabel ?? 'department',
+      },
+      load: {
+        avgWeeklyHours: 0,
+        avgMentalEffort: 0,
+        avgStress: 0,
+        loadIndex: 0,
+        label: 'Light',
+      },
+      effortToSuccess: [],
+      asOf: '',
+      weightingNote: '',
     };
   }
 
@@ -367,15 +474,86 @@ export function computeCourseStats(reviews: Review[]): CourseStats {
     (r) => r.trustLens.tier === 'most_informative'
   ).length;
 
-  const avgDifficulty =
-    Math.round((visible.reduce((acc, r) => acc + r.difficulty, 0) / n) * 10) / 10;
-  const avgWeeklyHours =
-    Math.round((visible.reduce((acc, r) => acc + r.weeklyHours, 0) / n) * 10) / 10;
-  const recommendationRate = Math.round(
-    (visible.filter((r) => r.recommended).length / n) * 100
+  // Freshness weighting: recent terms speak loudest, old terms still count.
+  const referenceTerm = visible.reduce(
+    (best, r) => (parseTermRecencyScore(r.term) > parseTermRecencyScore(best.term) ? r : best),
+    visible[0]
+  ).term;
+  const weightFor = (r: Review) => termFreshnessWeight(r.term, referenceTerm);
+  const totalWeight = visible.reduce((sum, r) => sum + weightFor(r), 0);
+  const effortOf = (r: Review) => r.mentalEffort ?? r.difficulty;
+  const stressOf = (r: Review) => r.stress ?? r.difficulty;
+
+  const avgDifficulty = round1(
+    weightedMean(visible.map((r) => ({ value: r.difficulty, weight: weightFor(r) })))
   );
-  const avgUsefulness =
-    Math.round((visible.reduce((acc, r) => acc + r.usefulness, 0) / n) * 10) / 10;
+  const avgWeeklyHours = round1(
+    weightedMean(visible.map((r) => ({ value: r.weeklyHours, weight: weightFor(r) })))
+  );
+  const recommendationRate = Math.round(
+    weightedMean(visible.map((r) => ({ value: r.recommended ? 100 : 0, weight: weightFor(r) })))
+  );
+  const avgUsefulness = round1(
+    weightedMean(visible.map((r) => ({ value: r.usefulness, weight: weightFor(r) })))
+  );
+  const avgMentalEffort = round1(
+    weightedMean(visible.map((r) => ({ value: effortOf(r), weight: weightFor(r) })))
+  );
+  const avgStress = round1(
+    weightedMean(visible.map((r) => ({ value: stressOf(r), weight: weightFor(r) })))
+  );
+  const loadIndex = computeLoadIndex(avgWeeklyHours, avgMentalEffort, avgStress);
+
+  // Shrink the rating toward a prior so a three-review course cannot masquerade as precise.
+  const priorRating = options?.priorRating ?? 3.5;
+  const priorWeight = Math.max(0, options?.priorWeight ?? 3);
+  const shrunkRating =
+    (visible.reduce((sum, r) => sum + r.usefulness * weightFor(r), 0) + priorRating * priorWeight) /
+    Math.max(0.001, totalWeight + priorWeight);
+  const ratingVariance =
+    visible.reduce(
+      (sum, r) => sum + weightFor(r) * Math.pow(r.usefulness - shrunkRating, 2),
+      0
+    ) / Math.max(1, totalWeight);
+  const standardError =
+    Math.sqrt(ratingVariance) / Math.sqrt(Math.max(1, totalWeight + priorWeight));
+  const margin = Math.min(1.2, Math.max(0.2, 1.96 * standardError));
+  const ratingPoint = round1(shrunkRating);
+  const rating: RatingRange = {
+    point: ratingPoint,
+    low: Math.min(ratingPoint, round1(Math.max(1, shrunkRating - margin))),
+    high: Math.max(ratingPoint, round1(Math.min(5, shrunkRating + margin))),
+    sampleSize: n,
+    anchoredToDepartment: typeof options?.priorRating === 'number',
+    priorLabel: options?.priorLabel ?? 'department',
+  };
+
+  // Effort-to-success: study-hour bands by the grade students were aiming for.
+  // Deliberately not a grade distribution and never an "easy A" ranking.
+  const effortToSuccess: EffortToSuccessBand[] = GRADE_BANDS.map((band) => {
+    const group = visible.filter((r) => r.targetGrade === band);
+    if (group.length === 0) return null;
+    const hours = group.map((r) => r.weeklyHours);
+    const methodCounts = new Map<StudyMethodKey, number>();
+    for (const review of group) {
+      for (const method of review.helpfulMethods ?? review.studyMethods) {
+        methodCounts.set(method, (methodCounts.get(method) ?? 0) + 1);
+      }
+    }
+    const topMethods = Array.from(methodCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([key]) => STUDY_METHOD_CATALOG[key].label);
+    return {
+      band,
+      label: GRADE_BAND_LABELS[band],
+      reviewCount: group.length,
+      avgWeeklyHours: round1(hours.reduce((sum, h) => sum + h, 0) / hours.length),
+      minWeeklyHours: Math.min(...hours),
+      maxWeeklyHours: Math.max(...hours),
+      topMethods,
+    };
+  }).filter((band): band is EffortToSuccessBand => band !== null);
 
   const confidenceLevel: CourseStats['confidenceLevel'] =
     n >= 7 ? 'strong' : n >= 4 ? 'moderate' : 'limited';
@@ -478,6 +656,17 @@ export function computeCourseStats(reviews: Review[]): CourseStats {
     usefulnessDistribution,
     termTrends,
     studyStrategyStats,
+    rating,
+    load: {
+      avgWeeklyHours,
+      avgMentalEffort,
+      avgStress,
+      loadIndex,
+      label: loadIndexLabel(loadIndex),
+    },
+    effortToSuccess,
+    asOf: referenceTerm,
+    weightingNote: `Averages are weighted toward ${referenceTerm}; each earlier term counts about 25% less.`,
   };
 }
 
@@ -854,5 +1043,293 @@ export function extractReviewHighlightSegments(
   }
 
   return segments;
+}
+
+const FEEDBACK_THEME_BUCKETS: Array<{ label: string; pattern: RegExp }> = [
+  {
+    label: 'Assessment & rubric clarity',
+    pattern: /midterm|exam|quiz|rubric|grading|partial credit|mark(?:ing|s)?\b|grade/i,
+  },
+  {
+    label: 'Pacing & workload spikes',
+    pattern: /weekly|workload|\bhours\b|pace|pacing|spike|deadline|crunch/i,
+  },
+  {
+    label: 'Tutorial & office-hour support',
+    pattern: /tutorial|office hours|dgd|lab session|review session/i,
+  },
+  {
+    label: 'Prerequisite & background readiness',
+    pattern: /prerequisite|background|foundation|notation|assume[sd]?|prior experience/i,
+  },
+  {
+    label: 'Feedback turnaround',
+    pattern: /feedback|returned|handed back|turnaround|comments back/i,
+  },
+];
+
+function themeBucketsFor(texts: string[]): TeachingTeamTheme[] {
+  return FEEDBACK_THEME_BUCKETS.map((bucket) => ({
+    label: bucket.label,
+    count: texts.filter((text) => bucket.pattern.test(text)).length,
+  }))
+    .filter((theme) => theme.count > 0)
+    .sort((a, b) => b.count - a.count);
+}
+
+function normalizeName(value: string | undefined): string {
+  return (value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Aggregate themes for one teaching-team member (professor or TA), built only
+ * from reviews that named that person. No student identity is ever included.
+ */
+export function computeTeachingTeamView(
+  instructor: InstructorProfile,
+  reviews: Review[]
+): TeachingTeamView {
+  const target = normalizeName(instructor.name);
+  const surname = target.split(' ').filter(Boolean).pop() ?? '';
+  const matched = reviews.filter((review) => {
+    if (review.moderationStatus === 'hidden') return false;
+    const named = normalizeName(review.taName);
+    if (!named) return false;
+    if (named === target) return true;
+    return surname.length > 3 && named.includes(surname);
+  });
+
+  const confusionThemes = themeBucketsFor(
+    matched.map((review) => `${review.whatWasChallenging} ${review.overallExperience}`)
+  );
+  const helpfulThemes = themeBucketsFor(
+    matched.map((review) => `${review.whatWorkedWell} ${review.practicalAdvice}`)
+  );
+  const excerpts = matched
+    .filter(
+      (review) =>
+        review.whatWorkedWell.trim().length > 20 || review.whatWasChallenging.trim().length > 20
+    )
+    .slice(0, 2)
+    .map((review) => {
+      const prefersWorked = review.whatWorkedWell.trim().length > 20;
+      return {
+        text: (prefersWorked ? review.whatWorkedWell : review.whatWasChallenging)
+          .trim()
+          .slice(0, 200),
+        term: review.term,
+        field: (prefersWorked ? 'worked' : 'challenging') as 'worked' | 'challenging',
+      };
+    });
+  const earlierTermMentions = matched.filter(
+    (review) => termDistance(review.term, instructor.term) > 0
+  ).length;
+
+  const note =
+    matched.length === 0
+      ? `No reviews have named ${instructor.name} yet. Section-level themes appear once students name their TA.`
+      : earlierTermMentions > 0
+      ? `${earlierTermMentions} of ${matched.length} mentions come from terms before ${instructor.term}, so part of this pattern may predate this section.`
+      : `All ${matched.length} mentions come from ${instructor.term} or later.`;
+
+  return {
+    instructorId: instructor.id,
+    name: instructor.name,
+    role: instructor.role,
+    term: instructor.term,
+    matchedReviewCount: matched.length,
+    confusionThemes,
+    helpfulThemes,
+    excerpts,
+    earlierTermMentions,
+    note,
+  };
+}
+
+/**
+ * Peak-week map: where the crunch lands, estimated from catalogue assessment
+ * weights plus the weeks students explicitly mention. Planning aid, not a syllabus.
+ */
+export function computePeakWeekMap(course: Course, reviews: Review[]): PeakWeekMap {
+  const WEEK_COUNT = 13; // weeks 1-12 of term plus the finals period
+  const scores = new Array<number>(WEEK_COUNT + 1).fill(0);
+  const drivers: string[][] = Array.from({ length: WEEK_COUNT + 1 }, () => []);
+
+  const add = (week: number, amount: number, driver?: string) => {
+    if (week < 1 || week > WEEK_COUNT) return;
+    scores[week] += amount;
+    if (driver && !drivers[week].includes(driver) && drivers[week].length < 3) {
+      drivers[week].push(driver);
+    }
+  };
+
+  for (const component of course.assessmentBreakdown ?? []) {
+    const name = component.name;
+    const lower = name.toLowerCase();
+    const weight = Math.max(0.5, Math.min(2, component.weightPercent / 25));
+    if (/final/.test(lower)) {
+      // The exam period is real, but the map is about in-term collisions.
+      add(13, weight * 0.6, name);
+    } else if (/midterm/.test(lower)) {
+      const twoMidterms = /\b(2|two)\b/.test(lower);
+      add(twoMidterms ? 5 : 6, weight * 1.3, name);
+      add(twoMidterms ? 9 : 10, weight * 1.1, name);
+    } else if (/project|report|paper|presentation/.test(lower)) {
+      add(11, weight, name);
+    } else if (/quiz|assignment|problem set|lab|homework|exercise/.test(lower)) {
+      for (let week = 2; week <= 12; week += 1) add(week, weight * 0.35, name);
+    } else {
+      add(12, weight * 0.5, name);
+    }
+  }
+
+  for (const review of reviews) {
+    if (review.moderationStatus === 'hidden') continue;
+    const text = `${review.overallExperience} ${review.whatWasChallenging} ${review.practicalAdvice}`;
+    const rangePattern = /weeks?\s*(\d{1,2})\s*(?:-|–|to|through|and)\s*(\d{1,2})/gi;
+    let rangeMatch: RegExpExecArray | null;
+    while ((rangeMatch = rangePattern.exec(text)) !== null) {
+      const start = Number(rangeMatch[1]);
+      const end = Number(rangeMatch[2]);
+      for (let week = Math.min(start, end); week <= Math.max(start, end); week += 1) {
+        add(week, 1.2, 'Student mentions');
+      }
+    }
+    const singlePattern = /\bweek\s*(\d{1,2})\b/gi;
+    let singleMatch: RegExpExecArray | null;
+    while ((singleMatch = singlePattern.exec(text)) !== null) {
+      add(Number(singleMatch[1]), 0.8, 'Student mentions');
+    }
+  }
+
+  const peak = Math.max(...scores);
+  const cells = Array.from({ length: WEEK_COUNT }, (_, index) => {
+    const week = index + 1;
+    return {
+      week,
+      label: week === 13 ? 'Finals' : `W${week}`,
+      intensity: peak > 0 ? Math.round((scores[week] / peak) * 100) : 0,
+      drivers: drivers[week],
+    };
+  });
+  const busiest = cells.reduce(
+    (best, cell) => (cell.intensity > best.intensity ? cell : best),
+    cells[0]
+  );
+
+  return {
+    cells,
+    busiestWeek: peak > 0 ? busiest.week : 0,
+    busiestLabel: peak > 0 ? busiest.label : '',
+    note:
+      peak > 0
+        ? 'Estimated from catalogue assessment weights plus the weeks students mention. A planning aid, not a syllabus.'
+        : 'No assessment weights or week-specific student mentions recorded for this course yet.',
+  };
+}
+
+/**
+ * Start / Stop / Continue digest for the teaching team. Uses only verbatim,
+ * already-anonymised excerpts from visible reviews, and works with no AI key.
+ */
+export function generateDeterministicStaffDigest(
+  course: Course,
+  reviews: Review[]
+): StaffDigest {
+  const ranked = rankAndFilterReviews(reviews, 'most_informative', 'all').slice(0, 8);
+  const count = ranked.length;
+  const start: StaffDigestItem[] = [];
+  const stop: StaffDigestItem[] = [];
+  const keep: StaffDigestItem[] = [];
+  const seen = new Set<string>();
+
+  const themeOf = (text: string) =>
+    FEEDBACK_THEME_BUCKETS.find((bucket) => bucket.pattern.test(text))?.label ??
+    'General course experience';
+
+  const pushItem = (
+    target: StaffDigestItem[],
+    review: EnrichedReview,
+    text: string,
+    theme: string
+  ) => {
+    const key = normalizeText(text).slice(0, 60);
+    if (!key || seen.has(key) || target.length >= 3) return;
+    seen.add(key);
+    target.push({
+      text,
+      theme,
+      evidenceReviewIds: [review.id],
+      term: review.term,
+    });
+  };
+
+  const ASK_PATTERN =
+    /\b(more|clearer|unclear|didn'?t|did not|never|assume[sd]?|missing|need(?:ed)?|should|wish|explain(?:ed)?)\b/i;
+  const FRICTION_PATTERN =
+    /\b(spike|overlap|same week|too fast|too much|harsh|unfair|penal|crush|rushed|unforgiving)\b/i;
+
+  for (const review of ranked) {
+    const challenge = review.whatWasChallenging.trim();
+    if (challenge.length > 25) {
+      const excerpt = challenge.slice(0, 240);
+      const theme = themeOf(challenge);
+      if (ASK_PATTERN.test(challenge)) pushItem(start, review, excerpt, theme);
+      else pushItem(stop, review, excerpt, theme);
+    }
+    if (review.whatWorkedWell.trim().length > 25) {
+      pushItem(keep, review, review.whatWorkedWell.trim().slice(0, 240), themeOf(review.whatWorkedWell));
+    }
+  }
+
+  // Guarantee all three buckets have something actionable when the sample allows.
+  if (start.length === 0 || stop.length === 0) {
+    for (const review of ranked) {
+      const challenge = review.whatWasChallenging.trim();
+      if (challenge.length <= 25) continue;
+      const theme = themeOf(challenge);
+      if (start.length === 0) pushItem(start, review, challenge.slice(0, 240), theme);
+      else pushItem(stop, review, challenge.slice(0, 240), theme);
+    }
+  }
+
+  const themeCounts = new Map<string, number>();
+  for (const review of ranked) {
+    const text = `${review.whatWasChallenging} ${review.overallExperience}`;
+    for (const bucket of FEEDBACK_THEME_BUCKETS) {
+      if (bucket.pattern.test(text)) {
+        themeCounts.set(bucket.label, (themeCounts.get(bucket.label) ?? 0) + 1);
+      }
+    }
+  }
+  const checklist = Array.from(themeCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(
+      ([label, mentions]) =>
+        `${label}: raised in ${mentions} of ${count} substantive responses — pick one concrete change and post it to the Feedback Loop.`
+    );
+
+  return {
+    courseId: course.id,
+    courseCode: course.code,
+    source: 'deterministic',
+    generatedAt: new Date().toISOString(),
+    eligibleReviewCount: count,
+    sampleNote:
+      count < 4
+        ? `Based on ${count} substantive review${count === 1 ? '' : 's'} — treat these buckets as preliminary.`
+        : `Built from ${count} substantive ${course.code} reviews; student identities are never included.`,
+    start,
+    stop,
+    keep,
+    checklist,
+    caveat:
+      'Quotes are verbatim excerpts from visible, already-anonymised reviews. No student, grade, or individual is attributable from this digest.',
+  };
 }
 
