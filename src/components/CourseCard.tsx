@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Bookmark } from 'lucide-react';
 import type { Course, CourseStats } from '../types/course';
+import { RecommendRing } from './charts/RecommendRing';
 
 interface CourseCardProps {
   course: Course;
@@ -15,11 +16,6 @@ interface CourseCardProps {
   registerItemRef?: (index: number, el: HTMLButtonElement | null) => void;
   onItemKeyDown?: (index: number, e: React.KeyboardEvent<HTMLButtonElement>) => void;
 }
-
-const RING_SIZE = 40;
-const RING_STROKE = 4;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2 - 2; // 16px radius inside 40x40 viewBox
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 interface ExploreMetricsProps {
   courseCode: string;
@@ -42,30 +38,8 @@ const ExploreMetricsCluster: React.FC<ExploreMetricsProps> = ({
   onToggleTapTooltip,
   onCloseTooltip,
 }) => {
-  const [ringRevealed, setRingRevealed] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    }
-    return false;
-  });
-  const hasAnimatedOnceRef = useRef(false);
-
-  useEffect(() => {
-    if (hasAnimatedOnceRef.current) return;
-    hasAnimatedOnceRef.current = true;
-    if (ringRevealed) return;
-    const raf = window.requestAnimationFrame(() => {
-      setRingRevealed(true);
-    });
-    return () => window.cancelAnimationFrame(raf);
-  }, [ringRevealed]);
-
   const recommendPct =
     hasReviews && stats ? Math.max(0, Math.min(100, Math.round(stats.recommendationRate))) : 0;
-  const targetOffset = hasReviews
-    ? RING_CIRCUMFERENCE * (1 - recommendPct / 100)
-    : RING_CIRCUMFERENCE;
-  const strokeDashoffset = ringRevealed ? targetOffset : RING_CIRCUMFERENCE;
 
   const roundedDots =
     hasReviews && stats ? Math.max(1, Math.min(5, Math.round(stats.avgDifficulty))) : 0;
@@ -92,48 +66,20 @@ const ExploreMetricsCluster: React.FC<ExploreMetricsProps> = ({
         aria-expanded={tooltipOpen}
         className="relative flex min-h-[44px] min-w-[44px] items-center justify-center rounded-control focus-visible:outline-2 focus-visible:outline-[var(--accent-strong)]"
       >
-        <span className="relative inline-flex h-10 w-10 items-center justify-center">
-          <svg
-            width={RING_SIZE}
-            height={RING_SIZE}
-            viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
-            className="-rotate-90"
-            aria-hidden="true"
-          >
-            <circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RING_RADIUS}
-              fill="none"
-              stroke="var(--border)"
-              strokeWidth={RING_STROKE}
-            />
-            {hasReviews && (
-              <circle
-                cx={RING_SIZE / 2}
-                cy={RING_SIZE / 2}
-                r={RING_RADIUS}
-                fill="none"
-                stroke="var(--chart)"
-                strokeWidth={RING_STROKE}
-                strokeLinecap="round"
-                strokeDasharray={RING_CIRCUMFERENCE}
-                strokeDashoffset={strokeDashoffset}
-                style={{
-                  transition: 'stroke-dashoffset 400ms cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              />
-            )}
-          </svg>
+        {hasReviews ? (
+          <RecommendRing
+            size={40}
+            percentage={recommendPct}
+            responseCount={stats?.responseCount}
+          />
+        ) : (
           <span
             aria-hidden="true"
-            className={`absolute inset-0 flex items-center justify-center text-[11px] font-semibold leading-none tabular-nums ${
-              hasReviews ? 'text-[var(--text)]' : 'text-[var(--text-muted)]'
-            }`}
+            className="font-explore inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[11px] font-semibold leading-none tabular-nums text-[var(--text-muted)]"
           >
-            {hasReviews ? `${recommendPct}%` : '—'}
+            —
           </span>
-        </span>
+        )}
       </button>
 
       <div className="flex flex-col items-end gap-1 min-w-[68px]" aria-hidden="true">
@@ -143,8 +89,8 @@ const ExploreMetricsCluster: React.FC<ExploreMetricsProps> = ({
               key={dot}
               className={`h-1.5 w-1.5 rounded-full ${
                 hasReviews && dot <= roundedDots
-                  ? 'bg-[var(--chart)]'
-                  : 'bg-[var(--border)]'
+                  ? 'bg-[var(--chart-1)]'
+                  : 'bg-[var(--chart-3)]'
               }`}
             />
           ))}

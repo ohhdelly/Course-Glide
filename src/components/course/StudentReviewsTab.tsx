@@ -8,6 +8,7 @@ import {
 } from '../../utils/trustLens';
 import { ReviewCard } from './ReviewCard';
 import { TrustLensInfo } from './TrustLensInfo';
+import { RatingDistribution } from '../charts/RatingDistribution';
 
 interface StudentReviewsTabProps {
   reviews: Review[];
@@ -127,6 +128,11 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
                   className="min-h-[44px] w-full lg:w-48 rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-strong)] focus:border-[var(--accent-strong)]"
                 >
                   <option value="all">All ratings</option>
+                  <option value="rating_5">Rating: 5 / 5</option>
+                  <option value="rating_4">Rating: 4 / 5</option>
+                  <option value="rating_3">Rating: 3 / 5</option>
+                  <option value="rating_2">Rating: 2 / 5</option>
+                  <option value="rating_1">Rating: 1 / 5</option>
                   <option value="recommended">Recommended</option>
                   <option value="critical">Not recommended</option>
                   <option value="difficulty_low">Difficulty 1–2 (Manageable)</option>
@@ -170,6 +176,13 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
           </div>
         )}
       </section>
+
+      {/* Clickable Rating Distribution (5 to 1) */}
+      <RatingDistribution
+        reviews={reviews}
+        activeFilter={ratingFilter}
+        onSelectRatingFilter={setRatingFilter}
+      />
 
       {/* Review List */}
       {totalVisible === 0 ? (

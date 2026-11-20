@@ -16,6 +16,7 @@ import { StudentReviewsTab } from './course/StudentReviewsTab';
 import { TeachingTeamTab } from './course/TeachingTeamTab';
 import { StudyStrategiesTab } from './course/StudyStrategiesTab';
 import { FeedbackLoopTab } from './course/FeedbackLoopTab';
+import { RecommendRing } from './charts/RecommendRing';
 
 export type CourseDetailTab =
   | 'overview'
@@ -301,13 +302,18 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-[var(--border)] sm:border-t-0 sm:border-l p-3 sm:p-4 min-w-0">
+          <div className="border-t border-[var(--border)] sm:border-t-0 sm:border-l p-3 sm:p-4 min-w-0 flex flex-col justify-between">
             <div className="text-xs font-medium text-[var(--text-muted)]">Recommend</div>
-            <div className="mt-1 type-metric text-[var(--text)]">
+            <div className="mt-2 flex items-center">
               {hasReviews ? (
-                `${stats.recommendationRate}%`
+                <RecommendRing
+                  size={96}
+                  percentage={stats.recommendationRate}
+                  responseCount={stats.responseCount}
+                  interactive
+                />
               ) : (
-                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
+                <span className="type-metric text-xl font-semibold text-[var(--text-muted)]">—</span>
               )}
             </div>
           </div>

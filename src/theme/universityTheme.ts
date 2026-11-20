@@ -15,6 +15,9 @@ export interface UniversityThemePalette {
   onAccent: string;
   accentStrong: string;
   chart: string;
+  chart1: string;
+  chart2: string;
+  chart3: string;
   // Derived chart tokens strictly mapped from the theme palette
   chartPrimary: string;
   chartSecondary: string;
@@ -45,6 +48,9 @@ const NEUTRAL_PALETTE: UniversityThemePalette = {
   onAccent: '#FFFFFF',
   accentStrong: '#1D4ED8',
   chart: '#1D4ED8',
+  chart1: '#1D4ED8',
+  chart2: '#7E7F81',
+  chart3: '#DFE2E8',
   chartPrimary: '#1D4ED8',
   chartSecondary: '#555963',
   chartGrid: '#DFE2E8',
@@ -65,6 +71,9 @@ const NEUTRAL_DARK_PALETTE: UniversityThemePalette = {
   onAccent: '#FFFFFF',
   accentStrong: '#93C5FD',
   chart: '#93C5FD',
+  chart1: '#93C5FD',
+  chart2: '#969490',
+  chart3: '#3D3A37',
   chartPrimary: '#93C5FD',
   chartSecondary: '#B8B4AC',
   chartGrid: '#3D3A37',
@@ -85,6 +94,9 @@ const UWATERLOO_PALETTE: UniversityThemePalette = {
   onAccent: '#141414',
   accentStrong: '#141414',
   chart: '#A67C00',
+  chart1: '#A67C00',
+  chart2: '#7E7E7E',
+  chart3: '#E4E0D5',
   chartPrimary: '#A67C00',
   chartSecondary: '#141414',
   chartGrid: '#E4E0D5',
@@ -105,6 +117,9 @@ const UWATERLOO_DARK_PALETTE: UniversityThemePalette = {
   onAccent: '#141414',
   accentStrong: '#FFD54F',
   chart: '#FFD54F',
+  chart1: '#FFD54F',
+  chart2: '#969490',
+  chart3: '#3D3A37',
   chartPrimary: '#FFD54F',
   chartSecondary: '#F2EFEA',
   chartGrid: '#3D3A37',
@@ -125,6 +140,9 @@ const UOTTAWA_PALETTE: UniversityThemePalette = {
   onAccent: '#FFFFFF',
   accentStrong: '#8F001A',
   chart: '#8F001A',
+  chart1: '#8F001A',
+  chart2: '#838384',
+  chart3: '#E3DFDE',
   chartPrimary: '#8F001A',
   chartSecondary: '#1E1E1F',
   chartGrid: '#E3DFDE',
@@ -145,6 +163,9 @@ const UOTTAWA_DARK_PALETTE: UniversityThemePalette = {
   onAccent: '#FFFFFF',
   accentStrong: '#E5566D',
   chart: '#E5566D',
+  chart1: '#E5566D',
+  chart2: '#969490',
+  chart3: '#3D3A37',
   chartPrimary: '#E5566D',
   chartSecondary: '#B8B4AC',
   chartGrid: '#3D3A37',

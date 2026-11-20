@@ -32,7 +32,10 @@
   --accent: #1D4ED8;
   --on-accent: #FFFFFF;
   --accent-strong: #1D4ED8;
-  --chart: #1D4ED8;
+  --chart-1: #1D4ED8;
+  --chart-2: #7E7F81;
+  --chart-3: var(--border);
+  --chart: var(--chart-1);
 
   --scrim: rgba(0, 0, 0, 0.5);
   --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -51,7 +54,10 @@
     --accent: #2563EB;
     --on-accent: #FFFFFF;
     --accent-strong: #93C5FD;
-    --chart: #93C5FD;
+    --chart-1: #93C5FD;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -67,7 +73,10 @@
     --accent: #2563EB;
     --on-accent: #FFFFFF;
     --accent-strong: #93C5FD;
-    --chart: #93C5FD;
+    --chart-1: #93C5FD;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -84,7 +93,10 @@
   --accent: #FFD54F;
   --on-accent: #141414;
   --accent-strong: #141414;
-  --chart: #A67C00;
+  --chart-1: #A67C00;
+  --chart-2: #7E7E7E;
+  --chart-3: var(--border);
+  --chart: var(--chart-1);
 
   @media (prefers-color-scheme: dark) {
     --bg: #1C1B1A;
@@ -96,7 +108,10 @@
     --accent: #FFD54F;
     --on-accent: #141414;
     --accent-strong: #FFD54F;
-    --chart: #FFD54F;
+    --chart-1: #FFD54F;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -112,7 +127,10 @@
     --accent: #FFD54F;
     --on-accent: #141414;
     --accent-strong: #FFD54F;
-    --chart: #FFD54F;
+    --chart-1: #FFD54F;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -128,7 +146,10 @@
   --accent: #8F001A;
   --on-accent: #FFFFFF;
   --accent-strong: #8F001A;
-  --chart: #8F001A;
+  --chart-1: #8F001A;
+  --chart-2: #838384;
+  --chart-3: var(--border);
+  --chart: var(--chart-1);
 
   @media (prefers-color-scheme: dark) {
     --bg: #1C1B1A;
@@ -140,7 +161,10 @@
     --accent: #8F001A;
     --on-accent: #FFFFFF;
     --accent-strong: #E5566D;
-    --chart: #E5566D;
+    --chart-1: #E5566D;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -156,7 +180,10 @@
     --accent: #8F001A;
     --on-accent: #FFFFFF;
     --accent-strong: #E5566D;
-    --chart: #E5566D;
+    --chart-1: #E5566D;
+    --chart-2: #969490;
+    --chart-3: var(--border);
+    --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
   }
@@ -332,8 +359,11 @@
   .font-explore h1,
   .font-explore h2,
   .font-explore h3,
+  .font-explore h4,
   .font-explore button,
-  .font-explore input {
+  .font-explore input,
+  .font-explore label,
+  .font-explore table {
     font-family: var(--font-explore);
   }
 

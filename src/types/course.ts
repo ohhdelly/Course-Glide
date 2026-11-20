@@ -41,6 +41,12 @@ export interface Course {
   termScheduleNote?: string;
   isOfficialCatalog?: boolean;
   assessmentBreakdown?: AssessmentComponent[];
+  workloadBreakdown?: {
+    lectures?: number;
+    assignments?: number;
+    studying?: number;
+    exams?: number;
+  };
 }
 
 export type GradeBand = '85+' | '80-84' | '70-79' | '60-69' | 'below-60';

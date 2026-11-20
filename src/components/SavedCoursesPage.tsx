@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Course, CourseStats } from '../types/course';
 import { CourseCard } from './CourseCard';
+import { TermWorkloadMeter } from './charts/TermWorkloadMeter';
 
 interface SavedCoursesPageProps {
   courses: Course[];
@@ -22,47 +23,20 @@ export const SavedCoursesPage: React.FC<SavedCoursesPageProps> = ({
 }) => {
   const savedCourses = courses.filter((c) => savedCourseIds.includes(c.id));
 
-  const reviewedSavedCourses = savedCourses.filter(
-    (c) => (statsMap[c.id]?.responseCount ?? 0) > 0
-  );
-  const totalWeeklyHours = reviewedSavedCourses.reduce(
-    (sum, c) => sum + (statsMap[c.id]?.avgWeeklyHours ?? 0),
-    0
-  );
-
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <h1 className="type-h1 text-[var(--text)]">
-            Saved Courses
-          </h1>
-          <p className="mt-1 type-small text-[var(--text-muted)]">
-            Compare workload expectations and jump directly into saved course profiles.
-          </p>
-        </div>
-
-        {savedCourses.length > 0 && (
-          <div className="surface-card w-full sm:w-auto rounded-card px-4 py-3 text-left sm:text-right">
-            <div className="type-caption text-[var(--text-muted)]">Combined self-reported workload</div>
-            <div className="type-body sm:type-h2 font-semibold text-[var(--text)] tabular-nums">
-              {reviewedSavedCourses.length > 0 ? (
-                <>
-                  {totalWeeklyHours.toFixed(1)} hrs/wk{' '}
-                  <span className="type-caption font-normal text-[var(--text-muted)]">
-                    across {reviewedSavedCourses.length} reviewed course
-                    {reviewedSavedCourses.length === 1 ? '' : 's'}
-                  </span>
-                </>
-              ) : (
-                <span className="type-small font-medium text-[var(--text-muted)]">
-                  No student workload data yet
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+      <div>
+        <h1 className="type-h1 text-[var(--text)]">
+          Saved Courses
+        </h1>
+        <p className="mt-1 type-small text-[var(--text-muted)]">
+          Compare workload expectations and jump directly into saved course profiles.
+        </p>
       </div>
+
+      {savedCourses.length > 0 && (
+        <TermWorkloadMeter courses={savedCourses} statsMap={statsMap} />
+      )}
 
       {savedCourses.length === 0 ? (
         <section className="surface-card rounded-card p-8 sm:p-12 text-center">

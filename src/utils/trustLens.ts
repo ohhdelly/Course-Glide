@@ -376,6 +376,11 @@ export type ReviewRatingFilter =
   | 'all'
   | 'recommended'
   | 'critical'
+  | 'rating_5'
+  | 'rating_4'
+  | 'rating_3'
+  | 'rating_2'
+  | 'rating_1'
   | 'difficulty_low'
   | 'difficulty_mid'
   | 'difficulty_high';
@@ -452,6 +457,16 @@ export function sortAndFilterReviews(
         return r.recommended;
       case 'critical':
         return !r.recommended;
+      case 'rating_5':
+        return r.usefulness === 5;
+      case 'rating_4':
+        return r.usefulness === 4;
+      case 'rating_3':
+        return r.usefulness === 3;
+      case 'rating_2':
+        return r.usefulness === 2;
+      case 'rating_1':
+        return r.usefulness === 1;
       case 'difficulty_low':
         return r.difficulty <= 2;
       case 'difficulty_mid':

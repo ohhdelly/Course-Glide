@@ -103,9 +103,19 @@ test('all light and dark university themes meet WCAG AA contrast (>= 4.5:1) for 
         `${theme.id} (${mode}) accentStrong on surface`
       );
       assert.ok(
-        computeContrastRatio(p.chart, p.surface) >= 3.0,
-        `${theme.id} (${mode}) chart on surface`
+        computeContrastRatio(p.chart1, p.surface) >= 3.0,
+        `${theme.id} (${mode}) chart1 on surface`
       );
+      assert.ok(
+        computeContrastRatio(p.chart2, p.surface) >= 3.0,
+        `${theme.id} (${mode}) chart2 on surface`
+      );
+      assert.equal(p.chart3, p.border, `${theme.id} (${mode}) chart3 matches border`);
+      if (mode === 'light') {
+        assert.notEqual(p.chart1.toUpperCase(), '#FFD54F');
+        assert.notEqual(p.chart2.toUpperCase(), '#FFD54F');
+        assert.notEqual(p.chart3.toUpperCase(), '#FFD54F');
+      }
       assert.ok(
         computeContrastRatio(p.chart, p.bg) >= 3.0,
         `${theme.id} (${mode}) chart on bg`
@@ -125,6 +135,7 @@ test('Waterloo and Ottawa themes match exact specified token values and never us
   assert.equal(waterloo.accent, '#FFD54F');
   assert.equal(waterloo.onAccent, '#141414');
   assert.equal(waterloo.accentStrong, '#141414');
+  assert.equal(waterloo.chart1, '#A67C00');
   assert.equal(waterloo.chart, '#A67C00');
   assert.notEqual(waterloo.accentStrong.toUpperCase(), '#FFD54F');
   assert.notEqual(waterloo.chart.toUpperCase(), '#FFD54F');
@@ -139,6 +150,7 @@ test('Waterloo and Ottawa themes match exact specified token values and never us
   assert.equal(ottawa.accent, '#8F001A');
   assert.equal(ottawa.onAccent, '#FFFFFF');
   assert.equal(ottawa.accentStrong, '#8F001A');
+  assert.equal(ottawa.chart1, '#8F001A');
   assert.equal(ottawa.chart, '#8F001A');
 
   const waterlooDark = getThemeConfig('uwaterloo').darkPalette;
@@ -151,6 +163,7 @@ test('Waterloo and Ottawa themes match exact specified token values and never us
   assert.equal(waterlooDark.accent, '#FFD54F');
   assert.equal(waterlooDark.onAccent, '#141414');
   assert.equal(waterlooDark.accentStrong, '#FFD54F');
+  assert.equal(waterlooDark.chart1, '#FFD54F');
 
   const ottawaDark = getThemeConfig('uottawa').darkPalette;
   assert.equal(ottawaDark.bg, '#1C1B1A');
@@ -162,6 +175,7 @@ test('Waterloo and Ottawa themes match exact specified token values and never us
   assert.equal(ottawaDark.accent, '#8F001A');
   assert.equal(ottawaDark.onAccent, '#FFFFFF');
   assert.equal(ottawaDark.accentStrong, '#E5566D');
+  assert.equal(ottawaDark.chart1, '#E5566D');
 });
 
 test('adding a new university config entry surfaces it automatically in switcher options', () => {

@@ -30,6 +30,7 @@ import {
   RatingRangeCard,
 } from './CourseLoadPanels';
 import { MidTermPulseCard } from './MidTermPulseCard';
+import { WorkloadBreakdown } from '../charts/WorkloadBreakdown';
 
 interface CourseOverviewTabProps {
   course: Course;
@@ -95,6 +96,9 @@ export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
             <RatingRangeCard stats={stats} />
             <LoadProfileCard stats={stats} />
           </div>
+
+          {/* Real workload breakdown (or plain-text weekly hours when no split exists) */}
+          <WorkloadBreakdown course={course} stats={stats} />
 
           {/* Effort-to-success bands by target grade (never a grade distribution) */}
           <EffortToSuccessCard stats={stats} reviews={reviews} />
