@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Bookmark,
   ChevronDown,
@@ -44,30 +44,39 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileMenuOpen]);
+
   const handleNav = (next: AppRoute) => {
     setMobileMenuOpen(false);
     onNavigate(next);
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:gap-8 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)] shadow-surface">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 lg:gap-8 lg:px-8">
         {/* Zone 1: Independent CourseGlide Brand + University Selector */}
-        <div className="flex items-center gap-4 min-w-0 shrink-0">
+        <div className="flex shrink-0 items-center gap-2 lg:gap-4">
           <button
             type="button"
             onClick={() => handleNav({ page: 'landing' })}
-            className="flex items-center gap-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-lg py-1 whitespace-nowrap shrink-0 group"
+            className="flex min-h-[44px] items-center gap-2 rounded-control px-1 py-1 text-left whitespace-nowrap shrink-0 hover:bg-[var(--surface-2)]"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0F172A] text-white font-display font-bold text-sm tracking-tight shadow-xs transition-transform duration-150 group-hover:scale-[1.03]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-control bg-[var(--text)] text-[var(--surface)] type-small font-semibold">
               CG
             </span>
-            <span className="font-display text-lg font-bold tracking-tight text-[var(--text-primary)]">
+            <span className="type-h2 text-[var(--text)]">
               CourseGlide
             </span>
           </button>
 
-          <div className="hidden sm:flex items-center border-l border-[var(--border)] pl-4">
+          <div className="hidden sm:flex items-center border-l border-[var(--border)] pl-2.5 lg:pl-4">
             <label htmlFor="uni-selector" className="sr-only">
               Select university
             </label>
@@ -77,10 +86,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 aria-label="Select university"
                 value={selectedUniversity}
                 onChange={(e) => onSelectUniversity(e.target.value as UniversityId)}
-                className={`appearance-none rounded-lg border py-1.5 pl-3 pr-8 text-xs font-semibold transition-colors focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-soft)] whitespace-nowrap cursor-pointer ${
+                className={`min-h-[44px] w-[138px] lg:w-[220px] appearance-none rounded-control border py-2 pl-2.5 pr-7 lg:pl-3 lg:pr-8 type-caption font-medium whitespace-nowrap truncate cursor-pointer transition-colors ${
                   selectedUniversity !== 'all'
-                    ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--text-primary)] hover:border-[var(--ring)]'
-                    : 'border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:border-[var(--border-strong)]'
+                    ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                    : 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:border-[var(--accent-strong)]'
                 }`}
               >
                 <option value="all">All Universities</option>
@@ -91,7 +100,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ))}
               </select>
               <ChevronDown
-                className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-[var(--text-secondary)]"
+                className={`pointer-events-none absolute right-2 h-4 w-4 ${
+                  selectedUniversity !== 'all' ? 'text-[var(--accent-strong)]' : 'text-[var(--text-muted)]'
+                }`}
                 aria-hidden="true"
               />
             </div>
@@ -101,15 +112,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Zone 2: Primary Navigation Links */}
         <nav
           aria-label="Primary navigation"
-          className="hidden md:flex items-center gap-2 text-sm font-medium"
+          className="hidden md:flex items-center gap-1 lg:gap-4 shrink-0"
         >
           <button
             type="button"
             onClick={() => handleNav({ page: 'explore' })}
-            className={`whitespace-nowrap shrink-0 rounded-lg px-4 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
+            aria-current={route.page === 'explore' || route.page === 'course' ? 'page' : undefined}
+            className={`whitespace-nowrap shrink-0 border-b-2 px-1.5 lg:px-2 py-2 min-h-[44px] type-small transition-colors ${
               route.page === 'explore' || route.page === 'course'
-                ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] font-semibold shadow-[inset_0_0_0_1px_var(--accent-subtle-border)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]/70 hover:text-[var(--text-primary)]'
+                ? 'border-[var(--accent-strong)] text-[var(--text)] font-semibold'
+                : 'border-transparent text-[var(--text-muted)] font-medium hover:text-[var(--text)]'
             }`}
           >
             Explore Courses
@@ -117,18 +129,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => handleNav({ page: 'saved' })}
-            className={`whitespace-nowrap shrink-0 rounded-lg px-4 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
+            aria-current={route.page === 'saved' ? 'page' : undefined}
+            className={`whitespace-nowrap shrink-0 border-b-2 px-1.5 lg:px-2 py-2 min-h-[44px] type-small transition-colors ${
               route.page === 'saved'
-                ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] font-semibold shadow-[inset_0_0_0_1px_var(--accent-subtle-border)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]/70 hover:text-[var(--text-primary)]'
+                ? 'border-[var(--accent-strong)] text-[var(--text)] font-semibold'
+                : 'border-transparent text-[var(--text-muted)] font-medium hover:text-[var(--text)]'
             }`}
           >
             Saved Courses
-            <span
-              className={`ml-1.5 font-mono text-xs tabular-nums ${
-                route.page === 'saved' ? 'text-[var(--accent-text)]' : 'text-[var(--text-muted)]'
-              }`}
-            >
+            <span className="ml-1.5 lg:ml-2 type-caption text-[var(--text-muted)] tabular-nums">
               ({savedCount})
             </span>
           </button>
@@ -139,10 +148,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onOpenProfileModal}
-            className="hidden md:inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-[var(--surface-subtle)] hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] whitespace-nowrap shrink-0"
+            className="btn-secondary hidden md:inline-flex min-h-[44px] max-w-[130px] lg:max-w-none items-center gap-1.5 lg:gap-2 rounded-control px-2.5 lg:px-3 py-2 type-caption font-medium shadow-surface whitespace-nowrap shrink-0"
           >
-            <User className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
-            <span>{currentUser ? currentUser.name : 'Sign In / Profile'}</span>
+            <User className="h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+            <span className="truncate">{currentUser ? currentUser.name : 'Sign In / Profile'}</span>
           </button>
 
           <button
@@ -150,7 +159,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}
-            className="inline-flex md:hidden items-center justify-center rounded-lg border border-[var(--border)] p-2 text-[var(--text-primary)] hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+            aria-controls="mobile-navigation-drawer"
+            className="btn-secondary inline-flex min-h-[44px] min-w-[44px] md:hidden items-center justify-center rounded-control"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -159,44 +169,66 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-4 md:hidden">
+        <div
+          id="mobile-navigation-drawer"
+          className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[var(--border)] bg-[var(--surface)] px-4 py-4 shadow-dialog md:hidden"
+        >
           <div className="mb-3">
-            <label htmlFor="mobile-uni-selector" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
-              University filter
+            <label htmlFor="mobile-uni-selector" className="block type-caption text-[var(--text-muted)] mb-1">
+              University theme &amp; filter
             </label>
-            <select
-              id="mobile-uni-selector"
-              value={selectedUniversity}
-              onChange={(e) => onSelectUniversity(e.target.value as UniversityId)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
-            >
-              <option value="all">All Universities</option>
-              {universities.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="mobile-uni-selector"
+                value={selectedUniversity}
+                onChange={(e) => onSelectUniversity(e.target.value as UniversityId)}
+                className="min-h-[44px] w-full appearance-none rounded-control border border-[var(--border)] bg-[var(--surface-2)] px-3 pr-8 py-2 type-small font-medium text-[var(--text)] hover:border-[var(--accent-strong)]"
+              >
+                <option value="all">All Universities</option>
+                {universities.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]"
+                aria-hidden="true"
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
+
+          <nav aria-label="Mobile navigation" className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => handleNav({ page: 'explore' })}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]"
+              aria-current={route.page === 'explore' || route.page === 'course' ? 'page' : undefined}
+              className={`flex min-h-[44px] items-center gap-2 rounded-control border-b-2 px-3 py-2 text-left type-small transition-colors ${
+                route.page === 'explore' || route.page === 'course'
+                  ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                  : 'border-transparent text-[var(--text-muted)] font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+              }`}
             >
-              <Compass className="h-4 w-4 text-[var(--accent-text)]" />
+              <Compass className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>Explore Courses</span>
             </button>
             <button
               type="button"
               onClick={() => handleNav({ page: 'saved' })}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]"
+              aria-current={route.page === 'saved' ? 'page' : undefined}
+              className={`flex min-h-[44px] items-center justify-between rounded-control border-b-2 px-3 py-2 text-left type-small transition-colors ${
+                route.page === 'saved'
+                  ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                  : 'border-transparent text-[var(--text-muted)] font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+              }`}
             >
-              <span className="flex items-center gap-2.5">
-                <Bookmark className="h-4 w-4 text-[var(--accent-text)]" />
+              <span className="flex items-center gap-2">
+                <Bookmark className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>Saved Courses</span>
               </span>
-              <span className="font-mono text-xs text-[var(--text-muted)]">{savedCount}</span>
+              <span className="type-caption text-[var(--text-muted)] tabular-nums">
+                {savedCount}
+              </span>
             </button>
             <button
               type="button"
@@ -204,19 +236,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 setMobileMenuOpen(false);
                 onOpenProfileModal();
               }}
-              className="btn-primary mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
+              className="btn-primary mt-2 flex min-h-[44px] items-center justify-center gap-2 rounded-control px-4 py-2 type-small font-semibold"
             >
-              <User className="h-4 w-4" />
-              <span>{currentUser ? `${currentUser.name} (Profile)` : 'Sign In / Profile'}</span>
+              <User className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{currentUser ? `${currentUser.name} (Profile)` : 'Sign In / Profile'}</span>
             </button>
             <button
               type="button"
               onClick={() => handleNav({ page: 'how-it-works' })}
-              className="mt-2 px-3 py-1.5 text-center text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--accent-text)]"
+              aria-current={route.page === 'how-it-works' ? 'page' : undefined}
+              className={`mt-1 flex min-h-[44px] items-center justify-center rounded-control border-b-2 px-3 py-2 text-center type-caption font-medium transition-colors ${
+                route.page === 'how-it-works'
+                  ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                  : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+              }`}
             >
               How CourseGlide Works &amp; Trust Lens
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </header>

@@ -1,8 +1,6 @@
 import React from 'react';
-import { Bookmark, CheckCircle2, LogOut, Shield, User, X } from 'lucide-react';
+import { CheckCircle2, LogOut, User, X } from 'lucide-react';
 import type { Course, DemoUser } from '../types/course';
-import { useUniversityTheme } from '../theme/ThemeContext';
-import { getUniversityCardAccent } from '../theme/universityTheme';
 
 interface ProfileModalProps {
   currentUser: DemoUser | null;
@@ -21,38 +19,32 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onSignOut,
   onOpenCourse,
 }) => {
-  const { themeId } = useUniversityTheme();
-
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="profile-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--scrim)] p-4"
     >
-      <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-subtle)] px-5 py-4 rounded-t-2xl">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
-            <h2 id="profile-modal-title" className="font-display text-base font-bold text-[var(--text-primary)]">
-              {currentUser ? 'Student Profile (Demo Mode)' : 'Sign In to CourseGlide'}
-            </h2>
-          </div>
+      <div className="w-full max-w-md rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog overflow-hidden">
+        <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-6 py-4">
+          <h2 id="profile-modal-title" className="type-body font-semibold text-[var(--text)]">
+            {currentUser ? 'Student Profile (Demo Mode)' : 'Sign In to CourseGlide'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close profile dialog"
-            className="rounded-lg p-1 text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-control text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
-          <div className="rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/70 p-3.5 text-xs leading-relaxed text-[var(--text-secondary)]">
-            <div className="flex items-center gap-1.5 font-semibold text-[var(--text-primary)] mb-1">
-              <Shield className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
-              <span>Labeled Demonstration Authentication</span>
+        <div className="p-6 space-y-6">
+          <div className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 type-caption text-[var(--text-muted)]">
+            <div className="font-semibold text-[var(--text)] mb-1">
+              Labeled Demonstration Authentication
             </div>
             Firebase Google Sign-In is not provisioned in this preview session. You can sign in as a
             demonstration student profile to test saved courses, helpfulness voting, and review
@@ -61,55 +53,48 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
           {currentUser ? (
             <div className="space-y-4">
-              <div className="rounded-lg border border-[var(--border)] p-4">
-                <div className="flex items-center justify-between">
+              <div className="rounded-control border border-[var(--border)] p-4">
+                <div className="flex items-center justify-between gap-2">
                   <div>
-                    <div className="font-display text-sm font-bold text-[var(--text-primary)]">
+                    <div className="type-small font-semibold text-[var(--text)]">
                       {currentUser.name}
                     </div>
-                    <div className="text-xs text-[var(--text-muted)]">{currentUser.email}</div>
+                    <div className="type-caption text-[var(--text-muted)]">{currentUser.email}</div>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--status-positive)]">
-                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="inline-flex items-center gap-1 type-caption font-medium text-[var(--text)]">
+                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                     <span>Demo Active</span>
                   </span>
                 </div>
-                <div className="mt-2 text-xs text-[var(--text-secondary)]">{currentUser.program}</div>
+                <div className="mt-2 type-caption text-[var(--text-muted)]">{currentUser.program}</div>
               </div>
 
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)] mb-2">
-                  <Bookmark className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
-                  <span>Saved Courses ({savedCourses.length})</span>
+                <div className="type-caption font-semibold text-[var(--text)] mb-2">
+                  Saved Courses ({savedCourses.length})
                 </div>
                 {savedCourses.length === 0 ? (
-                  <p className="text-xs text-[var(--text-muted)]">No saved courses yet.</p>
+                  <p className="type-caption text-[var(--text-muted)]">No saved courses yet.</p>
                 ) : (
-                  <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)]">
-                    {savedCourses.map((c) => {
-                      const codeColor =
-                        themeId === 'neutral'
-                          ? getUniversityCardAccent(c.universityId).codeClass
-                          : 'text-[var(--accent-code)]';
-                      return (
-                        <li key={c.id}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onOpenCourse(c.id);
-                              onClose();
-                            }}
-                            className="flex w-full items-center justify-between px-3 py-2 text-left text-xs hover:bg-[var(--surface-subtle)]"
-                          >
-                            <span>
-                              <strong className={`font-mono mr-1.5 ${codeColor}`}>{c.code}</strong>
-                              <span className="text-[var(--text-primary)]">{c.title}</span>
-                            </span>
-                            <span className="text-[var(--text-muted)]">Open</span>
-                          </button>
-                        </li>
-                      );
-                    })}
+                  <ul className="divide-y divide-[var(--border)] rounded-control border border-[var(--border)]">
+                    {savedCourses.map((c) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onOpenCourse(c.id);
+                            onClose();
+                          }}
+                          className="flex min-h-[44px] w-full items-center justify-between px-3 py-2 text-left type-caption hover:bg-[var(--surface-2)]"
+                        >
+                          <span>
+                            <strong className="mr-2 font-semibold text-[var(--text)] tabular-nums">{c.code}</strong>
+                            <span className="text-[var(--text)]">{c.title}</span>
+                          </span>
+                          <span className="text-[var(--text-muted)]">Open</span>
+                        </button>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </div>
@@ -118,9 +103,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={onSignOut}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]"
+                  className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 type-caption font-semibold"
                 >
-                  <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
                   <span>Sign Out Demo Session</span>
                 </button>
               </div>
@@ -130,12 +115,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <button
                 type="button"
                 onClick={onSignInDemo}
-                className="btn-primary flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-xs"
+                className="btn-primary flex min-h-[44px] w-full items-center justify-center gap-2 rounded-control px-4 py-2 type-small font-semibold shadow-surface"
               >
                 <User className="h-4 w-4" aria-hidden="true" />
                 <span>Continue as Demo Student</span>
               </button>
-              <p className="text-center text-[11px] text-[var(--text-muted)]">
+              <p className="text-center type-caption text-[var(--text-muted)]">
                 Uses local session demo account without real university credentials.
               </p>
             </div>

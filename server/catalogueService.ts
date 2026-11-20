@@ -330,6 +330,17 @@ export class CatalogueService {
       }
 
       const courseReviews = reviewsByCourse.get(course.id);
+      if (filters.term && filters.term !== 'all') {
+        const needle = filters.term.toLowerCase();
+        const matchesOffered = course.termsOffered.some((t) =>
+          t.toLowerCase().includes(needle)
+        );
+        const matchesReviewTerm = Boolean(
+          courseReviews?.some((r) => r.term.toLowerCase().includes(needle))
+        );
+        if (!matchesOffered && !matchesReviewTerm) continue;
+      }
+
       const hasReviews = Boolean(courseReviews && courseReviews.length > 0);
       if (filters.hasReviews === 'with_reviews' && !hasReviews) continue;
       if (filters.hasReviews === 'without_reviews' && hasReviews) continue;

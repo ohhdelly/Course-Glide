@@ -1,4 +1,4 @@
-export type UniversityId = 'all' | 'uwaterloo' | 'uottawa';
+export type UniversityId = 'all' | (string & {});
 
 export interface University {
   id: Exclude<UniversityId, 'all'>;
@@ -348,6 +348,7 @@ export interface ModerationReport {
 
 export interface CourseFilters {
   universityId: UniversityId;
+  term?: 'all' | 'Fall' | 'Winter' | 'Spring';
   department: string;
   level: 'all' | 100 | 200 | 300 | 400 | 500;
   maxDifficulty: 'all' | 2 | 3 | 4 | 5;

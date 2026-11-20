@@ -1,8 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
-import type { Review, TrustLensMode } from '../../types/course';
-import { rankAndFilterReviews } from '../../utils/trustLens';
+import { ShieldCheck } from 'lucide-react';
+import type { Review } from '../../types/course';
+import {
+  sortAndFilterReviews,
+  type ReviewRatingFilter,
+  type ReviewSortBy,
+} from '../../utils/trustLens';
 import { ReviewCard } from './ReviewCard';
+import { TrustLensInfo } from './TrustLensInfo';
 
 interface StudentReviewsTabProps {
   reviews: Review[];
@@ -21,202 +26,186 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
   onReport,
   onOpenWriteReview,
 }) => {
-  const [trustMode, setTrustMode] = useState<TrustLensMode>(
-    highlightReviewId ? 'all' : 'most_informative'
-  );
-  const [sentimentFilter, setSentimentFilter] = useState<'all' | 'recommended' | 'critical'>(
-    'all'
-  );
-  const [showHowItWorks, setShowHowItWorks] = useState(false);
-
-  const visibleAllCount = useMemo(
-    () => reviews.filter((r) => r.moderationStatus !== 'hidden').length,
-    [reviews]
+  const [sortBy, setSortBy] = useState<ReviewSortBy>('trust_lens');
+  const [ratingFilter, setRatingFilter] = useState<ReviewRatingFilter>('all');
+  const [includeLimited, setIncludeLimited] = useState<boolean>(
+    Boolean(highlightReviewId)
   );
 
-  const displayedReviews = useMemo(
-    () => rankAndFilterReviews(reviews, trustMode, sentimentFilter),
-    [reviews, trustMode, sentimentFilter]
+  const {
+    displayed: displayedReviews,
+    totalVisible,
+    hiddenLimitedCount,
+    avgTrustScore,
+    informativeCount,
+  } = useMemo(
+    () =>
+      sortAndFilterReviews(reviews, {
+        sortBy,
+        ratingFilter,
+        includeLimited: includeLimited || Boolean(highlightReviewId),
+      }),
+    [reviews, sortBy, ratingFilter, includeLimited, highlightReviewId]
   );
 
-  const hiddenLowInfoCount =
-    trustMode === 'most_informative'
-      ? Math.max(0, visibleAllCount - displayedReviews.length)
-      : 0;
+  const trustSummaryLabel =
+    avgTrustScore >= 70
+      ? 'High detail'
+      : avgTrustScore >= 45
+      ? 'Moderate detail'
+      : 'Limited detail';
 
   return (
-    <div className="space-y-5">
-      {/* CourseGlide Trust Lens Control Bar */}
+    <div className="space-y-4">
+      {/* Visually Distinct Trust Lens Banner + Sort & Filter Controls */}
       <section
-        aria-label="CourseGlide Trust Lens controls"
-        className="surface-card rounded-2xl p-5 sm:p-6"
+        aria-label="Trust Lens and review controls"
+        className="surface-tinted rounded-card p-4 sm:p-6 space-y-4"
       >
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--status-positive-bg)] text-[var(--status-positive)]">
-                <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
-              </span>
-              <h2 className="font-display text-base font-bold text-[var(--text-primary)]">
-                CourseGlide Trust Lens
-              </h2>
-            </div>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Surfaces specific, helpful reviews first while keeping valid criticism visible.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Primary Trust Lens Mode Selector */}
-            <div
-              role="group"
-              aria-label="Trust Lens ranking mode"
-              className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1"
-            >
-              <button
-                type="button"
-                onClick={() => setTrustMode('most_informative')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                  trustMode === 'most_informative'
-                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
-                }`}
-              >
-                Most Informative
-              </button>
-              <button
-                type="button"
-                onClick={() => setTrustMode('most_recent')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                  trustMode === 'most_recent'
-                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
-                }`}
-              >
-                Most Recent
-              </button>
-              <button
-                type="button"
-                onClick={() => setTrustMode('all')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                  trustMode === 'all'
-                    ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
-                }`}
-              >
-                All Reviews ({visibleAllCount})
-              </button>
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <ShieldCheck className="h-4 w-4 text-[var(--chart)] shrink-0" aria-hidden="true" />
+              <h2 className="text-base font-semibold text-[var(--text)]">Trust Lens</h2>
+              {totalVisible > 0 && (
+                <>
+                  <span className="inline-flex items-center rounded-control bg-[var(--accent)] px-2.5 py-0.5 text-xs font-semibold text-[var(--on-accent)] tabular-nums">
+                    {avgTrustScore}/100 · {trustSummaryLabel}
+                  </span>
+                  <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
+                    {informativeCount} of {totalVisible} detailed
+                  </span>
+                </>
+              )}
             </div>
 
-            {/* Sentiment Filter */}
-            <label htmlFor="review-sentiment-filter" className="sr-only">
-              Filter reviews by recommendation
-            </label>
-            <select
-              id="review-sentiment-filter"
-              aria-label="Filter reviews by recommendation"
-              value={sentimentFilter}
-              onChange={(e) =>
-                setSentimentFilter(e.target.value as 'all' | 'recommended' | 'critical')
-              }
-              className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface)] focus:border-[var(--ring)] focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-soft)]"
-            >
-              <option value="all">All Perspectives</option>
-              <option value="recommended">Recommended Only</option>
-              <option value="critical">Critical / Not Recommended</option>
-            </select>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="text-sm text-[var(--text-muted)]">
+                Highlights specific, evidence-backed reviews first — positive and negative ratings score equally.
+              </p>
+              <TrustLensInfo />
+            </div>
           </div>
+
+          {/* Simple Sort & Rating Filter Controls */}
+          {totalVisible > 0 && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-end shrink-0">
+              <div>
+                <label
+                  htmlFor="review-sort-select"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1"
+                >
+                  Sort by
+                </label>
+                <select
+                  id="review-sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as ReviewSortBy)}
+                  className="min-h-[44px] w-full lg:w-48 rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-strong)] focus:border-[var(--accent-strong)]"
+                >
+                  <option value="trust_lens">Trust Lens (Best detail)</option>
+                  <option value="most_helpful">Most helpful</option>
+                  <option value="most_recent">Most recent</option>
+                  <option value="rating_desc">Rating: Hardest first</option>
+                  <option value="rating_asc">Rating: Easiest first</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="review-rating-filter"
+                  className="block text-xs font-semibold text-[var(--text)] mb-1"
+                >
+                  Filter by rating
+                </label>
+                <select
+                  id="review-rating-filter"
+                  value={ratingFilter}
+                  onChange={(e) =>
+                    setRatingFilter(e.target.value as ReviewRatingFilter)
+                  }
+                  className="min-h-[44px] w-full lg:w-48 rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium text-[var(--text)] transition-colors hover:bg-[var(--surface-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-strong)] focus:border-[var(--accent-strong)]"
+                >
+                  <option value="all">All ratings</option>
+                  <option value="recommended">Recommended</option>
+                  <option value="critical">Not recommended</option>
+                  <option value="difficulty_low">Difficulty 1–2 (Manageable)</option>
+                  <option value="difficulty_mid">Difficulty 3 (Moderate)</option>
+                  <option value="difficulty_high">Difficulty 4–5 (Demanding)</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Status Summary & How Trust Lens Works Disclosure */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3.5 border-t border-[var(--border)] text-xs">
-          <span className="text-[var(--text-secondary)] tabular-nums">
-            Showing <strong className="font-semibold text-[var(--text-primary)]">{displayedReviews.length}</strong>{' '}
-            review{displayedReviews.length === 1 ? '' : 's'}
-            {hiddenLowInfoCount > 0 && sentimentFilter === 'all' && (
-              <span className="text-[var(--text-muted)]">
-                {' '}
-                · {hiddenLowInfoCount} brief or duplicate{' '}
-                {hiddenLowInfoCount === 1 ? 'entry' : 'entries'} hidden (switch to All Reviews to view)
-              </span>
-            )}
-          </span>
+        {/* Count Summary & Brief/Duplicate Toggle */}
+        {totalVisible > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-3 text-xs">
+            <span className="text-[var(--text-muted)] tabular-nums">
+              Showing{' '}
+              <strong className="font-semibold text-[var(--text)]">
+                {displayedReviews.length}
+              </strong>{' '}
+              of {totalVisible} review{totalVisible === 1 ? '' : 's'}
+              {hiddenLimitedCount > 0 && (
+                <span>
+                  {' '}
+                  · {hiddenLimitedCount} brief or duplicate hidden
+                </span>
+              )}
+            </span>
 
-          <button
-            type="button"
-            aria-expanded={showHowItWorks}
-            onClick={() => setShowHowItWorks((v) => !v)}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-[var(--accent-text)] transition-colors hover:bg-[var(--surface-accent)]"
-          >
-            <span>How Trust Lens works</span>
-            {showHowItWorks ? (
-              <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
-            ) : (
-              <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+            {(hiddenLimitedCount > 0 || includeLimited) && (
+              <button
+                type="button"
+                aria-pressed={includeLimited}
+                onClick={() => setIncludeLimited((v) => !v)}
+                className="btn-secondary inline-flex min-h-[36px] items-center rounded-control px-3 py-1 text-xs font-semibold"
+              >
+                {includeLimited
+                  ? 'Hide brief & duplicate entries'
+                  : `Show all (${totalVisible})`}
+              </button>
             )}
-          </button>
-        </div>
-
-        {showHowItWorks && (
-          <div className="mt-3 rounded-xl border border-[var(--accent-subtle-border)] bg-[var(--surface-accent)]/75 p-4 text-xs leading-relaxed text-[var(--text-secondary)] space-y-2">
-            <p>
-              <strong className="font-semibold text-[var(--text-primary)]">Transparent signal evaluation:</strong>{' '}
-              Trust Lens scores each submission on course-specific detail (references to assessments,
-              lectures, grading, or workload), concrete examples of what worked and what was challenging,
-              actionable study advice, recency, community helpfulness votes, and repetition/duplicate checks.
-            </p>
-            <p>
-              <strong className="font-semibold text-[var(--text-primary)]">Fairness guarantee:</strong>{' '}
-              Trust Lens never assumes positive reviews are truthful or negative reviews are biased.
-              Detailed criticism receives high context scores just like detailed praise. Trust Lens
-              measures informational utility, not absolute truth.
-            </p>
           </div>
         )}
       </section>
 
       {/* Review List */}
-      {visibleAllCount === 0 ? (
-        <div className="surface-card rounded-2xl p-10 text-center">
-          <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
+      {totalVisible === 0 ? (
+        <div className="surface-card rounded-card p-8 text-center">
+          <h3 className="text-base font-semibold text-[var(--text)]">
             No student reviews yet.
           </h3>
-          <p className="mt-1.5 text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-            Share concrete insights about assessments, workload, and preparation strategies to help future students.
+          <p className="mt-2 text-sm text-[var(--text-muted)] max-w-md mx-auto">
+            Share assessment details, weekly hours, and study tips to help students choosing this course.
           </p>
           <button
             type="button"
             onClick={onOpenWriteReview}
-            className="btn-primary mt-5 rounded-xl px-5 py-2.5 text-xs font-semibold shadow-xs"
+            className="btn-primary mt-4 inline-flex min-h-[44px] items-center rounded-control px-6 py-2 text-xs font-semibold shadow-surface"
           >
             Be the first to review
           </button>
         </div>
       ) : displayedReviews.length === 0 ? (
-        <div className="surface-card rounded-2xl p-10 text-center">
-          <h3 className="font-display text-base font-semibold text-[var(--text-primary)]">
-            No reviews match this filter selection
+        <div className="surface-card rounded-card p-8 text-center">
+          <h3 className="text-base font-semibold text-[var(--text)]">
+            No reviews match this rating filter
           </h3>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Try switching to All Reviews or All Perspectives, or contribute your own experience.
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
+            Reset the rating filter to view all reviews for this course.
           </p>
-          <div className="mt-4 flex items-center justify-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => {
-                setTrustMode('all');
-                setSentimentFilter('all');
+                setRatingFilter('all');
+                setIncludeLimited(true);
               }}
-              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-subtle)]"
+              className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-4 py-2 text-xs font-semibold"
             >
               Show all reviews
-            </button>
-            <button
-              type="button"
-              onClick={onOpenWriteReview}
-              className="btn-primary rounded-xl px-4 py-2 text-xs font-semibold"
-            >
-              Write a review
             </button>
           </div>
         </div>
@@ -237,3 +226,5 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
     </div>
   );
 };
+
+

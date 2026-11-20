@@ -1,12 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  ArrowLeft,
-  Bookmark,
-  CalendarCheck2,
-  CheckCircle2,
-  Info,
-  PenSquare,
-} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Bookmark, CalendarCheck2, CheckCircle2, Info, PenSquare } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import type {
   Course,
@@ -17,13 +10,19 @@ import type {
   InstructorProfile,
   Review,
 } from '../types/course';
+import { CollapsibleText } from './course/CollapsibleText';
 import { CourseOverviewTab } from './course/CourseOverviewTab';
 import { StudentReviewsTab } from './course/StudentReviewsTab';
 import { TeachingTeamTab } from './course/TeachingTeamTab';
 import { StudyStrategiesTab } from './course/StudyStrategiesTab';
 import { FeedbackLoopTab } from './course/FeedbackLoopTab';
 
-export type CourseDetailTab = 'overview' | 'reviews' | 'teaching' | 'feedback' | 'strategies';
+export type CourseDetailTab =
+  | 'overview'
+  | 'reviews'
+  | 'teaching'
+  | 'feedback'
+  | 'strategies';
 
 interface CourseDetailPageProps {
   course: Course;
@@ -76,14 +75,16 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [insights, setInsights] = useState<CourseInsightReport | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
-  const [showFullDescription, setShowFullDescription] = useState(false);
+  const tablistRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Record<CourseDetailTab, HTMLButtonElement | null>>({
+    overview: null,
+    reviews: null,
+    teaching: null,
+    feedback: null,
+    strategies: null,
+  });
 
   const hasReviews = stats.responseCount > 0;
-  const isLongDescription = course.description.length > 230;
-
-  useEffect(() => {
-    setShowFullDescription(false);
-  }, [course.id]);
 
   const loadInsights = async (forceRefresh = false) => {
     if (!hasReviews) {
@@ -117,64 +118,101 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     loadInsights(false);
   }, [course.id, reviews.length]);
 
+  const selectTab = (nextTab: CourseDetailTab, focusButton = false) => {
+    setActiveTab(nextTab);
+
+    // Keep scroll position sensible when switching tabs: if the user has scrolled
+    // below the tab bar, gently bring the tab bar back below the sticky header.
+    const listEl = tablistRef.current;
+    if (listEl) {
+      const rect = listEl.getBoundingClientRect();
+      if (rect.top < 72) {
+        const targetTop = Math.max(0, window.scrollY + rect.top - 80);
+        window.scrollTo({
+          top: targetTop,
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        });
+      }
+    }
+
+    if (focusButton) {
+      tabRefs.current[nextTab]?.focus();
+    }
+  };
+
   const jumpToReview = (reviewId: string) => {
     setHighlightReviewId(reviewId);
     setActiveTab('reviews');
     setTimeout(() => {
       const el = document.getElementById(`review-${reviewId}`);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+      el?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'center',
+      });
+    }, 170);
   };
 
   const tabs: Array<{ id: CourseDetailTab; label: string; count?: number }> = [
     { id: 'overview', label: 'Overview' },
     {
       id: 'reviews',
-      label: 'Student Reviews',
+      label: 'Reviews',
       count: reviews.filter((r) => r.moderationStatus !== 'hidden').length,
     },
-    { id: 'teaching', label: 'Teaching Team', count: instructors.length },
+    { id: 'teaching', label: 'TA feedback', count: instructors.length },
     { id: 'feedback', label: 'Feedback Loop', count: facultyResponses.length },
-    { id: 'strategies', label: 'Study Strategies' },
+    { id: 'strategies', label: 'Study strategies' },
   ];
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex: number | null = null;
+    if (e.key === 'ArrowRight') {
+      nextIndex = (index + 1) % tabs.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIndex = (index - 1 + tabs.length) % tabs.length;
+    } else if (e.key === 'Home') {
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      nextIndex = tabs.length - 1;
+    }
+
+    if (nextIndex !== null) {
+      e.preventDefault();
+      selectTab(tabs[nextIndex].id, true);
+    }
+  };
 
   const scheduleLabel =
     course.catalogStatus === 'scheduled_for_term'
-      ? 'Scheduled in term API'
+      ? 'Scheduled for active term'
       : course.catalogStatus === 'not_confirmed_for_term'
       ? 'Not confirmed for active term'
-      : course.isOfficialCatalog
-      ? `Listed in ${course.calendarVersion ?? '2026–2027 Academic Calendar'}`
-      : 'Demonstration course profile';
+      : course.calendarVersion ?? 'Official academic calendar';
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-      {/* Breadcrumb Back Link */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
+    <main className="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 sm:pt-10 lg:px-8">
+      {/* Top Breadcrumb Row */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-[var(--text-muted)]">
         <button
           type="button"
           onClick={onBackToExplore}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface)]/85 hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-control px-2 py-2 font-semibold text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
         >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           <span>Explore Courses</span>
         </button>
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
-          <CalendarCheck2 className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+        <span className="inline-flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <CalendarCheck2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{scheduleLabel}</span>
         </span>
       </div>
 
-      {/* Course Header Card */}
-      <section className="surface-card rounded-2xl bg-gradient-to-b from-[var(--surface-hero-mid)] via-[var(--surface)] to-[var(--surface)] p-6 sm:p-7 mb-6">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-          <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--text-muted)]">
-              <span className="font-mono text-sm font-bold text-[var(--accent-code)] tabular-nums">
-                {course.code}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span className="font-semibold text-[var(--text-primary)]">{course.universityName}</span>
+      {/* Course Header + Headline Metrics */}
+      <section className="surface-card rounded-card p-4 sm:p-6 mb-6">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+          <div className="max-w-3xl min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-[var(--text-muted)]">
+              <span className="font-semibold text-[var(--text)]">{course.universityName}</span>
               <span aria-hidden="true">·</span>
               <span>{course.department}</span>
               <span aria-hidden="true">·</span>
@@ -187,82 +225,73 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               )}
             </div>
 
-            <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl text-balance">
-              {course.title}
+            <h1 className="mt-2 type-h1 text-[var(--text)] text-balance">
+              <span className="tabular-nums whitespace-nowrap">{course.code}</span>
+              <span className="mx-2 text-[var(--text-muted)] font-normal" aria-hidden="true">
+                —
+              </span>
+              <span>{course.title}</span>
             </h1>
 
-            <p
-              className={`mt-2.5 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-[15px] ${
-                isLongDescription && !showFullDescription ? 'line-clamp-2' : ''
-              }`}
-            >
-              {course.description}
-            </p>
-            {isLongDescription && (
-              <button
-                type="button"
-                aria-expanded={showFullDescription}
-                onClick={() => setShowFullDescription((v) => !v)}
-                className="mt-1 text-xs font-semibold text-[var(--accent-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded"
-              >
-                {showFullDescription ? 'Show less' : 'Read full description'}
-              </button>
-            )}
+            <CollapsibleText
+              text={course.description}
+              className="mt-3 text-sm text-[var(--text-muted)]"
+            />
           </div>
 
-          {/* Primary Actions */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Save + Primary Action */}
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-3 w-full lg:w-auto shrink-0">
             <button
               type="button"
               onClick={() => onToggleSave(course.id)}
               aria-pressed={isSaved}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-xs transition-all active:scale-[0.98] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
+              className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-control border px-4 py-2 text-sm font-semibold shadow-surface transition-colors whitespace-nowrap ${
                 isSaved
-                  ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)]'
-                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-subtle)] hover:border-[var(--border-strong)]'
+                  ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)]'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--surface-2)] hover:border-[var(--accent-strong)]'
               }`}
             >
-              <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
+              <Bookmark className={`h-4 w-4 shrink-0 ${isSaved ? 'fill-current' : ''}`} />
               <span>{isSaved ? 'Saved' : 'Save Course'}</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenWriteReview}
-              className="btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-xs active:scale-[0.98] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+              className="btn-primary inline-flex min-h-[44px] items-center justify-center gap-2 rounded-control px-4 py-2 text-sm font-semibold whitespace-nowrap"
             >
-              <PenSquare className="h-4 w-4" aria-hidden="true" />
+              <PenSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>{hasReviews ? 'Write a Review' : 'Be the first to review'}</span>
             </button>
           </div>
         </div>
 
-        {/* Unified 4-Column Primary Metric Strip */}
-        <div className="mt-6 grid grid-cols-2 divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] sm:grid-cols-4 sm:divide-y-0 sm:divide-x">
-          <div className="px-4 py-3.5 sm:px-5">
+        {/* 4 Headline Metrics — single row on desktop, 2 columns on mobile */}
+        <div className="mt-6 grid grid-cols-2 rounded-control border border-[var(--border)] bg-[var(--surface-2)] sm:grid-cols-4">
+          <div className="p-3 sm:p-4 min-w-0">
             <div className="text-xs font-medium text-[var(--text-muted)]">Difficulty</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+            <div className="mt-1 type-metric text-[var(--text)]">
               {hasReviews ? (
                 <>
                   {stats.avgDifficulty.toFixed(1)}
                   <span className="text-sm font-normal text-[var(--text-muted)]"> / 5.0</span>
                 </>
               ) : (
-                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
               )}
             </div>
           </div>
 
-          <div className="border-l border-[var(--border)] px-4 py-3.5 sm:border-l-0 sm:px-5">
+          <div className="border-l border-[var(--border)] p-3 sm:p-4 min-w-0">
             <div className="text-xs font-medium text-[var(--text-muted)]">Load index</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+            <div className="mt-1 type-metric text-[var(--text)] tabular-nums">
               {hasReviews ? (
                 <>
                   {stats.load.loadIndex}
                   <span className="text-sm font-normal text-[var(--text-muted)]"> / 100</span>
                 </>
               ) : (
-                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
               )}
             </div>
             <div className="mt-0.5 text-[10px] text-[var(--text-muted)]">
@@ -272,23 +301,23 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             </div>
           </div>
 
-          <div className="px-4 py-3.5 sm:px-5">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Student recommendation</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-[var(--status-positive)] tabular-nums">
+          <div className="border-t border-[var(--border)] sm:border-t-0 sm:border-l p-3 sm:p-4 min-w-0">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Recommend</div>
+            <div className="mt-1 type-metric text-[var(--text)]">
               {hasReviews ? (
                 `${stats.recommendationRate}%`
               ) : (
-                <span className="text-lg font-semibold text-[var(--text-muted)]">—</span>
+                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
               )}
             </div>
           </div>
 
-          <div className="border-l border-[var(--border)] px-4 py-3.5 sm:border-l-0 sm:px-5">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Student responses</div>
-            <div className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-              {stats.responseCount}
-              <span className="ml-1.5 font-sans text-xs font-normal text-[var(--text-muted)]">
-                {hasReviews ? `(${stats.informativeCount} detailed)` : 'No reviews yet'}
+          <div className="border-t border-l border-[var(--border)] sm:border-t-0 p-3 sm:p-4 min-w-0">
+            <div className="text-xs font-medium text-[var(--text-muted)]">Responses</div>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+              <span className="type-metric text-[var(--text)]">{stats.responseCount}</span>
+              <span className="text-xs font-normal text-[var(--text-muted)] tabular-nums">
+                {hasReviews ? `${stats.informativeCount} detailed` : 'No reviews yet'}
               </span>
             </div>
           </div>
@@ -297,12 +326,9 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         {/* Sample-size confidence note */}
         <div className="mt-3.5 flex items-center gap-2 text-xs text-[var(--text-muted)]">
           {!hasReviews || stats.confidenceLevel === 'limited' ? (
-            <Info
-              className={`h-3.5 w-3.5 shrink-0 ${hasReviews ? 'text-[var(--status-warning)]' : 'text-[var(--accent-text)]'}`}
-              aria-hidden="true"
-            />
+            <Info className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
           ) : (
-            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--status-positive)] shrink-0" aria-hidden="true" />
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden="true" />
           )}
           <span>
             {hasReviews
@@ -313,41 +339,49 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
 
         {hasReviews && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-5 text-[11px] text-[var(--text-muted)]">
-            <span className="font-medium text-[var(--text-secondary)]">As of {stats.asOf}</span>
+            <span className="font-medium text-[var(--text)]">As of {stats.asOf}</span>
             <span aria-hidden="true">·</span>
             <span>{stats.weightingNote}</span>
           </div>
         )}
       </section>
 
-      {/* Integrated Sub-Navigation Tabs */}
+      {/* Segmented Section Tabs (horizontal scroll on mobile, arrow-key navigation) */}
       <div
+        ref={tablistRef}
         role="tablist"
         aria-label="Course detail sections"
-        className="mb-6 flex overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-1.5 gap-1.5"
+        className="no-scrollbar mb-6 flex overflow-x-auto rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-1 gap-1"
       >
-        {tabs.map((tab) => {
+        {tabs.map((tab, index) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
+              ref={(el) => {
+                tabRefs.current[tab.id] = el;
+              }}
               role="tab"
               type="button"
               aria-selected={isActive}
-              onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${
+              aria-controls="course-tabpanel"
+              tabIndex={isActive ? 0 : -1}
+              onClick={() => selectTab(tab.id)}
+              onKeyDown={(e) => handleTabKeyDown(e, index)}
+              className={`inline-flex min-h-[44px] items-center whitespace-nowrap shrink-0 rounded-[4px] border px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                 isActive
-                  ? 'bg-[var(--surface-accent)] text-[var(--accent-code)] shadow-xs border border-[var(--accent-subtle-border)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface)]/70 hover:text-[var(--text-primary)] border border-transparent'
+                  ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--on-accent)]'
+                  : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
               }`}
             >
               <span>{tab.label}</span>
               {typeof tab.count === 'number' && (
                 <span
-                  className={`ml-1.5 rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums ${
+                  className={`ml-2 rounded-[2px] px-2 py-0.5 text-xs font-medium tabular-nums ${
                     isActive
-                      ? 'bg-[var(--surface)]/90 text-[var(--accent-text)]'
-                      : 'bg-[var(--surface)]/65 text-[var(--text-muted)]'
+                      ? 'bg-[var(--surface)] text-[var(--text)]'
+                      : 'bg-[var(--surface)] text-[var(--text-muted)]'
                   }`}
                 >
                   {tab.count}
@@ -358,16 +392,20 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         })}
       </div>
 
-      {/* Active Tab Panel with Smooth Transition.
-          A keyed motion.div (no AnimatePresence) swaps panels synchronously: waiting for an
-          exit animation left the previous tab rendered after the selected tab had changed. */}
-      <div role="tabpanel">
-        <motion.div
-          key={`${course.id}-${activeTab}`}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: 'easeOut' }}
-        >
+      {/* Active Section Panel. A keyed motion.div swaps panels synchronously: an
+          AnimatePresence exit animation left the previous tab rendered after the
+          selected tab had changed. */}
+      <div
+        id="course-tabpanel"
+        role="tabpanel"
+        aria-labelledby={`tab-${activeTab}`}
+      >
+          <motion.div
+            key={`${course.id}-${activeTab}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.15, ease: 'easeOut' }}
+          >
             {activeTab === 'overview' && (
               <CourseOverviewTab
                 course={course}
@@ -418,8 +456,9 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 onOpenWriteReview={onOpenWriteReview}
               />
             )}
-        </motion.div>
+          </motion.div>
       </div>
     </main>
   );
 };
+

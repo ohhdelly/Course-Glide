@@ -82,8 +82,8 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
     <section className={cardShell} aria-label="Mid-term pulse">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text-primary)]">
-            <Timer className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text)]">
+            <Timer className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
             Mid-term pulse — {courseCode}
           </h2>
           <p className="text-xs text-[var(--text-muted)]">
@@ -96,7 +96,7 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
           <select
             value={week}
             onChange={(event) => setWeek(Number(event.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] px-2 py-1 font-mono text-[11px] text-[var(--text-secondary)] focus:border-[var(--ring)] focus:outline-none"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 font-mono text-[11px] text-[var(--text)] focus:border-[var(--accent)] focus:outline-none"
             title="In a live deployment this comes from the registrar calendar; the demo lets you preview any week."
           >
             {Array.from({ length: 13 }, (_, index) => index + 1).map((value) => (
@@ -108,14 +108,14 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
         </label>
       </div>
 
-      <p className="mt-3 text-xs text-[var(--text-secondary)]">
+      <p className="mt-3 text-xs text-[var(--text)]">
         {pulse?.windowNote ?? 'Checking the pulse window…'}
       </p>
 
       {sent ? (
         <div className="mt-4 space-y-3">
-          <div className="flex items-start gap-2 rounded-xl border border-[var(--status-positive-border)] bg-[var(--status-positive-bg)]/60 p-4 text-xs text-[var(--text-secondary)]">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--status-positive)]" aria-hidden="true" />
+          <div className="flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/60 p-4 text-xs text-[var(--text)]">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <span>
               Sent. Your answers are aggregated with everyone else&apos;s and stay sealed
               {pulse?.sealedUntil ? ` until ${new Date(pulse.sealedUntil).toLocaleDateString()}` : ' until the term ends'}.
@@ -139,7 +139,7 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
           )}
         </div>
       ) : !windowOpen ? (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-xs text-[var(--text-secondary)]">
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--text)]">
           <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
           <span>
             The pulse opens in week 4 and closes after week 8. Outside the window the form stays
@@ -147,14 +147,14 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
           </span>
         </div>
       ) : promptsRemaining === 0 ? (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-xs text-[var(--text-secondary)]">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--status-positive)]" aria-hidden="true" />
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--text)]">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
           <span>You have used both of your pulses for this term. Thanks — that is the cap by design.</span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
           <div>
-            <label htmlFor="pulse-keeps" className="block text-[11px] font-semibold text-[var(--text-primary)]">
+            <label htmlFor="pulse-keeps" className="block text-[11px] font-semibold text-[var(--text)]">
               What is working right now?
             </label>
             <input
@@ -164,11 +164,11 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
               onChange={(event) => setKeepsWorking(event.target.value)}
               maxLength={300}
               placeholder="One sentence is enough"
-              className="mt-1 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="pulse-not" className="block text-[11px] font-semibold text-[var(--text-primary)]">
+            <label htmlFor="pulse-not" className="block text-[11px] font-semibold text-[var(--text)]">
               What is not working?
             </label>
             <input
@@ -178,11 +178,11 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
               onChange={(event) => setNotWorking(event.target.value)}
               maxLength={300}
               placeholder="Be specific about the week or the assessment"
-              className="mt-1 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="pulse-change" className="block text-[11px] font-semibold text-[var(--text-primary)]">
+            <label htmlFor="pulse-change" className="block text-[11px] font-semibold text-[var(--text)]">
               One change you would make
             </label>
             <input
@@ -192,7 +192,7 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
               onChange={(event) => setOneChange(event.target.value)}
               maxLength={300}
               placeholder="The smallest change that would help"
-              className="mt-1 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--ring)] focus:outline-none"
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             />
           </div>
 
@@ -246,7 +246,7 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
     <div className="surface-card rounded-xl p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h4 className="text-sm font-semibold text-[var(--text-primary)]">Mid-term pulse (aggregated)</h4>
+          <h4 className="text-sm font-semibold text-[var(--text)]">Mid-term pulse (aggregated)</h4>
           <p className="mt-0.5 text-xs text-[var(--text-muted)]">
             Sealed while the term runs; themes appear only after it ends.
           </p>
@@ -256,7 +256,7 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
           <select
             value={term}
             onChange={(event) => setTerm(event.target.value)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] px-2 py-1 font-mono text-[11px] text-[var(--text-secondary)] focus:border-[var(--ring)] focus:outline-none"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 font-mono text-[11px] text-[var(--text)] focus:border-[var(--accent)] focus:outline-none"
           >
             <option value="Fall 2025">Fall 2025 (ended)</option>
             <option value="Fall 2026">Fall 2026 (in progress)</option>
@@ -265,9 +265,9 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
       </div>
 
       {!pulse ? (
-        <p className="mt-3 text-xs text-[var(--text-secondary)]">No pulse data available.</p>
+        <p className="mt-3 text-xs text-[var(--text)]">No pulse data available.</p>
       ) : pulse.sealed ? (
-        <div className="mt-3 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5 text-[11px] text-[var(--text-secondary)]">
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5 text-[11px] text-[var(--text)]">
           <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
           <span>
             {pulse.responseCount} response{pulse.responseCount === 1 ? '' : 's'} collected for{' '}
@@ -276,14 +276,14 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
           </span>
         </div>
       ) : pulse.responseCount === 0 ? (
-        <p className="mt-3 text-xs text-[var(--text-secondary)]">
+        <p className="mt-3 text-xs text-[var(--text)]">
           No mid-term pulses were sent in {pulse.term}.
         </p>
       ) : (
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {columns.map((column) => (
             <div key={column.key}>
-              <div className="text-[11px] font-semibold text-[var(--text-primary)]">{column.title}</div>
+              <div className="text-[11px] font-semibold text-[var(--text)]">{column.title}</div>
               <ul className="mt-1.5 space-y-1">
                 {pulse.themes[column.key].length === 0 ? (
                   <li className="text-[11px] text-[var(--text-muted)]">Nothing logged</li>
@@ -291,7 +291,7 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
                   pulse.themes[column.key].map((theme) => (
                     <li
                       key={`${column.key}-${theme.label}`}
-                      className="flex items-center justify-between gap-2 rounded-md bg-[var(--surface-subtle)] px-2 py-1 text-[11px] text-[var(--text-secondary)]"
+                      className="flex items-center justify-between gap-2 rounded-md bg-[var(--surface-2)] px-2 py-1 text-[11px] text-[var(--text)]"
                     >
                       <span>{theme.label}</span>
                       <span className="font-mono tabular-nums">{theme.count}</span>

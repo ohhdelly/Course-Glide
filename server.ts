@@ -269,6 +269,9 @@ app.get('/api/courses', (req, res) => {
   const uniRaw = sanitizeText(req.query.universityId, 24);
   const universityId: UniversityId =
     uniRaw === 'uwaterloo' || uniRaw === 'uottawa' ? uniRaw : 'all';
+  const termRaw = sanitizeText(req.query.term, 24);
+  const term: NonNullable<CourseFilters['term']> =
+    termRaw === 'Fall' || termRaw === 'Winter' || termRaw === 'Spring' ? termRaw : 'all';
   const department = sanitizeText(req.query.department, 80) || 'all';
   const levelRaw = Number(req.query.level);
   const level: CourseFilters['level'] =
@@ -305,6 +308,7 @@ app.get('/api/courses', (req, res) => {
     query: q,
     filters: {
       universityId,
+      term,
       department,
       level,
       maxDifficulty,

@@ -365,6 +365,21 @@ export function enrichReviewsWithTrustLens(reviews: Review[]): EnrichedReview[] 
   }));
 }
 
+export type ReviewSortBy =
+  | 'trust_lens'
+  | 'most_helpful'
+  | 'most_recent'
+  | 'rating_desc'
+  | 'rating_asc';
+
+export type ReviewRatingFilter =
+  | 'all'
+  | 'recommended'
+  | 'critical'
+  | 'difficulty_low'
+  | 'difficulty_mid'
+  | 'difficulty_high';
+
 export function rankAndFilterReviews(
   reviews: Review[],
   mode: TrustLensMode,
@@ -402,6 +417,93 @@ export function rankAndFilterReviews(
     if (dateDiff !== 0) return dateDiff;
     return b.trustLens.score - a.trustLens.score;
   });
+}
+
+export function sortAndFilterReviews(
+  reviews: Review[],
+  options: {
+    sortBy: ReviewSortBy;
+    ratingFilter: ReviewRatingFilter;
+    includeLimited: boolean;
+  }
+): {
+  displayed: EnrichedReview[];
+  totalVisible: number;
+  hiddenLimitedCount: number;
+  avgTrustScore: number;
+  informativeCount: number;
+} {
+  const visible = reviews.filter((r) => r.moderationStatus !== 'hidden');
+  const enriched = enrichReviewsWithTrustLens(visible);
+
+  const informativeCount = enriched.filter(
+    (r) => r.trustLens.tier === 'most_informative'
+  ).length;
+  const avgTrustScore =
+    enriched.length > 0
+      ? Math.round(
+          enriched.reduce((sum, r) => sum + r.trustLens.score, 0) / enriched.length
+        )
+      : 0;
+
+  const byRating = enriched.filter((r) => {
+    switch (options.ratingFilter) {
+      case 'recommended':
+        return r.recommended;
+      case 'critical':
+        return !r.recommended;
+      case 'difficulty_low':
+        return r.difficulty <= 2;
+      case 'difficulty_mid':
+        return r.difficulty === 3;
+      case 'difficulty_high':
+        return r.difficulty >= 4;
+      default:
+        return true;
+    }
+  });
+
+  const nonLimited = byRating.filter((r) => r.trustLens.tier !== 'limited');
+  const pool =
+    options.includeLimited || nonLimited.length === 0 ? byRating : nonLimited;
+  const hiddenLimitedCount =
+    options.includeLimited || nonLimited.length === 0
+      ? 0
+      : Math.max(0, byRating.length - nonLimited.length);
+
+  const sorted = [...pool].sort((a, b) => {
+    if (options.sortBy === 'most_helpful') {
+      const netA = a.helpfulVotes - a.notHelpfulVotes;
+      const netB = b.helpfulVotes - b.notHelpfulVotes;
+      if (netB !== netA) return netB - netA;
+      if (b.helpfulVotes !== a.helpfulVotes) return b.helpfulVotes - a.helpfulVotes;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    if (options.sortBy === 'most_recent') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    if (options.sortBy === 'rating_desc') {
+      if (b.difficulty !== a.difficulty) return b.difficulty - a.difficulty;
+      return b.trustLens.score - a.trustLens.score;
+    }
+    if (options.sortBy === 'rating_asc') {
+      if (a.difficulty !== b.difficulty) return a.difficulty - b.difficulty;
+      return b.trustLens.score - a.trustLens.score;
+    }
+    // 'trust_lens'
+    if (b.trustLens.score !== a.trustLens.score) {
+      return b.trustLens.score - a.trustLens.score;
+    }
+    return b.helpfulVotes - a.helpfulVotes;
+  });
+
+  return {
+    displayed: sorted,
+    totalVisible: visible.length,
+    hiddenLimitedCount,
+    avgTrustScore,
+    informativeCount,
+  };
 }
 
 export interface CourseStatsOptions {
@@ -835,6 +937,15 @@ export function filterAndSearchCourses(
       if (query.trim() && matchScore === 0) return false;
       if (filters.universityId !== 'all' && course.universityId !== filters.universityId) {
         return false;
+      }
+      if (filters.term && filters.term !== 'all') {
+        const needle = filters.term.toLowerCase();
+        const matchesOffered = course.termsOffered.some((t) =>
+          t.toLowerCase().includes(needle)
+        );
+        const matchesTrend =
+          stats?.termTrends.some((tt) => tt.term.toLowerCase().includes(needle)) ?? false;
+        if (!matchesOffered && !matchesTrend) return false;
       }
       if (filters.department !== 'all') {
         const matchesDeptOrSubject =

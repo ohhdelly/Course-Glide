@@ -15,16 +15,16 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
     <section className={cardShell} aria-label="Student rating range">
       <div className="flex items-baseline justify-between gap-2">
         <div>
-          <h2 className="font-display text-base font-bold text-[var(--text-primary)]">Student rating</h2>
+          <h2 className="font-display text-base font-bold text-[var(--text)]">Student rating</h2>
           <p className={muted}>Perceived usefulness, shown as an honest range</p>
         </div>
-        <span className="rounded-md bg-[var(--surface-subtle)] px-2 py-0.5 font-mono text-xs text-[var(--text-secondary)] tabular-nums">
+        <span className="rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)] tabular-nums">
           n = {rating.sampleSize}
         </span>
       </div>
 
       <div className="mt-3 flex items-end gap-2">
-        <span className="font-mono text-3xl font-bold leading-none text-[var(--text-primary)] tabular-nums">
+        <span className="font-mono text-3xl font-bold leading-none text-[var(--text)] tabular-nums">
           {rating.low.toFixed(1)}–{rating.high.toFixed(1)}
         </span>
         <span className="text-sm font-normal text-[var(--text-muted)]">/ 5</span>
@@ -34,7 +34,7 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
         {rating.sampleSize === 1 ? '' : 's'} · band widens as answers disagree
       </p>
 
-      <p className="mt-3 text-xs leading-relaxed text-[var(--text-secondary)]">
+      <p className="mt-3 text-xs leading-relaxed text-[var(--text)]">
         No single score is printed because {rating.sampleSize} response
         {rating.sampleSize === 1 ? '' : 's'} cannot support that much precision.
         {rating.anchoredToDepartment
@@ -43,7 +43,7 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
       </p>
 
       {cappedSample && (
-        <p className="mt-2 text-[11px] font-medium text-[var(--status-warning)]">
+        <p className="mt-2 text-[11px] font-medium text-[var(--accent-strong)]">
           Limited sample — treat this band as a hint, not a verdict.
         </p>
       )}
@@ -63,41 +63,41 @@ export const LoadProfileCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
     <section className={cardShell} aria-label="Course load index">
       <div className="flex items-baseline justify-between gap-2">
         <div>
-          <h2 className="font-display text-base font-bold text-[var(--text-primary)]">Load index</h2>
+          <h2 className="font-display text-base font-bold text-[var(--text)]">Load index</h2>
           <p className={muted}>Three axes, not one hours figure</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-subtle)] px-2 py-0.5 font-mono text-xs text-[var(--text-secondary)]">
-          <Gauge className="h-3.5 w-3.5 text-[var(--accent-text)]" aria-hidden="true" />
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)]">
+          <Gauge className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
           {load.loadIndex}/100
         </span>
       </div>
 
       <div className="mt-3 flex items-end gap-2">
-        <span className="font-display text-2xl font-bold leading-none text-[var(--text-primary)]">
+        <span className="font-display text-2xl font-bold leading-none text-[var(--text)]">
           {load.label}
         </span>
       </div>
 
-      <div className="mt-4 space-y-1 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+      <div className="mt-4 space-y-1 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5">
         {axes.map((axis) => (
           <div key={axis.label} className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--text-secondary)]">{axis.label}</span>
-              <span className="font-mono font-semibold text-[var(--text-primary)] tabular-nums">
+              <span className="text-[var(--text)]">{axis.label}</span>
+              <span className="font-mono font-semibold text-[var(--text)] tabular-nums">
                 {axis.value.toFixed(1)} {axis.suffix}
               </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
               <div
                 className="h-full rounded-full"
                 style={{
                   width: `${Math.min(100, Math.round((axis.value / axis.max) * 100))}%`,
                   backgroundColor:
                     axis.label === 'Time'
-                      ? 'var(--chart-primary)'
+                      ? 'var(--chart)'
                       : axis.label === 'Mental effort'
-                      ? 'var(--chart-secondary)'
-                      : 'var(--chart-tertiary)',
+                      ? 'var(--chart)'
+                      : 'var(--chart)',
                 }}
               />
             </div>
@@ -105,7 +105,7 @@ export const LoadProfileCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
         ))}
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-secondary)]">
+      <p className="mt-3 text-[11px] leading-relaxed text-[var(--text)]">
         Mental effort is weighted above raw hours: students price a term by how draining the work
         feels, not only by how long it takes.
       </p>
@@ -141,8 +141,8 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
     <section className={cardShell} aria-label="What it took to reach your target grade">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text-primary)]">
-            <Target className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text)]">
+            <Target className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
             What it took to reach your target grade
           </h2>
           <p className={muted}>
@@ -153,7 +153,7 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
       </div>
 
       {bands.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-xs text-[var(--text-secondary)]">
+        <p className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--text)]">
           No student has shared a target grade for this course yet. The card stays empty rather than
           inventing a grade curve.
         </p>
@@ -170,8 +170,8 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
                   aria-pressed={isActive}
                   className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
                     isActive
-                      ? 'border-[var(--accent-subtle-border)] bg-[var(--surface-accent)] text-[var(--accent-code)]'
-                      : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)]'
+                      ? 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--accent)]'
+                      : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--surface-2)]'
                   }`}
                 >
                   {GRADE_BAND_LABELS[band.band]}
@@ -183,9 +183,9 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
 
           {active && (
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5">
                 <div className={muted}>Typical week</div>
-                <div className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)] tabular-nums">
+                <div className="mt-1 font-mono text-xl font-bold text-[var(--text)] tabular-nums">
                   {active.avgWeeklyHours.toFixed(1)}
                   <span className="ml-1 text-xs font-normal text-[var(--text-muted)]">hrs</span>
                 </div>
@@ -193,9 +193,9 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
                   range {active.minWeeklyHours}–{active.maxWeeklyHours} hrs
                 </div>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5">
                 <div className={muted}>What they leaned on</div>
-                <ul className="mt-1.5 space-y-0.5 text-[11px] text-[var(--text-primary)]">
+                <ul className="mt-1.5 space-y-0.5 text-[11px] text-[var(--text)]">
                   {active.topMethods.length > 0 ? (
                     active.topMethods.map((method) => <li key={method}>{method}</li>)
                   ) : (
@@ -203,9 +203,9 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
                   )}
                 </ul>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-3.5">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5">
                 <div className={muted}>How to read this</div>
-                <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                <p className="mt-1 text-[11px] leading-relaxed text-[var(--text)]">
                   Effort is a lever, not a verdict. The card shows what students in this band actually
                   did — never an "easy A" shortcut.
                 </p>
@@ -218,9 +218,9 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
               {advice.map((review) => (
                 <li
                   key={review.id}
-                  className="flex gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-[11px] leading-relaxed text-[var(--text-secondary)]"
+                  className="flex gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-[11px] leading-relaxed text-[var(--text)]"
                 >
-                  <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-text)]" aria-hidden="true" />
+                  <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden="true" />
                   <span>
                     {review.practicalAdvice}
                     <span className="ml-1 text-[var(--text-muted)]">· {review.term}</span>
@@ -252,14 +252,14 @@ export const PeakWeekPanel: React.FC<{ course: Course; reviews: Review[] }> = ({
     <section className={cardShell} aria-label="Peak week map">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text-primary)]">
-            <CalendarRange className="h-4 w-4 text-[var(--accent-text)]" aria-hidden="true" />
+          <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text)]">
+            <CalendarRange className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
             Peak-week map
           </h2>
           <p className={muted}>Where the crunch actually lands during the term</p>
         </div>
         {hasSignal && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-2 py-0.5 text-[11px] font-semibold text-[var(--status-warning)]">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent-strong)]">
             <Activity className="h-3.5 w-3.5" aria-hidden="true" />
             Busiest: {map.busiestLabel}
           </span>
@@ -294,7 +294,7 @@ export const PeakWeekPanel: React.FC<{ course: Course; reviews: Review[] }> = ({
             .map((cell) => (
               <span
                 key={`driver-${cell.week}`}
-                className="rounded-md bg-[var(--surface-subtle)] px-2 py-0.5 text-[10px] text-[var(--text-secondary)]"
+                className="rounded-md bg-[var(--surface-2)] px-2 py-0.5 text-[10px] text-[var(--text)]"
               >
                 {cell.label}: {cell.drivers.join(' · ')}
               </span>
