@@ -1079,4 +1079,10 @@ async function startServer() {
   });
 }
 
-startServer();
+export default app;
+
+// Vercel imports this module to get the request handler; there is no long-lived
+// listener there, and Vercel serves the built assets itself.
+if (!process.env.VERCEL) {
+  void startServer();
+}

@@ -17,7 +17,14 @@ import { computeCourseStats } from '../src/utils/trustLens.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CATALOG_PATH = path.resolve(__dirname, './data/uwaterlooCatalogue.json');
+// Local runs resolve next to this file; the Vercel function bundle keeps the
+// relative path at the deployment root instead.
+const CATALOG_PATH =
+  [
+    path.resolve(__dirname, './data/uwaterlooCatalogue.json'),
+    path.resolve(process.cwd(), 'server/data/uwaterlooCatalogue.json'),
+  ].find((candidate) => fs.existsSync(candidate)) ??
+  path.resolve(__dirname, './data/uwaterlooCatalogue.json');
 
 interface RawWaterlooSnapshot {
   calendarId: string;
