@@ -7,3 +7,4 @@ coverage/
 .env*
 !.env.example
 .courseglide-demo-store.json
+.vercel
