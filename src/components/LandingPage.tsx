@@ -23,6 +23,47 @@ const DESCRIPTIVE_REQUEST =
   /\b(easy|bird|light|heavy|hard|chill|workload|hours?|avoid|without|no\s+\w+|projects?|exams?|essays?|assignments?|readings?|level|year|term|semester|recommend(?:ed)?|interesting|enjoy|fun|elective|online|morning|evening|prof(?:essor)?|lecture|seminar|lab|group|presentation|difficult)\b/i;
 
 /**
+ * The example prompts used to be a static block under the search box. They now
+ * drift behind the hero as ambient, low-opacity buttons: still real clickable
+ * examples, but no longer occupying a section of their own.
+ */
+interface FloatingChip {
+  label: string;
+  variant: 'course' | 'advisor';
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  delay: string;
+  duration: string;
+}
+
+const FLOATING_CHIPS: FloatingChip[] = [
+  { label: 'MATH 137', variant: 'course', top: '12%', left: '1.5%', delay: '-3s', duration: '26s' },
+  { label: 'CS 135', variant: 'course', top: '34%', left: '3%', delay: '-11s', duration: '31s' },
+  { label: 'ECON 101', variant: 'course', top: '60%', left: '1%', delay: '-7s', duration: '28s' },
+  { label: 'MAT 1320', variant: 'course', top: '79%', left: '9%', delay: '-16s', duration: '34s' },
+  { label: 'GNG 1105', variant: 'course', top: '6%', right: '3%', delay: '-13s', duration: '29s' },
+  {
+    label: 'bird course, under 10 hours a week',
+    variant: 'advisor',
+    top: '18%',
+    right: '1.5%',
+    delay: '-5s',
+    duration: '30s',
+  },
+  { label: 'AI course for third year', variant: 'advisor', top: '44%', right: '2%', delay: '-20s', duration: '33s' },
+  {
+    label: 'writing elective with no final exam',
+    variant: 'advisor',
+    bottom: '6%',
+    right: '3%',
+    delay: '-9s',
+    duration: '27s',
+  },
+];
+
+/**
  * One box, two engines: a course code or a couple of keywords is a catalogue
  * lookup, while a sentence about workload, level or what to avoid is an advisor
  * request. This is only the default; the student can pin either mode.
@@ -160,10 +201,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     ? []
     : localAutocompleteMatches;
 
-  // One condition drives the popover and the example chips underneath it, so the
-  // chips can never sit clickable behind an open list.
-  // One condition drives the popover and the example chips underneath it, so the
-  // chips can never sit clickable behind an open list.
+  // One condition drives the popover, so the listbox only opens for a catalogue
+  // lookup that actually has something to show.
   const suggestionsOpen =
     effectiveMode === 'catalogue' &&
     searchFocused &&
@@ -217,6 +256,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       : `Waterloo ${calendarVersion} · uOttawa demo courses`;
   }, [catalogueMeta, selectedUniversity]);
 
+  const runSample = (chip: FloatingChip) => {
+    if (chip.variant === 'advisor') {
+      setQuery(chip.label);
+      setMode('advisor');
+      onAskAdvisor(chip.label);
+      return;
+    }
+    const found = courses.find((c) => c.code === chip.label);
+    if (found) onOpenCourse(found.id);
+    else onSearchSubmit(chip.label);
+  };
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (effectiveMode === 'advisor') {
@@ -256,10 +307,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <main>
       {/* Hero Section */}
-      <section className="border-b border-[var(--border)] bg-[var(--bg)]">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-1 type-caption text-[var(--text-muted)] shadow-surface text-balance tabular-nums">
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--bg)]">
+        {/* Theme-tinted wash behind everything: picks up yellow / garnet / blue per theme. */}
+        <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
+
+        <div className="hero-copy pointer-events-none relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {/* pointer-events-none keeps the drifting chips clickable in the gutters;
+              the form re-enables pointer events for itself. */}
+          <div className="pointer-events-none mx-auto max-w-3xl text-center">
+            <span className="hero-badge inline-flex items-center justify-center rounded-control border border-[var(--border)] px-3 py-1 type-caption text-[var(--text-muted)] shadow-surface text-balance tabular-nums">
               {heroSourceLabel}
             </span>
             {/* The webfont swaps in a line later than the fallback, which used to
@@ -276,7 +332,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Elevated Search Bar with Autocomplete */}
             <form
               onSubmit={handleFormSubmit}
-              className="mx-auto mt-8 max-w-2xl text-left"
+              className="pointer-events-auto mx-auto mt-8 max-w-2xl text-left"
               role="search"
               aria-label="Search courses or describe what you want"
             >
@@ -458,60 +514,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              <div
-                aria-hidden={suggestionsOpen}
-                className={`mt-4 space-y-2 text-center type-caption text-[var(--text-muted)] transition-opacity duration-200 ${
-                  suggestionsOpen ? 'pointer-events-none opacity-40' : 'opacity-100'
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span>Try:</span>
-                  {['MATH 137', 'CS 135', 'ECON 101', 'MAT 1320', 'GNG 1105'].map((sample) => (
-                    <button
-                      key={sample}
-                      type="button"
-                      disabled={suggestionsOpen}
-                      onClick={() => {
-                        const found = courses.find((c) => c.code === sample);
-                        if (found) onOpenCourse(found.id);
-                        else onSearchSubmit(sample);
-                      }}
-                      className="chip-course inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums"
-                    >
-                      {sample}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span className="inline-flex items-center gap-1">
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                    Or ask:
-                  </span>
-                  {[
-                    'bird course, under 10 hours a week',
-                    'AI course for third year',
-                    'writing elective with no final exam',
-                  ].map((sample) => (
-                    <button
-                      key={sample}
-                      type="button"
-                      disabled={suggestionsOpen}
-                      onClick={() => {
-                        setQuery(sample);
-                        setMode('advisor');
-                        onAskAdvisor(sample);
-                      }}
-                      className="chip-advisor inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium"
-                    >
-                      {sample}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </form>
 
 
           </div>
+        </div>
+
+        {/* Ambient examples: real buttons, dimmed and drifting, no longer a section.
+            Kept after the hero copy in the DOM so the search box comes first in the
+            tab order; layout is unaffected because these are absolutely placed. */}
+        <div className="chip-cloud pointer-events-none absolute inset-0 z-0">
+          {FLOATING_CHIPS.map((chip) => (
+            <button
+              key={chip.label}
+              type="button"
+              onClick={() => runSample(chip)}
+              style={
+                {
+                  top: chip.top,
+                  bottom: chip.bottom,
+                  left: chip.left,
+                  right: chip.right,
+                  // Custom properties rather than animation-* so the prism spin
+                  // on hover keeps its own 6s timing instead of inheriting these.
+                  '--chip-delay': chip.delay,
+                  '--chip-duration': chip.duration,
+                } as React.CSSProperties
+              }
+              className={`chip-float hidden md:inline-flex ${
+                chip.variant === 'course' ? 'chip-course tabular-nums' : 'chip-advisor'
+              } min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium`}
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -519,7 +555,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end mb-8">
           <div>
-            <h2 className="type-h1 text-[var(--text)]">
+            <span className="type-caption font-semibold uppercase tracking-[0.16em] text-[var(--chart-1)]">
+              Sample comparison
+            </span>
+            <h2 className="mt-2 type-h1 text-[var(--text)]">
               Compare sample courses
             </h2>
             <p className="mt-1 type-small text-[var(--text-muted)] text-pretty">
@@ -559,7 +598,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="border-t border-[var(--border)] bg-[var(--surface-2)] py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-6">
-            <h2 className="type-h1 text-[var(--text)] text-balance">
+            <span className="type-caption font-semibold uppercase tracking-[0.16em] text-[var(--chart-1)]">
+              Trust Lens
+            </span>
+            <h2 className="mt-2 type-h1 text-[var(--text)] text-balance">
               What students actually need to know before enrolling.
             </h2>
           </div>

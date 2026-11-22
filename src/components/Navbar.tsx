@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               CG
             </span>
             <span className="type-h2 text-[var(--text)]">
-              CourseGlide
+              Course<span className="brand-glide">Glide</span>
             </span>
           </button>
 

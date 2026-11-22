@@ -727,7 +727,9 @@ export default function App() {
       <footer className="border-t border-[var(--border)] bg-[var(--surface-2)]">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-6 type-caption text-[var(--text-muted)] sm:flex-row sm:items-center sm:px-6 lg:px-8">
           <div>
-            <strong className="font-semibold text-[var(--text)]">CourseGlide</strong>
+            <strong className="font-semibold text-[var(--text)]">
+              Course<span className="brand-glide">Glide</span>
+            </strong>
             <span className="mx-2" aria-hidden="true">·</span>
             <span>Seeded demo reviews and teaching-team responses.</span>
           </div>
