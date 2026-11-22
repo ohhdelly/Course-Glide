@@ -1,5 +1,6 @@
 /**
- * Minimal JSON-generation client for an OpenAI-compatible endpoint.
+ * Minimal JSON-generation client for the OpenAI-compatible endpoint at NVIDIA
+ * integrate.api.nvidia.com.
  *
  * The CourseGlide advisor treats the model as an optional language layer: it
  * translates a student's sentence into fixed search parameters and nothing

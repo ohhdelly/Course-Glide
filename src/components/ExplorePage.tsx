@@ -471,11 +471,18 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
           setMaxHours(brief.maxHours);
           setDepartment(brief.subjectCodes[0] ?? 'all');
           setHasReviews(brief.wantsReviews ? 'with_reviews' : 'all');
+          const advisorOnlyLimits: string[] = [];
+          if (brief.excludeSubjectsLabel) {
+            advisorOnlyLimits.push(`no ${brief.excludeSubjectsLabel} courses`);
+          }
+          if (brief.excludeKeywords.length > 0) {
+            advisorOnlyLimits.push(`no ${brief.excludeKeywords.join(', no ')}`);
+          }
           setAdvisorNote(
-            brief.excludeKeywords.length > 0
-              ? `Catalogue filters can include but not exclude words, so “no ${brief.excludeKeywords.join(
-                  ', no '
-                )}” remains enforced in the advisor list above only.`
+            advisorOnlyLimits.length > 0
+              ? `Catalogue filters can include but not exclude, so ${advisorOnlyLimits.join(
+                  ' and '
+                )} stays enforced in the advisor list above only.`
               : null
           );
           setQuery('');

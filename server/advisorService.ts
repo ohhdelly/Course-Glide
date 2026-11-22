@@ -128,6 +128,12 @@ const STOPWORDS = new Set([
   'grades', 'class', 'prof', 'professor', 'instructor', 'lecture', 'lectures',
   'elective', 'electives', 'credit', 'credits', 'first', 'second', 'third',
   'fourth', 'senior', 'junior', 'asking', 'help', 'please', 'thanks', 'new',
+  'for', 'recommend', 'recommended', 'non', 'background', 'knowledge',
+  'experience', 'skill', 'skills', 'training', 'able', 'know', 'zero',
+  'completely', 'totally', 'bit', 'lot', 'interested', 'interest', 'as',
+  'at', 'all', 'so', 'much', 'nothing', 'anything', 'something',
+  'someone', 'somebody', 'anyone', 'anybody', 'who', 'whom', 'person',
+  'people', 'student', 'students', 'one',
 ]);
 
 /**
@@ -143,38 +149,219 @@ function isUsableKeyword(value: string): boolean {
   return words.some((word) => word.length >= 3 && !STOPWORDS.has(word));
 }
 
-/** Phrased refusals ("no essays", "avoid finals") become hard exclusions. */
-const NEGATION_HINTS: Array<{ pattern: RegExp; exclude: string[] }> = [
+/**
+ * Subjects a student means when they say they have "no technical background".
+ * These are calendar subject codes, so the exclusion is exact instead of hoping
+ * a course description happens to contain the word "technical".
+ */
+const TECHNICAL_SUBJECTS = [
+  'CS', 'ECE', 'CO', 'SE', 'SYDE', 'GNG', 'ME', 'MSE', 'CIVE', 'ENVE', 'GEOE',
+  'MTE', 'NE', 'AE', 'BME', 'MATH', 'AMATH', 'STAT', 'ACTSC', 'PMATH', 'MTHEL',
+  'PHYS', 'CHEM', 'CHE', 'DATSC', 'SCI',
+  // uOttawa subject codes: MAT and MATBUS are its mathematics, CSI its CS.
+  'MAT', 'MATBUS', 'CSI',
+];
+// Every technical degree in this calendar assumes calculus, so "no math
+// background" rules out the same subjects as a technical gap — including the
+// uOttawa codes (MAT, CSI), which use different letters for the same fields.
+const MATH_SUBJECTS = [...TECHNICAL_SUBJECTS];
+
+interface AvoidTopic {
+  pattern: RegExp;
+  keywords: string[];
+  /** Whole subjects the topic rules out, when the limitation is a background gap. */
+  subjects?: string[];
+  /** Chip/summary wording for the subject exclusion. */
+  label?: string;
+  difficulty?: AdvisorBrief['maxDifficulty'];
+}
+
+/**
+ * What a refusal is about. A refusal is a constraint on the results — it is
+ * never a search term, so no word from a negated phrase ever reaches retrieval.
+ */
+const AVOID_TOPICS: AvoidTopic[] = [
+  // One stem per concept: "lab" also matches "laboratory" in a description, so a
+  // second entry would only add a duplicate chip.
+  { pattern: /\b(essays?|papers?)\b/, keywords: ['essay'] },
+  { pattern: /\b(exams?|finals?|midterms?)\b/, keywords: ['exam'] },
+  { pattern: /\b(group|team)\s*(work|projects?)\b/, keywords: ['group', 'team'] },
+  { pattern: /\bpresentations?\b/, keywords: ['presentation'] },
+  { pattern: /\b(readings?|reading\s+lists?)\b/, keywords: ['reading'] },
+  { pattern: /\b(labs?|laboratory)\b/, keywords: ['lab'] },
   {
-    pattern: /\b(no|without|avoid|hate|dislike|not\s+want|don\s*t\s+want)\s+(more\s+)?essays?\b/,
-    exclude: ['essay', 'essays'],
+    // A background gap is answered by removing whole subjects, not by hunting
+    // for the words "technical" or "computational" inside descriptions.
+    pattern: /\b(technical|tech|techy|computers?|computing|coding|programming|software|code)\b/,
+    keywords: [],
+    subjects: TECHNICAL_SUBJECTS,
+    label: 'technical background',
+    difficulty: 3,
   },
   {
-    pattern: /\b(no|without|avoid|hate|dislike|not\s+want|don\s*t\s+want)\s+(more\s+)?(final\s+)?exams?\b/,
-    exclude: ['exam', 'exams', 'final exam'],
+    pattern: /\b(math|maths|mathematics|calculus|algebra|quantitative)\b/,
+    keywords: [],
+    subjects: MATH_SUBJECTS,
+    label: 'math background',
+    difficulty: 3,
   },
-  {
-    pattern: /\b(no|without|avoid|hate|dislike)\s+(more\s+)?(group|team)\s*work\b/,
-    exclude: ['group work', 'team work', 'group project'],
-  },
-  {
-    pattern: /\b(no|without|avoid|hate|dislike)\s+(more\s+)?presentations?\b/,
-    exclude: ['presentation', 'presentations'],
-  },
+  { pattern: /\b(writing|reports?)\b/, keywords: ['writing'] },
+  { pattern: /\b(memoriz\w+|memorisation|memorization|rote)\b/, keywords: ['memoriz'] },
+];
+
+/** "no technical KNOWLEDGE": the second word names the gap, not a topic. */
+const AVOID_FILLER = new Set([
+  'knowledge', 'background', 'experience', 'experiences', 'skill', 'skills',
+  'training', 'ability', 'abilities', 'idea', 'clue', 'interest', 'interested',
+  'fan', 'prerequisites', 'prereqs', 'whatsoever', 'stuff', 'things', 'thing',
+]);
+
+const TRIGGER_WORDS = new Set([
+  'no', 'without', 'avoid', 'avoiding', 'hate', 'dislike', 'not', 'want',
+  'wanted', 'into', 'in', 'a', 'an', 'of', 'any', 'more', 'too', 'much', 'at',
+  'all', 'fan', 'dont', 'don', 't', 'like', 'really', 'very', 'super', 'papers',
+  // Wording of a knowledge gap rather than its topic.
+  'know', 'knows', 'knew', 'nothing', 'little', 'about', 'with', 'never',
+  'studied', 'took', 'done', 'used', 'bad', 'terrible', 'hopeless', 'am', 'im',
+  'and', 'or', 'any', 'very', 'quite', 'good', 'with',
+]);
+
+/** A refusal scope: the words that follow "no", "without", "avoid", ... */
+const NEGATION_TRIGGER =
+  /\b(?:no|without|avoid(?:ing)?|hates?|dislikes?|can\s*t\s+stand|sick\s+of|tired\s+of|not\s+(?:want|into|interested\s+in|a\s+fan\s+of|good\s+at)|don\s*t\s+(?:want|like))\s+(?:more\s+|any\s+|too\s+much\s+)?([a-z][a-z-]*(?:\s+[a-z][a-z-]*){0,3})/g;
+
+/**
+ * "I know nothing about computers", "never studied math": a knowledge gap said
+ * without a "no" trigger. Normalisation strips apostrophes, so "don't" arrives
+ * as "don t" — every pattern here matches that form.
+ */
+const GAP_TRIGGER =
+  /\b(?:(?:really\s+)?know(?:s)?\s+(?:nothing|very\s+little)\s+about|nothing\s+about|no\s+experience\s+(?:with|in)|never\s+(?:studied|took|done|used)|(?:am|i\s+m)\s+(?:not\s+)?(?:bad|terrible|hopeless)\s+(?:at|with))\s+([a-z][a-z-]*(?:\s+[a-z][a-z-]*){0,3})/g;
+
+/** "non-technical", "not at all techy": the same limitation with no "no" trigger. */
+const STANDALONE_AVOIDS = [
+  /\bnon[-\s]?technical\b/,
+  /\bnon[-\s]?tech\b/,
+  /\bnot\s+(?:very\s+|that\s+|super\s+)?(?:technical|techy|tech[-\s]?savvy)(?:\s+at\s+all)?\b/,
+  /\b(?:tech|computer)[-\s]?illiterate\b/,
 ];
 
 /**
- * A refused thing must not also steer retrieval. "No essays" is not a request
- * for a writing course, so negated phrases are removed before subject hints run.
+ * "as an arts student" describes who is asking, not which courses they want.
+ * The phrase is removed so it cannot be mistaken for a department request.
  */
-const NEGATED_PHRASE =
-  /\b(?:no|without|avoid|hate|dislike|not\s+want|don'?t\s+want)\s+(?:more\s+)?(?:final\s+)?(?:essays?|exams?|group\s+work|team\s+work|group\s+projects?|presentations?)\b/g;
+const BACKGROUND_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
+  {
+    pattern: /\b(?:arts?|humanities)\s+(?:student|major|undergrad\w*|degree|program)\b/,
+    label: 'arts background',
+  },
+  {
+    pattern: /\b(?:engineering|stem)\s+(?:student|major|undergrad\w*|degree|program)\b/,
+    label: 'engineering background',
+  },
+];
+
+interface AvoidReading {
+  /** The query with every refusal and background statement removed. */
+  text: string;
+  keywords: string[];
+  subjects: string[];
+  label: string;
+  difficulty: AdvisorBrief['maxDifficulty'];
+  backgroundLabels: string[];
+  /** Every content word a refusal or gap phrase named, usable as a blocklist. */
+  negatedWords: string[];
+}
+
+/**
+ * Reads refusals and background statements out of a sentence before anything
+ * else runs. Without this pass a limitation like "no technical knowledge" is
+ * tokenised into "technical" + "knowledge" and returns technical courses.
+ */
+function collectAvoid(rawText: string): AvoidReading {
+  const keywords: string[] = [];
+  const subjects: string[] = [];
+  const labels: string[] = [];
+  const backgroundLabels: string[] = [];
+  const negatedWords: string[] = [];
+  let difficulty: AdvisorBrief['maxDifficulty'] = 'all';
+
+  let text = rawText;
+  for (const entry of BACKGROUND_PATTERNS) {
+    const pattern = new RegExp(entry.pattern.source, 'g');
+    if (!pattern.test(text)) continue;
+    text = text.replace(new RegExp(entry.pattern.source, 'g'), ' ');
+    if (!backgroundLabels.includes(entry.label)) backgroundLabels.push(entry.label);
+  }
+
+  const scopes: string[] = [];
+  text = text.replace(NEGATION_TRIGGER, (matched: string) => {
+    // "no more than 10 hours" is a budget, not a refusal.
+    if (/\d/.test(matched)) return matched;
+    const scope = matched.replace(/^\S+\s+/, '').trim();
+    if (scope) scopes.push(scope);
+    return ' ';
+  });
+  text = text.replace(GAP_TRIGGER, (matched: string) => {
+    // Trigger words are filtered out later, so the whole match is a safe scope.
+    scopes.push(matched);
+    return ' ';
+  });
+  for (const pattern of STANDALONE_AVOIDS) {
+    if (!pattern.test(text)) continue;
+    text = text.replace(new RegExp(pattern.source, 'g'), ' ');
+    scopes.push('technical');
+  }
+
+  for (const scope of scopes) {
+    let matchedTopic = false;
+    for (const topic of AVOID_TOPICS) {
+      if (!topic.pattern.test(scope)) continue;
+      matchedTopic = true;
+      for (const keyword of topic.keywords) {
+        if (!keywords.includes(keyword)) keywords.push(keyword);
+      }
+      for (const subject of topic.subjects ?? []) {
+        if (!subjects.includes(subject)) subjects.push(subject);
+      }
+      if (topic.label && !labels.includes(topic.label)) labels.push(topic.label);
+      if (topic.difficulty && difficulty === 'all') difficulty = topic.difficulty;
+    }
+    // Anything the refusal names — even a topic we have no rule for — must not
+    // become a search word. Those words are remembered so a language model can
+    // never reintroduce them as a topic either.
+    for (const word of scope.split(/\s+/)) {
+      if (word.length < 3 || TRIGGER_WORDS.has(word) || AVOID_FILLER.has(word)) continue;
+      if (STOPWORDS.has(word)) continue;
+      if (!negatedWords.includes(word)) negatedWords.push(word);
+      // A topic we have a rule for already contributes its own keywords and
+      // subjects, so its words are not repeated as extra chips.
+      if (!matchedTopic && !keywords.includes(word)) keywords.push(word);
+    }
+  }
+
+  return {
+    text: text.replace(/\s+/g, ' ').trim(),
+    keywords,
+    subjects,
+    label: labels.join(' & '),
+    difficulty,
+    backgroundLabels,
+    negatedWords,
+  };
+}
+
+/**
+ * A refused thing must not also steer retrieval. "No essays" is not a request
+ * for a writing course, so negated subjects are dropped before results are built.
+ */
 
 const SUBJECT_HINTS: Array<{ pattern: RegExp; codes: string[]; keywords: string[] }> = [
   {
     pattern: /\b(ai|artificial intelligence|machine learning|deep learning|neural|ml)\b/,
     codes: ['CS', 'ECE', 'SYDE'],
-    keywords: ['machine learning', 'artificial intelligence', 'neural', 'data'],
+    // "data" alone matched every database course; the phrases carry the topic.
+    keywords: ['machine learning', 'artificial intelligence', 'deep learning', 'neural network'],
   },
   {
     pattern: /\b(cs|comp sci|computer science|computing|programming|coding|software|algorithms?|data structures?|developer)\b/,
@@ -358,7 +545,12 @@ export function parseAdvisorBrief(
   availableSubjects: string[]
 ): AdvisorBrief {
   const text = normalize(query);
-  const positive = text.replace(NEGATED_PHRASE, ' ');
+  const avoid = collectAvoid(text);
+  // Subject hints and search words run on the text with every refusal and
+  // background statement removed: "no technical knowledge" must not steer
+  // retrieval toward technical courses, and "as an arts student" must not be
+  // read as a request for music or studio art.
+  const positive = avoid.text;
   const subjectLookup = new Map(availableSubjects.map((code) => [code.toLowerCase(), code]));
 
   const subjectCodes: string[] = [];
@@ -374,6 +566,12 @@ export function parseAdvisorBrief(
     }
   }
 
+  // A subject the sentence also rules out stays out: "no technical knowledge but
+  // interested in AI" must not literally request CS while excluding all of it.
+  const requestedSubjects = subjectCodes.filter(
+    (code) => !avoid.subjects.some((blocked) => blocked.toLowerCase() === code.toLowerCase())
+  );
+
   const excludeKeywords: string[] = [];
   // "no essay" and "no essays" describe one constraint, not two chips.
   const addExclude = (term: string) => {
@@ -386,10 +584,7 @@ export function parseAdvisorBrief(
     }
     excludeKeywords.push(term);
   };
-  for (const hint of NEGATION_HINTS) {
-    if (!hint.pattern.test(text)) continue;
-    for (const term of hint.exclude) addExclude(term);
-  }
+  for (const term of avoid.keywords) addExclude(term);
 
   const consumed = new Set(keywords.flatMap((keyword) => keyword.split(' ')));
   for (const token of positive.split(' ')) {
@@ -408,7 +603,11 @@ export function parseAdvisorBrief(
 
   const level = detectLevel(text);
   const maxHours = detectHours(text);
-  const maxDifficulty = detectDifficulty(text);
+  const detectedDifficulty = detectDifficulty(text);
+  // A stated knowledge gap ("no technical knowledge") also implies an
+  // accessible course; explicit wording such as "difficulty 2" still wins.
+  const maxDifficulty =
+    detectedDifficulty !== 'all' ? detectedDifficulty : avoid.difficulty;
   const term = detectTerm(text);
   const wantsReviews = /\b(review|reviews|reviewed|rated|recommend|recommended|reputation|feedback)\b/.test(
     text
@@ -416,7 +615,9 @@ export function parseAdvisorBrief(
 
   const constraints: string[] = [];
   if (level !== 'all') constraints.push(`${level}-level`);
-  for (const code of subjectCodes.slice(0, 2)) constraints.push(code);
+  for (const code of requestedSubjects.slice(0, 2)) constraints.push(code);
+  for (const label of avoid.backgroundLabels) constraints.push(label);
+  if (avoid.label) constraints.push(`no ${avoid.label}`);
   if (maxHours !== 'all') constraints.push(`≤${maxHours} h/week`);
   if (maxDifficulty !== 'all') constraints.push(`difficulty ≤ ${maxDifficulty}/5`);
   if (term !== 'all') constraints.push(`${term} term`);
@@ -431,9 +632,11 @@ export function parseAdvisorBrief(
 
   return stripNegatedSignals({
     intent: '',
-    subjectCodes: subjectCodes.slice(0, 3),
+    subjectCodes: requestedSubjects.slice(0, 3),
     keywords: cleanedKeywords.slice(0, 6),
     excludeKeywords,
+    excludeSubjects: avoid.subjects,
+    excludeSubjectsLabel: avoid.label,
     level,
     maxDifficulty,
     maxHours,
@@ -528,6 +731,19 @@ function sanitizeBriefPatch(
     clean.excludeKeywords = excludes;
   }
 
+  if (Array.isArray(raw.excludeSubjects)) {
+    const codes: string[] = [];
+    for (const entry of raw.excludeSubjects.slice(0, 30)) {
+      if (typeof entry !== 'string') continue;
+      const real = subjectLookup.get(entry.trim().toLowerCase());
+      if (real && !codes.includes(real)) codes.push(real);
+    }
+    clean.excludeSubjects = codes;
+  }
+  if (typeof raw.excludeSubjectsLabel === 'string') {
+    clean.excludeSubjectsLabel = truncate(raw.excludeSubjectsLabel, 40);
+  }
+
   const level = coerceLevel(raw.level);
   if (level !== null) clean.level = level;
   const hours = coerceHours(raw.maxHours);
@@ -552,15 +768,47 @@ function sanitizeBriefPatch(
  * "computer science" or "AI" to their subjects.
  */
 function groundModelPatch(patch: Partial<AdvisorBrief>, query: string): Partial<AdvisorBrief> {
-  const tokens = new Set(normalize(query).split(' '));
+  const text = normalize(query);
+  const tokens = new Set(text.split(' '));
+  // The same refusal reading the rules parser uses: a model may not turn
+  // "no technical knowledge" into the search phrase "no technical knowledge",
+  // and it may not hand back a subject the sentence already ruled out.
+  const avoid = collectAvoid(text);
+  const negatedWords = new Set(avoid.negatedWords);
+  const excludedSubjects = new Set(avoid.subjects.map((code) => code.toLowerCase()));
+
+  // A number the student never mentioned must not tighten the search. Without
+  // this the model happily invents "≤10 h/week" for "no technical knowledge",
+  // which then filters out every real answer.
+  const mentionsTime = /\b(hours?|hrs?|h|workload|time|week|weekly|per\s+week)\b/.test(text);
+  const mentionsDifficulty =
+    /\b(easy|easier|easy\s+a|bird|chill|light|heavy|hard|difficult|difficulty|manageable|stress\w*|gentle)\b/.test(
+      text
+    );
+  const mentionsLevel =
+    /\b(first|second|third|fourth|1st|2nd|3rd|4th|year|years|level|grad|graduate|masters?)\b/.test(text);
+  const mentionsTerm = /\b(fall|autumn|winter|spring|summer)\b/.test(text);
+  const mentionsReviews = /\b(review|reviews|reviewed|rated|rating|recommend\w*|reputation|feedback)\b/.test(
+    text
+  );
+
   return {
     ...patch,
-    subjectCodes: (patch.subjectCodes ?? []).filter((code) => tokens.has(code.toLowerCase())),
+    subjectCodes: (patch.subjectCodes ?? []).filter(
+      (code) => tokens.has(code.toLowerCase()) && !excludedSubjects.has(code.toLowerCase())
+    ),
     // A search word the student never wrote is a guess, and a guess here drags
     // every result toward an unrelated department. Synonyms stay in the rules.
-    keywords: (patch.keywords ?? []).filter((keyword) =>
-      keyword.split(/\s+/).every((word) => tokens.has(word))
-    ),
+    keywords: (patch.keywords ?? []).filter((keyword) => {
+      const words = keyword.split(/\s+/);
+      if (!words.every((word) => tokens.has(word))) return false;
+      return !words.some((word) => negatedWords.has(word) || TRIGGER_WORDS.has(word));
+    }),
+    ...(mentionsTime ? {} : { maxHours: undefined }),
+    ...(mentionsDifficulty ? {} : { maxDifficulty: undefined }),
+    ...(mentionsLevel ? {} : { level: undefined }),
+    ...(mentionsTerm ? {} : { term: undefined }),
+    ...(mentionsReviews ? {} : { wantsReviews: undefined }),
   };
 }
 
@@ -601,6 +849,14 @@ function mergeBrief(
     excludeKeywords: [...(patch.excludeKeywords ?? []), ...base.excludeKeywords].filter(
       (term, index, list) => list.indexOf(term) === index
     ),
+    excludeSubjects:
+      patch.excludeSubjects && patch.excludeSubjects.length === 0
+        ? []
+        : patch.excludeSubjects ?? base.excludeSubjects,
+    excludeSubjectsLabel:
+      patch.excludeSubjects && patch.excludeSubjects.length === 0
+        ? ''
+        : patch.excludeSubjectsLabel ?? base.excludeSubjectsLabel,
     level: patch.level && patch.level !== 'all' ? patch.level : base.level,
     maxDifficulty: looserValue(
       base.maxDifficulty as 1 | 2 | 3 | 4 | 5 | 'all',
@@ -622,6 +878,7 @@ function rebuildConstraints(brief: AdvisorBrief): AdvisorBrief {
   const constraints: string[] = [];
   if (brief.level !== 'all') constraints.push(`${brief.level}-level`);
   for (const code of brief.subjectCodes.slice(0, 2)) constraints.push(code);
+  if (brief.excludeSubjectsLabel) constraints.push(`no ${brief.excludeSubjectsLabel}`);
   if (brief.maxHours !== 'all') constraints.push(`≤${brief.maxHours} h/week`);
   if (brief.maxDifficulty !== 'all') constraints.push(`difficulty ≤ ${brief.maxDifficulty}/5`);
   if (brief.term !== 'all') constraints.push(`${brief.term} term`);
@@ -695,6 +952,21 @@ function evaluateCandidate(
 
   if (brief.subjectCodes.some((code) => code.toLowerCase() === (course.subjectCode ?? '').toLowerCase())) {
     score += 14;
+  }
+
+  // A course whose prerequisites are in a ruled-out subject still asks for the
+  // background the student said they do not have.
+  if (brief.excludeSubjects.length > 0 && course.prerequisites) {
+    const prerequisiteCodes = course.prerequisites.match(/\b[A-Z]{2,6}\s?\d{2,3}[A-Z]?\b/g) ?? [];
+    const blocked = prerequisiteCodes
+      .map((code) => code.replace(/\s+/g, ' ').split(' ')[0])
+      .find((subject) => brief.excludeSubjects.includes(subject));
+    if (blocked) {
+      score -= 26;
+      notes.push(
+        `Prerequisite ${blocked} sits in a subject you ruled out (no ${brief.excludeSubjectsLabel || 'that background'}).`
+      );
+    }
   }
 
   if (stats.responseCount > 0) {
@@ -881,6 +1153,7 @@ export async function runAdvisor(request: AdvisorRequest, deps: AdvisorDeps): Pr
     const candidates = deps.catalogue.getAdvisorCandidates({
       tokens: activeBrief.keywords,
       subjectCodes: activeBrief.subjectCodes,
+      excludeSubjects: activeBrief.excludeSubjects,
       universityId: request.universityId,
       reviews: deps.reviews,
       limit: 90,
@@ -939,6 +1212,12 @@ export async function runAdvisor(request: AdvisorRequest, deps: AdvisorDeps): Pr
       `Filtered out ${excludedTotal} course${excludedTotal === 1 ? '' : 's'} whose calendar description mentions ${brief.excludeKeywords
         .slice(0, 2)
         .join(' or ')}.`
+    );
+  }
+
+  if (results.length === 0 && brief.excludeSubjectsLabel) {
+    caveats.push(
+      `Every calendar match sat in a subject ruled out by “no ${brief.excludeSubjectsLabel}”. Remove that limit to see those courses.`
     );
   }
 

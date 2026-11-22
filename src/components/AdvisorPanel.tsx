@@ -93,7 +93,8 @@ export const AdvisorPanel: React.FC<AdvisorPanelProps> = ({
       | 'term'
       | 'wantsReviews'
       | 'subjectCodes'
-      | 'excludeKeywords',
+      | 'excludeKeywords'
+      | 'excludeSubjects',
     value?: string
   ) => {
     if (!brief) return;
@@ -102,6 +103,9 @@ export const AdvisorPanel: React.FC<AdvisorPanelProps> = ({
       next.subjectCodes = brief.subjectCodes.filter((code) => code !== value);
     } else if (key === 'excludeKeywords') {
       next.excludeKeywords = brief.excludeKeywords.filter((term) => term !== value);
+    } else if (key === 'excludeSubjects') {
+      next.excludeSubjects = [];
+      next.excludeSubjectsLabel = '';
     } else if (key === 'wantsReviews') {
       next.wantsReviews = false;
     } else if (key === 'level') {
@@ -232,6 +236,12 @@ export const AdvisorPanel: React.FC<AdvisorPanelProps> = ({
                   onClear={() => clearDimension('subjectCodes', code)}
                 />
               ))}
+              {brief.excludeSubjectsLabel && (
+                <Chip
+                  label={`no ${brief.excludeSubjectsLabel}`}
+                  onClear={() => clearDimension('excludeSubjects')}
+                />
+              )}
               {brief.maxHours !== 'all' && (
                 <Chip
                   label={`≤${brief.maxHours} h/week`}

@@ -415,7 +415,7 @@ export interface DemoUser {
 
 /**
  * A student's free-text request, translated into catalogue search parameters.
- * Produced by the rules parser and, when a Gemini key is configured, refined by
+ * Produced by the rules parser and, when a model provider is configured, refined by
  * the model. Only these fixed fields cross the boundary, so the model can never
  * inject arbitrary queries into the catalogue.
  */
@@ -425,6 +425,13 @@ export interface AdvisorBrief {
   keywords: string[];
   /** Terms the student explicitly does not want ("no essays", "avoid finals"). */
   excludeKeywords: string[];
+  /**
+   * Whole subjects ruled out by a stated limitation rather than a topic request:
+   * "no technical knowledge" must never return CS, MATH or engineering courses.
+   */
+  excludeSubjects: string[];
+  /** Human label for those subjects, e.g. "technical background". */
+  excludeSubjectsLabel: string;
   level: CourseFilters['level'];
   maxDifficulty: 'all' | 1 | 2 | 3 | 4 | 5;
   maxHours: CourseFilters['maxHours'];
@@ -440,7 +447,7 @@ export interface AdvisorResult {
   /** Data-grounded reasons, always derived from the catalogue snapshot and reviews. */
   matchReasons: string[];
   evidenceReviewIds: string[];
-  /** Optional one-line phrasing from Gemini; never the sole basis of a match. */
+  /** Optional one-line phrasing from the model; never the sole basis of a match. */
   rationale?: string;
   /** Set when a match stretches one of the student's limits. */
   caution?: string;

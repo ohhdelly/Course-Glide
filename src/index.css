@@ -1,10 +1,28 @@
 @import "tailwindcss";
 
+/* Inter ships from this origin (preloaded in index.html), so it is decoded before
+   first paint and no swap is painted over the fallback. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/inter-latin-variable.woff2") format("woff2");
+}
+
+/* Safety net for a cold, slow first paint: the fallback face is scaled to Inter's
+   measured advance widths, so even a late swap keeps hero text on the same pixels. */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Roboto");
+  size-adjust: 107.876%;
+}
+
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-explore: "Public Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Inter", "Inter Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Inter", "Inter Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-explore: "Public Sans", "Inter", "Inter Fallback", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* Strictly enforce the 12 / 14 / 16 / 20 / 28 / 40 px font scale */
   --text-xs: 12px;
@@ -186,6 +204,29 @@
     --chart: var(--chart-1);
     --shadow-surface: none;
     --shadow-dialog: 0 12px 28px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Registered so the prism border can rotate; without @property support the gradient
+   still paints, it just stays still. */
+@property --prism-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes prism-spin {
+  to {
+    --prism-angle: 360deg;
+  }
+}
+
+@keyframes prism-sheen {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
   }
 }
 
@@ -495,6 +536,121 @@
     color: var(--text);
     border: 1px solid var(--accent-strong);
     border-radius: var(--radius-control);
+  }
+
+  /* Hero example chips — course lookups: a white hairline over a faint theme tint */
+  .chip-course {
+    border: 1px solid color-mix(in oklab, #FFFFFF 88%, var(--border));
+    border-radius: var(--radius-control);
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent) 13%, var(--surface)),
+      color-mix(in oklab, var(--accent) 6%, var(--surface))
+    );
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, color var(--theme-transition), transform 80ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .chip-course:hover:not(:disabled) {
+      border-color: #FFFFFF;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  .chip-course:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Hero example chips — advisor prompts: a slow prism edge, with a sheen only on hover */
+  .chip-advisor {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    background-image:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, #8B5CF6 10%, var(--surface)),
+        color-mix(in oklab, #22D3EE 8%, var(--surface))
+      ),
+      conic-gradient(
+        from var(--prism-angle),
+        #A78BFA,
+        #67E8F9,
+        #6EE7B7,
+        #FDE68A,
+        #FCA5A5,
+        #C4B5FD,
+        #A78BFA
+      );
+    background-clip: padding-box, border-box;
+    color: var(--text);
+    /* Calm at rest: the prism edge is a still gradient. It only starts rotating
+       while the chip is hovered or keyboard-focused, so nothing drifts in the
+       background of the hero. */
+    cursor: pointer;
+    transition: box-shadow 160ms ease, color var(--theme-transition), transform 80ms ease;
+  }
+
+  .chip-advisor::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: linear-gradient(
+      115deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.6) 50%,
+      transparent 65%
+    );
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    background-position: 150% 0;
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .chip-advisor:hover:not(:disabled) {
+      box-shadow: 0 2px 10px color-mix(in oklab, #8B5CF6 28%, transparent);
+      animation: prism-spin 6s linear infinite;
+    }
+
+    .chip-advisor:hover:not(:disabled)::after {
+      opacity: 1;
+      animation: prism-sheen 1100ms ease-out;
+    }
+  }
+
+  .chip-advisor:focus-visible:not(:disabled) {
+    animation: prism-spin 6s linear infinite;
+  }
+
+  .chip-advisor:disabled {
+    cursor: not-allowed;
+    animation: none;
+  }
+
+  /* The global reduced-motion block zeroes animation durations; this also removes the
+     hover sheen outright, so nothing shimmers or sweeps at all. */
+  @media (prefers-reduced-motion: reduce) {
+    /* Remove the spin outright instead of leaving the global 0.00001s override in
+       place, so the resting, hovered and keyboard-focused chip are all provably
+       static while the conic border keeps painting. */
+    .chip-advisor,
+    .chip-advisor:hover:not(:disabled),
+    .chip-advisor:focus-visible:not(:disabled) {
+      animation: none !important;
+    }
+
+    .chip-advisor::after {
+      animation: none !important;
+      opacity: 0 !important;
+    }
   }
 
   /* Radii placed after surfaces and buttons so nested elements can override to smaller radii */

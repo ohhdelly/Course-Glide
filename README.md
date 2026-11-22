@@ -26,7 +26,7 @@ CourseGlide is a university course intelligence platform. It pairs an official a
 
 - **Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS 4, `motion`, `lucide-react`, `recharts`
 - **Backend:** Express 4 running in the same process as Vite's dev middleware (`tsx server.ts`)
-- **AI (optional):** Google Gen AI (Gemini) for synthesising review insights, with a deterministic Trust Lens fallback
+- **AI (optional):** NVIDIA Nemotron (OpenAI-compatible API) for the AI Course Advisor's language layer, and Google Gen AI (Gemini) for synthesising review insights — each with a deterministic fallback
 - **Data (optional):** Waterloo Open Data API v3 for live term schedule confirmation
 - **Persistence:** JSON file (`.courseglide-demo-store.json`) — demo-grade, not a production datastore
 
@@ -45,7 +45,7 @@ NODE_ENV=production bun run start
 bun run lint       # tsc --noEmit
 ```
 
-Override the port with `PORT`, e.g. `PORT=3010 bun run dev`.
+Override the port with `PORT`, e.g. `PORT=3010 bun run dev`. If that port is already taken the dev server logs the collision and starts on the next free port instead (e.g. `http://localhost:3001`), so check the startup line for the real URL.
 
 ## 🔑 Environment variables
 
@@ -53,6 +53,10 @@ Copy `.env.example` to `.env`. All keys are optional.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
+| `NVIDIA_API_KEY` | No | Enables the AI Course Advisor's language layer on `integrate.api.nvidia.com`. Without it the advisor answers from the rules-based parser alone. |
+| `NVIDIA_MODEL` | No | Primary advisor model. Defaults to `nvidia/nemotron-3.5-bolt-e4b`. |
+| `NVIDIA_FALLBACK_MODELS` | No | Comma-separated models tried after the primary one, inside one overall time budget. |
+| `NVIDIA_BASE_URL` | No | OpenAI-compatible base URL. Defaults to `https://integrate.api.nvidia.com/v1`. |
 | `GEMINI_API_KEY` | No | Enables AI-generated course insights via `@google/genai`. Without it, insights come from the deterministic Trust Lens generator. |
 | `UWATERLOO_API_KEY` | No | Confirms live term-specific schedules against the Waterloo Open Data API v3. Without it, schedule notes are based on the calendar snapshot only. |
 | `APP_URL` | No | Public URL of the app (injected by Google AI Studio in the original environment). |

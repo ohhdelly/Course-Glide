@@ -281,6 +281,8 @@ export class CatalogueService {
   public getAdvisorCandidates(params: {
     tokens: string[];
     subjectCodes: string[];
+    /** Subjects excluded by a stated limitation, e.g. "no technical knowledge". */
+    excludeSubjects?: string[];
     universityId: UniversityId;
     reviews: Review[];
     limit?: number;
@@ -299,6 +301,9 @@ export class CatalogueService {
       )
     );
     const subjectHints = new Set(params.subjectCodes.map((code) => code.toLowerCase()));
+    const excludedSubjects = new Set(
+      (params.excludeSubjects ?? []).map((code) => code.toLowerCase())
+    );
 
     const shortlist: Array<{
       course: Course;
@@ -311,18 +316,25 @@ export class CatalogueService {
       if (params.universityId !== 'all' && course.universityId !== params.universityId) {
         continue;
       }
+      if (excludedSubjects.size > 0 && excludedSubjects.has(entry.lowerSubject)) {
+        continue;
+      }
 
       const matchedKeywords: string[] = [];
       let matchScore = 0;
 
       for (const token of tokens) {
         const compactToken = token.replace(/\s+/g, '');
+        // A two-word phrase ("machine learning") is a specific topic, so matching
+        // it outweighs a generic single word and can carry a course past the
+        // level penalty that a bare department match cannot.
+        const phrase = token.includes(' ');
         let hit = 0;
         if (compactToken.length >= 2 && entry.compactCode.includes(compactToken)) hit = 26;
-        else if (entry.lowerTitle.includes(token)) hit = 22;
+        else if (entry.lowerTitle.includes(token)) hit = 22 + (phrase ? 14 : 0);
         else if (entry.lowerSubject === token) hit = 20;
         else if (entry.lowerDept.includes(token)) hit = 14;
-        else if (entry.lowerDesc.includes(token)) hit = 10;
+        else if (entry.lowerDesc.includes(token)) hit = 10 + (phrase ? 6 : 0);
         if (hit > 0) {
           matchScore += hit;
           matchedKeywords.push(token);

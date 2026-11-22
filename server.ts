@@ -2,6 +2,7 @@ import 'dotenv/config';
 import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'node:fs';
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -1127,8 +1128,45 @@ ${JSON.stringify(reviewDigest, null, 2)}`;
   }
 });
 
+async function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.once('error', () => resolve(false));
+    probe.once('listening', () => {
+      probe.close(() => resolve(true));
+    });
+    probe.listen(port, '127.0.0.1');
+  });
+}
+
+/**
+ * Another process may already own the requested port (a loopback-only
+ * listener still shadows us, even though the wildcard bind succeeds). Walk
+ * forward to the first free port so `npm run dev` always starts somewhere
+ * reachable, and say which port it landed on.
+ */
+async function resolvePort(requested: number): Promise<number> {
+  for (let port = requested; port < requested + 20; port += 1) {
+    if (await isPortAvailable(port)) return port;
+  }
+  return requested;
+}
+
 async function startServer() {
-  const PORT = Number(process.env.PORT) || 3000;
+  const requestedPort = Number(process.env.PORT) || 3000;
+  // Skipping a busy port is a dev convenience only: in production the server must
+  // bind exactly the port it was given, so a platform health check never gets a
+  // silently relocated app — it fails loudly instead.
+  const isProductionRuntime = process.env.NODE_ENV === 'production';
+  if (isProductionRuntime && !(await isPortAvailable(requestedPort))) {
+    console.error(`Port ${requestedPort} is already in use — refusing to start in production.`);
+    process.exit(1);
+  }
+  const PORT = isProductionRuntime ? requestedPort : await resolvePort(requestedPort);
+
+  if (PORT !== requestedPort) {
+    console.log(`Port ${requestedPort} is already in use — starting on port ${PORT} instead.`);
+  }
 
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
@@ -1145,8 +1183,13 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`CourseGlide server listening on http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`CourseGlide server listening on http://localhost:${PORT}`);
+  });
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    console.error(`Could not start the server on port ${PORT}: ${error.message}`);
+    console.error('Free that port or pick another one, e.g. PORT=3020 npm run dev');
+    process.exit(1);
   });
 }
 

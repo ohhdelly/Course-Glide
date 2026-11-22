@@ -160,6 +160,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     ? []
     : localAutocompleteMatches;
 
+  // One condition drives the popover and the example chips underneath it, so the
+  // chips can never sit clickable behind an open list.
+  // One condition drives the popover and the example chips underneath it, so the
+  // chips can never sit clickable behind an open list.
+  const suggestionsOpen =
+    effectiveMode === 'catalogue' &&
+    searchFocused &&
+    (autocompleteMatches.length > 0 || Boolean(trimmedQuery && remoteLoading));
+
   const curatedCourses = useMemo(() => {
     const priorityIds = ['math-137', 'cs-135', 'econ-101', 'mat-1320', 'gng-1105', 'csi-2110'];
     const pool = universityFiltered;
@@ -253,7 +262,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <span className="inline-flex items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-1 type-caption text-[var(--text-muted)] shadow-surface text-balance tabular-nums">
               {heroSourceLabel}
             </span>
-            <h1 className="mt-4 type-h1 sm:type-display text-[var(--text)] text-balance">
+            {/* The webfont swaps in a line later than the fallback, which used to
+                push the search box and both chip rows down 35px after load. Two
+                reserved line-heights keep everything below it still. */}
+            <h1 className="mt-4 min-h-[2lh] type-h1 sm:type-display text-[var(--text)] text-balance">
               See real course workload and student advice before you enroll.
             </h1>
             <p className="mt-4 type-body text-[var(--text-muted)] text-pretty">
@@ -264,67 +276,156 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Elevated Search Bar with Autocomplete */}
             <form
               onSubmit={handleFormSubmit}
-              className="relative mx-auto mt-8 max-w-2xl text-left"
+              className="mx-auto mt-8 max-w-2xl text-left"
               role="search"
               aria-label="Search courses or describe what you want"
             >
-              <div className="flex items-center rounded-card border border-[var(--border)] bg-[var(--surface)] p-2 shadow-surface transition-colors hover:border-[var(--accent-strong)] focus-within:border-[var(--accent-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[var(--accent-strong)]">
-                {effectiveMode === 'advisor' ? (
-                  <Sparkles
-                    className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--accent-strong)]"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <Search
-                    className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--text-muted)]"
-                    aria-hidden="true"
-                  />
-                )}
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setActiveSuggestionIdx(-1);
-                  }}
-                  onKeyDown={handleInputKeyDown}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
-                  placeholder={
-                    effectiveMode === 'advisor'
-                      ? 'Describe the course you want — workload, level, what to avoid'
-                      : 'Search a course code, title, or instructor — or describe what you want'
-                  }
-                  aria-label={
-                    effectiveMode === 'advisor'
-                      ? 'Describe the course you are looking for'
-                      : 'Search courses, course codes, or instructors'
-                  }
-                  aria-expanded={
-                    effectiveMode === 'catalogue' &&
-                    searchFocused &&
-                    (autocompleteMatches.length > 0 || remoteLoading)
-                  }
-                  aria-autocomplete={effectiveMode === 'catalogue' ? 'list' : 'none'}
-                  className="min-h-[44px] min-w-0 w-full bg-transparent px-2 sm:px-3 py-2 type-small sm:type-body text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={effectiveMode === 'advisor' && trimmedQuery.length < 3}
-                  className="btn-primary inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap disabled:opacity-60"
-                >
-                  <span>{effectiveMode === 'advisor' ? 'Find my courses' : 'Search'}</span>
+              {/* The popover is anchored here, not to the whole form, so it hugs the box */}
+              <div className="relative">
+                <div className="flex items-center rounded-card border border-[var(--border)] bg-[var(--surface)] p-2 shadow-surface transition-colors hover:border-[var(--accent-strong)] focus-within:border-[var(--accent-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[var(--accent-strong)]">
                   {effectiveMode === 'advisor' ? (
-                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                    <Sparkles
+                      className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--accent-strong)]"
+                      aria-hidden="true"
+                    />
                   ) : (
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    <Search
+                      className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--text-muted)]"
+                      aria-hidden="true"
+                    />
                   )}
-                </button>
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setActiveSuggestionIdx(-1);
+                    }}
+                    onKeyDown={handleInputKeyDown}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
+                    placeholder={
+                      effectiveMode === 'advisor'
+                        ? 'Describe the course you want — workload, level, what to avoid'
+                        : 'Search a course code, title, or instructor — or describe what you want'
+                    }
+                    aria-label={
+                      effectiveMode === 'advisor'
+                        ? 'Describe the course you are looking for'
+                        : 'Search courses, course codes, or instructors'
+                    }
+                    aria-expanded={suggestionsOpen}
+                    aria-autocomplete={effectiveMode === 'catalogue' ? 'list' : 'none'}
+                    className="min-h-[44px] min-w-0 w-full bg-transparent px-2 sm:px-3 py-2 type-small sm:type-body text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={effectiveMode === 'advisor' && trimmedQuery.length < 3}
+                    className="btn-primary inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap disabled:opacity-60 sm:min-w-[9.5rem]"
+                  >
+                    {/* Both labels share one grid cell, so the button is always as wide as the
+                        longer one and the input beside it never resizes when the mode flips.
+                        visibility:hidden keeps the unused label out of the a11y tree. */}
+                    <span className="grid">
+                      <span
+                        className={`col-start-1 row-start-1 ${
+                          effectiveMode === 'advisor' ? 'visible' : 'invisible'
+                        }`}
+                      >
+                        {/* Phones get the short verb so the button doesn't crowd the input. */}
+                        <span className="sm:hidden">Find</span>
+                        <span className="hidden sm:inline">Find my courses</span>
+                      </span>
+                      <span
+                        className={`col-start-1 row-start-1 ${
+                          effectiveMode === 'advisor' ? 'invisible' : 'visible'
+                        }`}
+                      >
+                        Search
+                      </span>
+                    </span>
+                    {effectiveMode === 'advisor' ? (
+                      <Sparkles className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+
+                {suggestionsOpen && (
+                  <div
+                    role="listbox"
+                    aria-label="Course suggestions"
+                    className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog"
+                  >
+                    <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 type-caption text-[var(--text-muted)]">
+                      {trimmedQuery
+                        ? remoteLoading && !hasFreshRemote
+                          ? 'Searching catalogue...'
+                          : 'Matching courses'
+                        : 'Popular courses'}
+                    </div>
+                    {autocompleteMatches.length > 0 ? (
+                      <ul className="divide-y divide-[var(--border)]">
+                        {autocompleteMatches.map((course, idx) => {
+                          const s =
+                            (hasFreshRemote ? remoteState.statsMap[course.id] : undefined) ??
+                            statsMap[course.id];
+                          const hasReviews = (s?.responseCount ?? 0) > 0;
+                          const isActive = idx === activeSuggestionIdx;
+                          return (
+                            <li key={course.id}>
+                              <button
+                                type="button"
+                                role="option"
+                                aria-selected={isActive}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  onOpenCourse(course.id);
+                                }}
+                                className={`flex min-h-[44px] w-full flex-col items-start justify-between gap-1 px-4 py-3 text-left transition-colors sm:flex-row sm:items-center sm:gap-4 ${
+                                  isActive
+                                    ? 'bg-[var(--surface-2)]'
+                                    : 'hover:bg-[var(--surface-2)]'
+                                }`}
+                              >
+                                <div className="min-w-0 w-full sm:w-auto">
+                                  <div className="flex items-center gap-2">
+                                    <span className="shrink-0 rounded-control bg-[var(--surface-2)] border border-[var(--border)] px-2 py-1 type-caption font-semibold text-[var(--text)] tabular-nums">
+                                      {course.code}
+                                    </span>
+                                    <span className="truncate type-small font-medium text-[var(--text)]">
+                                      {course.title}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1 truncate type-caption text-[var(--text-muted)]">
+                                    {course.universityName} · {course.department}
+                                  </div>
+                                </div>
+                                <div className="shrink-0 text-left sm:text-right type-caption text-[var(--text-muted)] tabular-nums">
+                                  {hasReviews && s
+                                    ? `${s.avgWeeklyHours.toFixed(1)} hrs/wk · ${s.recommendationRate}% rec`
+                                    : 'No reviews yet'}
+                                </div>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <div className="px-4 py-3 type-caption text-[var(--text-muted)]">
+                        Finding matching courses across Waterloo &amp; uOttawa...
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Mode follows the sentence until the student pins one */}
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1">
-                <span className="type-caption text-[var(--text-muted)] text-pretty">
+                {/* flex-1 pins the hint's box to the space beside the mode toggle, so the
+                    sentence changing length rewraps inside a static rect. */}
+                <span className="min-h-[36px] min-w-0 flex-1 sm:min-h-[18px] type-caption text-[var(--text-muted)] text-pretty">
                   {effectiveMode === 'advisor'
                     ? 'Plain language → ranked matches from the calendar and real reviews.'
                     : 'Exact course lookup across the catalogue.'}
@@ -357,89 +458,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              {effectiveMode === 'catalogue' &&
-                searchFocused &&
-                (autocompleteMatches.length > 0 || Boolean(trimmedQuery && remoteLoading)) && (
-                <div
-                  role="listbox"
-                  aria-label="Course suggestions"
-                  className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog"
-                >
-                  <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 type-caption text-[var(--text-muted)]">
-                    {trimmedQuery
-                      ? remoteLoading && !hasFreshRemote
-                        ? 'Searching catalogue...'
-                        : 'Matching courses'
-                      : 'Popular courses'}
-                  </div>
-                  {autocompleteMatches.length > 0 ? (
-                    <ul className="divide-y divide-[var(--border)]">
-                      {autocompleteMatches.map((course, idx) => {
-                        const s =
-                          (hasFreshRemote ? remoteState.statsMap[course.id] : undefined) ??
-                          statsMap[course.id];
-                        const hasReviews = (s?.responseCount ?? 0) > 0;
-                        const isActive = idx === activeSuggestionIdx;
-                        return (
-                          <li key={course.id}>
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={isActive}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                onOpenCourse(course.id);
-                              }}
-                              className={`flex min-h-[44px] w-full flex-col items-start justify-between gap-1 px-4 py-3 text-left transition-colors sm:flex-row sm:items-center sm:gap-4 ${
-                                isActive
-                                  ? 'bg-[var(--surface-2)]'
-                                  : 'hover:bg-[var(--surface-2)]'
-                              }`}
-                            >
-                              <div className="min-w-0 w-full sm:w-auto">
-                                <div className="flex items-center gap-2">
-                                  <span className="shrink-0 rounded-control bg-[var(--surface-2)] border border-[var(--border)] px-2 py-1 type-caption font-semibold text-[var(--text)] tabular-nums">
-                                    {course.code}
-                                  </span>
-                                  <span className="truncate type-small font-medium text-[var(--text)]">
-                                    {course.title}
-                                  </span>
-                                </div>
-                                <div className="mt-1 truncate type-caption text-[var(--text-muted)]">
-                                  {course.universityName} · {course.department}
-                                </div>
-                              </div>
-                              <div className="shrink-0 text-left sm:text-right type-caption text-[var(--text-muted)] tabular-nums">
-                                {hasReviews && s
-                                  ? `${s.avgWeeklyHours.toFixed(1)} hrs/wk · ${s.recommendationRate}% rec`
-                                  : 'No reviews yet'}
-                              </div>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <div className="px-4 py-3 type-caption text-[var(--text-muted)]">
-                      Finding matching courses across Waterloo &amp; uOttawa...
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-4 space-y-2 text-center type-caption text-[var(--text-muted)]">
+              <div
+                aria-hidden={suggestionsOpen}
+                className={`mt-4 space-y-2 text-center type-caption text-[var(--text-muted)] transition-opacity duration-200 ${
+                  suggestionsOpen ? 'pointer-events-none opacity-40' : 'opacity-100'
+                }`}
+              >
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <span>Try:</span>
                   {['MATH 137', 'CS 135', 'ECON 101', 'MAT 1320', 'GNG 1105'].map((sample) => (
                     <button
                       key={sample}
                       type="button"
+                      disabled={suggestionsOpen}
                       onClick={() => {
                         const found = courses.find((c) => c.code === sample);
                         if (found) onOpenCourse(found.id);
                         else onSearchSubmit(sample);
                       }}
-                      className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums shadow-surface"
+                      className="chip-course inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums"
                     >
                       {sample}
                     </button>
@@ -458,12 +495,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <button
                       key={sample}
                       type="button"
+                      disabled={suggestionsOpen}
                       onClick={() => {
                         setQuery(sample);
                         setMode('advisor');
                         onAskAdvisor(sample);
                       }}
-                      className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium shadow-surface"
+                      className="chip-advisor inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium"
                     >
                       {sample}
                     </button>
