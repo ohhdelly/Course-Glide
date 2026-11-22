@@ -412,3 +412,50 @@ export interface DemoUser {
   program: string;
   role: 'student' | 'faculty_demo';
 }
+
+/**
+ * A student's free-text request, translated into catalogue search parameters.
+ * Produced by the rules parser and, when a Gemini key is configured, refined by
+ * the model. Only these fixed fields cross the boundary, so the model can never
+ * inject arbitrary queries into the catalogue.
+ */
+export interface AdvisorBrief {
+  intent: string;
+  subjectCodes: string[];
+  keywords: string[];
+  /** Terms the student explicitly does not want ("no essays", "avoid finals"). */
+  excludeKeywords: string[];
+  level: CourseFilters['level'];
+  maxDifficulty: 'all' | 1 | 2 | 3 | 4 | 5;
+  maxHours: CourseFilters['maxHours'];
+  term: NonNullable<CourseFilters['term']>;
+  wantsReviews: boolean;
+  constraints: string[];
+}
+
+export interface AdvisorResult {
+  course: Course;
+  stats: CourseStats;
+  score: number;
+  /** Data-grounded reasons, always derived from the catalogue snapshot and reviews. */
+  matchReasons: string[];
+  evidenceReviewIds: string[];
+  /** Optional one-line phrasing from Gemini; never the sole basis of a match. */
+  rationale?: string;
+  /** Set when a match stretches one of the student's limits. */
+  caution?: string;
+}
+
+export interface AdvisorResponse {
+  query: string;
+  brief: AdvisorBrief;
+  summary: string;
+  results: AdvisorResult[];
+  /** 'ai' only when a language model shaped the brief or the phrasing. */
+  source: 'ai' | 'rules';
+  provider?: 'nvidia';
+  model?: string;
+  generatedAt: string;
+  candidateCount: number;
+  caveats: string[];
+}

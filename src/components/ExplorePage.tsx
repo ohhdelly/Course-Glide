@@ -21,6 +21,7 @@ import type {
 import { filterAndSearchCourses } from '../utils/trustLens';
 import { CourseCard } from './CourseCard';
 import { ExploreSelect, type ExploreSelectOption } from './ExploreSelect';
+import { AdvisorPanel } from './AdvisorPanel';
 
 interface ExplorePageProps {
   courses: Course[];
@@ -32,6 +33,7 @@ interface ExplorePageProps {
   selectedUniversity: UniversityId;
   onSelectUniversity: (id: UniversityId) => void;
   initialQuery?: string;
+  initialAdvisorQuery?: string;
   reviewRevision?: number;
   savedCourseIds: string[];
   onToggleSave: (courseId: string) => void;
@@ -94,6 +96,7 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
   selectedUniversity,
   onSelectUniversity,
   initialQuery = '',
+  initialAdvisorQuery = '',
   reviewRevision = 0,
   savedCourseIds,
   onToggleSave,
@@ -121,6 +124,7 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [advisorNote, setAdvisorNote] = useState<string | null>(null);
   const [serverData, setServerData] = useState<PaginatedCoursesResponse | null>(null);
   const [suggestions, setSuggestions] = useState<Course[]>([]);
   const abortRef = useRef<AbortController | null>(null);
@@ -456,6 +460,39 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
 
   return (
     <main className="font-explore mx-auto max-w-7xl px-4 pt-12 pb-12 sm:px-6 lg:px-8">
+      <AdvisorPanel
+        universityId={selectedUniversity}
+        initialQuery={initialAdvisorQuery}
+        onOpenCourse={onOpenCourse}
+        onApplyBrief={(brief) => {
+          setTerm(brief.term);
+          setLevel(brief.level);
+          setMaxDifficulty(brief.maxDifficulty === 1 ? 'all' : brief.maxDifficulty);
+          setMaxHours(brief.maxHours);
+          setDepartment(brief.subjectCodes[0] ?? 'all');
+          setHasReviews(brief.wantsReviews ? 'with_reviews' : 'all');
+          setAdvisorNote(
+            brief.excludeKeywords.length > 0
+              ? `Catalogue filters can include but not exclude words, so “no ${brief.excludeKeywords.join(
+                  ', no '
+                )}” remains enforced in the advisor list above only.`
+              : null
+          );
+          setQuery('');
+          setDebouncedQuery('');
+          setPage(1);
+        }}
+      />
+
+      {advisorNote && (
+        <p
+          role="status"
+          className="mb-6 rounded-control border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 type-caption text-[var(--text-muted)] text-pretty"
+        >
+          {advisorNote}
+        </p>
+      )}
+
       {/* Header Row — clean H1 + compact segmented view toggle, no subtitle */}
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="type-h1 text-[var(--text)] scroll-mt-24">

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,6 +15,8 @@ import {
   withDemoReviewSignals,
 } from './src/data/demoDataset.ts';
 import { CatalogueService } from './server/catalogueService.ts';
+import { checkAdvisorRateLimit, runAdvisor } from './server/advisorService.ts';
+import { resolveLlmConfig } from './server/llm.ts';
 import {
   GRADE_BANDS,
   computeCourseStats,
@@ -36,6 +39,10 @@ import type {
   StudyMethodKey,
   UniversityId,
 } from './src/types/course.ts';
+
+// Local development keeps secrets in .env.local (Vite's convention); `.env` remains a
+// fallback. On Vercel the real environment variables are injected by the platform.
+dotenv.config({ path: '.env.local' });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,14 +79,22 @@ function createInitialStore(): DemoStore {
   };
 }
 
+function mergeSeedReviews(stored: Review[]): Review[] {
+  const known = new Set(stored.map((review) => review.id));
+  const added = DEMO_REVIEWS.filter((review) => !known.has(review.id));
+  return added.length > 0 ? [...stored, ...structuredClone(added)] : stored;
+}
+
 function loadStore(): DemoStore {
   try {
     if (fs.existsSync(STORE_PATH)) {
       const raw = fs.readFileSync(STORE_PATH, 'utf-8');
       const parsed = JSON.parse(raw) as Partial<DemoStore>;
       if (Array.isArray(parsed.reviews) && parsed.reviews.length > 0) {
-        return {
-          reviews: parsed.reviews.map(withDemoReviewSignals),
+        // A persisted store predates new seed reviews, so append any that are
+        // missing instead of discarding the reviews a presenter already typed.
+        const loaded: DemoStore = {
+          reviews: mergeSeedReviews(parsed.reviews.map(withDemoReviewSignals)),
           facultyResponses: Array.isArray(parsed.facultyResponses)
             ? parsed.facultyResponses.map(normalizeFacultyResponse)
             : structuredClone(DEMO_FACULTY_RESPONSES),
@@ -94,6 +109,8 @@ function loadStore(): DemoStore {
             'demo-student': ['math-137', 'cs-135'],
           },
         };
+        if (loaded.reviews.length !== parsed.reviews.length) saveStore(loaded);
+        return loaded;
       }
     }
   } catch (err) {
@@ -215,14 +232,68 @@ function aggregatePulseField(
 const app = express();
 app.use(express.json({ limit: '256kb' }));
 
+const advisorLlm = resolveLlmConfig();
+
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     mode: 'demonstration',
     firebaseConfigured: false,
     geminiConfigured: Boolean(aiClient),
+    advisor: {
+      enabled: Boolean(advisorLlm),
+      provider: advisorLlm?.provider ?? null,
+      model: advisorLlm?.model ?? null,
+      fallbacks: advisorLlm?.models.slice(1) ?? [],
+      fallback: 'rules-based parser',
+    },
     catalogue: catalogue.getMetadata(),
   });
+});
+
+app.post('/api/advisor', async (req, res) => {
+  const query = sanitizeText(req.body?.query, 600);
+  if (query.length < 3) {
+    res.status(400).json({
+      error: 'Please describe the course you are looking for in a few words.',
+    });
+    return;
+  }
+
+  const forwarded = req.headers['x-forwarded-for'];
+  const clientId =
+    sanitizeText(typeof forwarded === 'string' ? forwarded.split(',')[0] : '', 64) ||
+    sanitizeText(req.ip, 64) ||
+    'anonymous';
+  if (!checkAdvisorRateLimit(clientId)) {
+    res.status(429).json({
+      error:
+        'That is a lot of advisor requests in a short time. Please wait a few minutes and try again.',
+    });
+    return;
+  }
+
+  const uniRaw = sanitizeText(req.body?.universityId, 24);
+  const universityId: UniversityId =
+    uniRaw === 'uwaterloo' || uniRaw === 'uottawa' ? uniRaw : 'all';
+
+  const briefOverride =
+    req.body?.briefOverride && typeof req.body.briefOverride === 'object'
+      ? req.body.briefOverride
+      : undefined;
+
+  try {
+    const response = await runAdvisor(
+      { query, universityId, ...(briefOverride ? { briefOverride } : {}) },
+      { catalogue, reviews: store.reviews }
+    );
+    res.json(response);
+  } catch (err) {
+    console.warn('Advisor request failed:', err);
+    res.status(500).json({
+      error: 'The advisor could not finish that search. Try rephrasing it.',
+    });
+  }
 });
 
 app.get('/api/bootstrap', (req, res) => {

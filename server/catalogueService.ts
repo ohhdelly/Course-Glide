@@ -273,6 +273,93 @@ export class CatalogueService {
     return this.courses.filter((c) => reviewedIds.has(c.id) || priorityIds.has(c.id));
   }
 
+  /**
+   * Advisor retrieval: scores every indexed course against free-text tokens and
+   * subject hints. Only text matching runs over the full catalogue; review stats
+   * are computed for the shortlist, so a 4,343-course scan stays cheap.
+   */
+  public getAdvisorCandidates(params: {
+    tokens: string[];
+    subjectCodes: string[];
+    universityId: UniversityId;
+    reviews: Review[];
+    limit?: number;
+  }): Array<{
+    course: Course;
+    stats: CourseStats;
+    matchScore: number;
+    matchedKeywords: string[];
+  }> {
+    const limit = Math.max(1, Math.min(120, params.limit ?? 60));
+    const tokens = Array.from(
+      new Set(
+        params.tokens
+          .map((token) => token.toLowerCase().trim())
+          .filter((token) => token.length >= 2)
+      )
+    );
+    const subjectHints = new Set(params.subjectCodes.map((code) => code.toLowerCase()));
+
+    const shortlist: Array<{
+      course: Course;
+      matchScore: number;
+      matchedKeywords: string[];
+    }> = [];
+
+    for (const entry of this.index) {
+      const { course } = entry;
+      if (params.universityId !== 'all' && course.universityId !== params.universityId) {
+        continue;
+      }
+
+      const matchedKeywords: string[] = [];
+      let matchScore = 0;
+
+      for (const token of tokens) {
+        const compactToken = token.replace(/\s+/g, '');
+        let hit = 0;
+        if (compactToken.length >= 2 && entry.compactCode.includes(compactToken)) hit = 26;
+        else if (entry.lowerTitle.includes(token)) hit = 22;
+        else if (entry.lowerSubject === token) hit = 20;
+        else if (entry.lowerDept.includes(token)) hit = 14;
+        else if (entry.lowerDesc.includes(token)) hit = 10;
+        if (hit > 0) {
+          matchScore += hit;
+          matchedKeywords.push(token);
+        }
+      }
+
+      if (subjectHints.has(entry.lowerSubject)) {
+        matchScore += 24;
+        matchedKeywords.push(entry.lowerSubject);
+      }
+
+      if (tokens.length > 0 && matchScore === 0) continue;
+      shortlist.push({ course, matchScore, matchedKeywords });
+    }
+
+    const reviewed = new Map<string, Review[]>();
+    for (const review of params.reviews) {
+      if (review.moderationStatus === 'hidden') continue;
+      const list = reviewed.get(review.courseId) ?? [];
+      list.push(review);
+      reviewed.set(review.courseId, list);
+    }
+
+    const evidenceCount = (courseId: string) => reviewed.get(courseId)?.length ?? 0;
+    // A request such as "bird course, under 10 hours" carries no topic words, so
+    // every course ties at zero. Lead with courses that have student evidence so
+    // the workload and difficulty limits can actually be checked against reviews.
+    shortlist.sort(
+      (a, b) => b.matchScore - a.matchScore || evidenceCount(b.course.id) - evidenceCount(a.course.id)
+    );
+
+    return shortlist.slice(0, limit).map((item) => ({
+      ...item,
+      stats: computeCourseStats(reviewed.get(item.course.id) ?? []),
+    }));
+  }
+
   public queryCourses(params: {
     query?: string;
     filters: CourseFilters;

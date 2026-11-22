@@ -118,6 +118,7 @@ export default function App() {
     return 'all';
   });
   const [exploreQuery, setExploreQuery] = useState('');
+  const [advisorQuery, setAdvisorQuery] = useState('');
   const [reviewRevision, setReviewRevision] = useState(0);
   const [courseDetailLoading, setCourseDetailLoading] = useState(false);
   const [courseNotFoundId, setCourseNotFoundId] = useState<string | null>(null);
@@ -611,6 +612,12 @@ export default function App() {
               }
               onSearchSubmit={(q) => {
                 setExploreQuery(q);
+                setAdvisorQuery('');
+                navigate({ page: 'explore' });
+              }}
+              onAskAdvisor={(q) => {
+                setAdvisorQuery(q);
+                setExploreQuery('');
                 navigate({ page: 'explore' });
               }}
               onGoExplore={() => navigate({ page: 'explore' })}
@@ -629,6 +636,7 @@ export default function App() {
               selectedUniversity={selectedUniversity}
               onSelectUniversity={handleSelectUniversity}
               initialQuery={exploreQuery}
+              initialAdvisorQuery={advisorQuery}
               reviewRevision={reviewRevision}
               savedCourseIds={savedCourseIds}
               onToggleSave={handleToggleSave}

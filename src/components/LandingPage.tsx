@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Search,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import type {
   CatalogueMetadata,
@@ -14,6 +15,25 @@ import type {
 import { scoreCourseSearchMatch } from '../utils/trustLens';
 import { CourseCard } from './CourseCard';
 import { CollapsibleText } from './course/CollapsibleText';
+
+type SearchMode = 'auto' | 'catalogue' | 'advisor';
+
+const COURSE_CODE_ONLY = /^[a-z]{2,6}\s?-?\d{2,3}[a-z]?$/i;
+const DESCRIPTIVE_REQUEST =
+  /\b(easy|bird|light|heavy|hard|chill|workload|hours?|avoid|without|no\s+\w+|projects?|exams?|essays?|assignments?|readings?|level|year|term|semester|recommend(?:ed)?|interesting|enjoy|fun|elective|online|morning|evening|prof(?:essor)?|lecture|seminar|lab|group|presentation|difficult)\b/i;
+
+/**
+ * One box, two engines: a course code or a couple of keywords is a catalogue
+ * lookup, while a sentence about workload, level or what to avoid is an advisor
+ * request. This is only the default; the student can pin either mode.
+ */
+export function detectSearchMode(raw: string): Exclude<SearchMode, 'auto'> {
+  const text = raw.trim();
+  if (!text) return 'catalogue';
+  if (COURSE_CODE_ONLY.test(text)) return 'catalogue';
+  if (DESCRIPTIVE_REQUEST.test(text)) return 'advisor';
+  return text.split(/\s+/).length <= 2 ? 'catalogue' : 'advisor';
+}
 
 interface LandingPageProps {
   courses: Course[];
@@ -28,6 +48,7 @@ interface LandingPageProps {
     tab?: 'overview' | 'reviews' | 'teaching' | 'strategies'
   ) => void;
   onSearchSubmit: (query: string) => void;
+  onAskAdvisor: (query: string) => void;
   onGoExplore: () => void;
   onGoHowItWorks: () => void;
 }
@@ -42,10 +63,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onToggleSave,
   onOpenCourse,
   onSearchSubmit,
+  onAskAdvisor,
   onGoExplore,
   onGoHowItWorks,
 }) => {
   const [query, setQuery] = useState('');
+  const [mode, setMode] = useState<SearchMode>('auto');
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeSuggestionIdx, setActiveSuggestionIdx] = useState(-1);
   const [remoteState, setRemoteState] = useState<{
@@ -126,6 +149,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [query, universityFiltered, instructorsByCourse]);
 
   const trimmedQuery = query.trim();
+  const effectiveMode: Exclude<SearchMode, 'auto'> =
+    mode === 'auto' ? detectSearchMode(trimmedQuery) : mode;
   const hasFreshRemote = trimmedQuery.length > 0 && remoteState?.query === trimmedQuery;
   const autocompleteMatches = !trimmedQuery
     ? localAutocompleteMatches
@@ -185,6 +210,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (effectiveMode === 'advisor') {
+      if (trimmedQuery.length >= 3) onAskAdvisor(trimmedQuery);
+      return;
+    }
     if (activeSuggestionIdx >= 0 && autocompleteMatches[activeSuggestionIdx]) {
       onOpenCourse(autocompleteMatches[activeSuggestionIdx].id);
       return;
@@ -197,7 +226,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!searchFocused || autocompleteMatches.length === 0) return;
+    if (effectiveMode !== 'catalogue' || !searchFocused || autocompleteMatches.length === 0)
+      return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveSuggestionIdx((prev) =>
@@ -236,13 +266,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               onSubmit={handleFormSubmit}
               className="relative mx-auto mt-8 max-w-2xl text-left"
               role="search"
-              aria-label="Course search"
+              aria-label="Search courses or describe what you want"
             >
               <div className="flex items-center rounded-card border border-[var(--border)] bg-[var(--surface)] p-2 shadow-surface transition-colors hover:border-[var(--accent-strong)] focus-within:border-[var(--accent-strong)] has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[var(--accent-strong)]">
-                <Search
-                  className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--text-muted)]"
-                  aria-hidden="true"
-                />
+                {effectiveMode === 'advisor' ? (
+                  <Sparkles
+                    className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--accent-strong)]"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Search
+                    className="ml-2 sm:ml-3 h-4 w-4 shrink-0 text-[var(--text-muted)]"
+                    aria-hidden="true"
+                  />
+                )}
                 <input
                   type="text"
                   value={query}
@@ -253,22 +290,76 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   onKeyDown={handleInputKeyDown}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
-                  placeholder="Search courses, codes, or instructors..."
-                  aria-label="Search courses, course codes, or instructors"
-                  aria-expanded={searchFocused && (autocompleteMatches.length > 0 || remoteLoading)}
-                  aria-autocomplete="list"
+                  placeholder={
+                    effectiveMode === 'advisor'
+                      ? 'Describe the course you want — workload, level, what to avoid'
+                      : 'Search a course code, title, or instructor — or describe what you want'
+                  }
+                  aria-label={
+                    effectiveMode === 'advisor'
+                      ? 'Describe the course you are looking for'
+                      : 'Search courses, course codes, or instructors'
+                  }
+                  aria-expanded={
+                    effectiveMode === 'catalogue' &&
+                    searchFocused &&
+                    (autocompleteMatches.length > 0 || remoteLoading)
+                  }
+                  aria-autocomplete={effectiveMode === 'catalogue' ? 'list' : 'none'}
                   className="min-h-[44px] min-w-0 w-full bg-transparent px-2 sm:px-3 py-2 type-small sm:type-body text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="btn-primary inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap"
+                  disabled={effectiveMode === 'advisor' && trimmedQuery.length < 3}
+                  className="btn-primary inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap disabled:opacity-60"
                 >
-                  <span>Search</span>
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  <span>{effectiveMode === 'advisor' ? 'Find my courses' : 'Search'}</span>
+                  {effectiveMode === 'advisor' ? (
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  )}
                 </button>
               </div>
 
-              {searchFocused && (autocompleteMatches.length > 0 || (trimmedQuery && remoteLoading)) && (
+              {/* Mode follows the sentence until the student pins one */}
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1">
+                <span className="type-caption text-[var(--text-muted)] text-pretty">
+                  {effectiveMode === 'advisor'
+                    ? 'Plain language → ranked matches from the calendar and real reviews.'
+                    : 'Exact course lookup across the catalogue.'}
+                </span>
+                <div
+                  role="group"
+                  aria-label="Search mode"
+                  className="inline-flex shrink-0 items-center rounded-control border border-[var(--border)] bg-[var(--surface)] p-0.5"
+                >
+                  {(['catalogue', 'advisor'] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setMode(mode === option ? 'auto' : option)}
+                      aria-pressed={effectiveMode === option}
+                      title={
+                        mode === option
+                          ? 'Following your wording again'
+                          : `Always use ${option === 'catalogue' ? 'course search' : 'the advisor'}`
+                      }
+                      className={`inline-flex min-h-[32px] items-center rounded-[6px] px-2.5 py-1 type-caption font-medium transition-colors ${
+                        effectiveMode === option
+                          ? 'bg-[var(--accent)] text-[var(--on-accent)]'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+                      }`}
+                    >
+                      {option === 'catalogue' ? 'Courses' : 'Ask'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {effectiveMode === 'catalogue' &&
+                searchFocused &&
+                (autocompleteMatches.length > 0 || Boolean(trimmedQuery && remoteLoading)) && (
                 <div
                   role="listbox"
                   aria-label="Course suggestions"
@@ -336,24 +427,52 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               )}
 
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 type-caption text-[var(--text-muted)]">
-                <span>Try searching:</span>
-                {['MATH 137', 'CS 135', 'ECON 101', 'MAT 1320', 'GNG 1105'].map((sample) => (
-                  <button
-                    key={sample}
-                    type="button"
-                    onClick={() => {
-                      const found = courses.find((c) => c.code === sample);
-                      if (found) onOpenCourse(found.id);
-                      else onSearchSubmit(sample);
-                    }}
-                    className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums shadow-surface"
-                  >
-                    {sample}
-                  </button>
-                ))}
+              <div className="mt-4 space-y-2 text-center type-caption text-[var(--text-muted)]">
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <span>Try:</span>
+                  {['MATH 137', 'CS 135', 'ECON 101', 'MAT 1320', 'GNG 1105'].map((sample) => (
+                    <button
+                      key={sample}
+                      type="button"
+                      onClick={() => {
+                        const found = courses.find((c) => c.code === sample);
+                        if (found) onOpenCourse(found.id);
+                        else onSearchSubmit(sample);
+                      }}
+                      className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium tabular-nums shadow-surface"
+                    >
+                      {sample}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <span className="inline-flex items-center gap-1">
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                    Or ask:
+                  </span>
+                  {[
+                    'bird course, under 10 hours a week',
+                    'AI course for third year',
+                    'writing elective with no final exam',
+                  ].map((sample) => (
+                    <button
+                      key={sample}
+                      type="button"
+                      onClick={() => {
+                        setQuery(sample);
+                        setMode('advisor');
+                        onAskAdvisor(sample);
+                      }}
+                      className="btn-secondary inline-flex min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium shadow-surface"
+                    >
+                      {sample}
+                    </button>
+                  ))}
+                </div>
               </div>
             </form>
+
+
           </div>
         </div>
       </section>

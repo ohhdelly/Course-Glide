@@ -186,6 +186,67 @@ export const DEMO_COURSES: Course[] = [
   },
 ];
 
+type DemoReviewSeed = {
+  id: string;
+  courseId: string;
+  term: string;
+  professor: string;
+  ta?: string;
+  alias: string;
+  difficulty: 1 | 2 | 3 | 4 | 5;
+  hours: number;
+  recommended: boolean;
+  usefulness?: 1 | 2 | 3 | 4 | 5;
+  overall: string;
+  worked: string;
+  challenging: string;
+  advice: string;
+  methods?: Review['studyMethods'];
+  helpful?: Review['studyMethods'];
+  votes?: number;
+  created: string;
+  effort?: NonNullable<Review['mentalEffort']>;
+  stress?: NonNullable<Review['stress']>;
+  targetGrade?: NonNullable<Review['targetGrade']>;
+  verified?: boolean;
+};
+
+/**
+ * Compact builder for the wider demo spread. Seeded reviews are still complete
+ * Review records; the defaults just keep moderator-only and metadata fields out
+ * of the way so each story fits in a few readable lines.
+ */
+const seedReview = (seed: DemoReviewSeed): Review => ({
+  id: seed.id,
+  courseId: seed.courseId,
+  universityId: 'uwaterloo',
+  term: seed.term,
+  instructorName: seed.professor,
+  ...(seed.ta ? { taName: seed.ta } : {}),
+  authorAlias: seed.alias,
+  isAnonymous: true,
+  verifiedEnrollment: seed.verified ?? true,
+  difficulty: seed.difficulty,
+  weeklyHours: seed.hours,
+  mentalEffort: seed.effort ?? seed.difficulty,
+  stress: seed.stress ?? seed.difficulty,
+  ...(seed.targetGrade ? { targetGrade: seed.targetGrade } : {}),
+  recommended: seed.recommended,
+  usefulness: seed.usefulness ?? 4,
+  overallExperience: seed.overall,
+  whatWorkedWell: seed.worked,
+  whatWasChallenging: seed.challenging,
+  practicalAdvice: seed.advice,
+  studyMethods: seed.methods ?? ['practice_problems', 'lecture_attendance'],
+  helpfulMethods: seed.helpful ?? seed.methods ?? ['practice_problems'],
+  helpfulVotes: seed.votes ?? 6,
+  notHelpfulVotes: 0,
+  createdAt: seed.created,
+  moderationStatus: 'visible',
+  reportCount: 0,
+  isDemoData: true,
+});
+
 const DEMO_REVIEW_SEED: Review[] = [
   // MATH 137 — Flagship demonstration narrative (8 varied reviews)
   {
@@ -1035,6 +1096,755 @@ const DEMO_REVIEW_SEED: Review[] = [
     reportCount: 0,
     isDemoData: true,
   },
+
+  // ── Wider demo spread: 30 reviews across 13 further courses ───────────────
+  // CS 349 runs as the low-workload 300-level CS elective, so it can carry the
+  // advisor's "light 300-level CS" example with real numbers behind it.
+  seedReview({
+    id: 'rev-cs349-1',
+    courseId: 'cs-349',
+    term: 'Fall 2025',
+    professor: 'Prof. Hana Okafor (Demo)',
+    ta: 'Iris Bellamy (Demo TA)',
+    alias: '3A CS Student',
+    difficulty: 2,
+    hours: 7,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'The most project-driven CS course I have taken. Marks come from a prototype walkthrough plus a final demo, with no exam to cram for.',
+    worked:
+      'Weekly critique sessions meant feedback arrived while the prototype could still change, and the rubric was published before every milestone.',
+    challenging:
+      'Accessibility and keyboard-only testing took longer than expected on the final build.',
+    advice:
+      'Pick a small, testable interface idea in week two and run one usability session with a friend before each milestone.',
+    methods: ['project_based', 'lecture_attendance'],
+    helpful: ['project_based'],
+    votes: 21,
+    created: '2025-12-16T15:10:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-cs349-2',
+    courseId: 'cs-349',
+    term: 'Winter 2025',
+    professor: 'Prof. Derek Iwu (Demo)',
+    alias: '2B CS Student',
+    difficulty: 3,
+    hours: 8,
+    recommended: true,
+    overall:
+      'Light weekly load until the final prototype push, which is genuinely fun if you like building interfaces.',
+    worked:
+      'Studio time was scheduled during lab hours, so the group had a room and a TA available every week.',
+    challenging:
+      'Front-end tooling choices are open-ended; picking a stack early saved a lot of churn.',
+    advice:
+      'Use plain HTML and CSS for the first prototype instead of learning a framework and the course material at once.',
+    methods: ['project_based', 'study_groups'],
+    helpful: ['project_based'],
+    votes: 12,
+    created: '2025-04-22T10:05:00.000Z',
+    effort: 3,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-cs348-1',
+    courseId: 'cs-348',
+    term: 'Fall 2025',
+    professor: 'Prof. Anita Chandra (Demo)',
+    alias: '3A CS Student',
+    difficulty: 3,
+    hours: 8,
+    recommended: true,
+    overall:
+      'A practical database course: SQL, schema design, then transactions. Manageable alongside two other CS courses.',
+    worked:
+      'Assignments ran against a real database instance, so query plans and index choices actually mattered.',
+    challenging:
+      'Normalization proofs and isolation-level questions on the midterm needed more precision than the lectures suggested.',
+    advice:
+      'Rewrite every query with EXPLAIN before submitting; the marking scheme rewards a sensible index choice.',
+    methods: ['practice_problems', 'project_based', 'past_exams'],
+    helpful: ['practice_problems'],
+    votes: 16,
+    created: '2025-12-17T09:40:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs348-2',
+    courseId: 'cs-348',
+    term: 'Winter 2025',
+    professor: 'Prof. Anita Chandra (Demo)',
+    ta: 'Kenji Mori (Demo TA)',
+    alias: '3B CS Student',
+    difficulty: 3,
+    hours: 10,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'The term project is the whole point: you design and build a small application on top of a database you model yourself.',
+    worked:
+      'TA Kenji ran an optional schema-review hour before the project proposal was due.',
+    challenging:
+      'Concurrency control questions were the hardest part of the final, and the readings for them were dense.',
+    advice:
+      'Model your project schema in week three and get it reviewed; a bad schema makes every later query painful.',
+    methods: ['project_based', 'tutorial_sessions'],
+    helpful: ['project_based', 'tutorial_sessions'],
+    votes: 9,
+    created: '2025-04-25T17:20:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs341-1',
+    courseId: 'cs-341',
+    term: 'Fall 2025',
+    professor: 'Prof. Samuel Achebe (Demo)',
+    alias: '3A CS Student',
+    difficulty: 4,
+    hours: 12,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'The backbone algorithms course. Proofs and recurrence analysis are demanding, but every later CS course feels easier afterwards.',
+    worked:
+      'Problem sets were released with a hint sheet, and the marking scheme rewarded the right invariant even on incomplete proofs.',
+    challenging:
+      'NP-completeness reductions in the last third of the term demand a lot of independent practice.',
+    advice:
+      'Write the loop invariant before the code in every dynamic-programming question, then verify the base case by hand.',
+    methods: ['practice_problems', 'textbook_reading', 'past_exams'],
+    helpful: ['practice_problems', 'past_exams'],
+    votes: 26,
+    created: '2025-12-19T13:30:00.000Z',
+    effort: 4,
+    stress: 4,
+    targetGrade: '85+',
+  }),
+  seedReview({
+    id: 'rev-cs341-2',
+    courseId: 'cs-341',
+    term: 'Winter 2025',
+    professor: 'Prof. Laila Haddad (Demo)',
+    alias: '3B CS Student',
+    difficulty: 5,
+    hours: 14,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Heavy but fair. Three assignments landed in the same fortnight as the midterm, which made that stretch brutal.',
+    worked:
+      'Lecture recordings and annotated slides were posted the same day, which helped when a proof step was missed live.',
+    challenging:
+      'Amortized analysis and flow networks were taught quickly and then tested in detail.',
+    advice:
+      'Start each assignment the day it drops; the last question always takes longer than the first three combined.',
+    methods: ['practice_problems', 'study_groups'],
+    helpful: ['study_groups'],
+    votes: 11,
+    created: '2025-04-28T08:55:00.000Z',
+    effort: 5,
+    stress: 5,
+    targetGrade: '80-84',
+  }),
+  seedReview({
+    id: 'rev-cs341-3',
+    courseId: 'cs-341',
+    term: 'Fall 2024',
+    professor: 'Prof. Samuel Achebe (Demo)',
+    alias: '4A CS Student',
+    difficulty: 4,
+    hours: 11,
+    recommended: true,
+    overall:
+      'Consistent weekly work beats cramming here. The final was almost exactly the difficulty of the practice set.',
+    worked:
+      'Practice finals from previous years were posted with solutions, and the tutorial covered the trickiest reduction.',
+    challenging:
+      'Getting full marks on correctness arguments required precise wording.',
+    advice:
+      'Keep a one-page list of standard reductions and the exact transformation used for each.',
+    methods: ['past_exams', 'practice_problems'],
+    helpful: ['past_exams'],
+    votes: 14,
+    created: '2024-12-20T16:45:00.000Z',
+    effort: 4,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs343-1',
+    courseId: 'cs-343',
+    term: 'Fall 2025',
+    professor: 'Prof. Miriam Osei (Demo)',
+    ta: 'Rafael Duarte (Demo TA)',
+    alias: '4A CS Student',
+    difficulty: 4,
+    hours: 13,
+    recommended: true,
+    overall:
+      'Threads, locks and message passing taught through projects rather than exams. Debugging races is the whole course.',
+    worked:
+      'Assignment checkpoints were graded early, so a broken design was caught before the deadline.',
+    challenging:
+      'Non-deterministic bugs can take hours to reproduce without a good logging strategy.',
+    advice:
+      'Log every lock acquisition with a thread id from the first assignment; you will need it later.',
+    methods: ['project_based', 'practice_problems'],
+    helpful: ['project_based'],
+    votes: 10,
+    created: '2025-12-15T11:25:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-cs343-2',
+    courseId: 'cs-343',
+    term: 'Winter 2025',
+    professor: 'Prof. Miriam Osei (Demo)',
+    alias: '4B CS Student',
+    difficulty: 5,
+    hours: 15,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Excellent material, but the projects are long and the term has three of them back to back.',
+    worked:
+      'The professor held extra office hours the week before each project deadline.',
+    challenging:
+      'Deadlock detection and lock-ordering proofs were the hardest questions of the degree so far.',
+    advice:
+      'Take it in a term where you can afford two long project weeks, not alongside three other CS courses.',
+    methods: ['project_based', 'textbook_reading'],
+    helpful: ['project_based'],
+    votes: 7,
+    created: '2025-04-29T14:10:00.000Z',
+    effort: 5,
+    stress: 5,
+  }),
+  seedReview({
+    id: 'rev-cs360-1',
+    courseId: 'cs-360',
+    term: 'Fall 2025',
+    professor: 'Prof. Noah Bergstrom (Demo)',
+    alias: '3A CS / Math Student',
+    difficulty: 3,
+    hours: 10,
+    recommended: true,
+    overall:
+      'Proofs about machines and languages, with almost no programming. If you liked MATH 135, this is a comfortable 300-level.',
+    worked:
+      'Weekly problem sets were short and matched the lecture notes word for word.',
+    challenging:
+      'Pumping-lemma arguments need careful case analysis and precise notation.',
+    advice:
+      'Redo every proof from lecture in your own words the same evening before attempting the problem set.',
+    methods: ['practice_problems', 'textbook_reading'],
+    helpful: ['practice_problems'],
+    votes: 13,
+    created: '2025-12-18T12:00:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs360-2',
+    courseId: 'cs-360',
+    term: 'Fall 2024',
+    professor: 'Prof. Noah Bergstrom (Demo)',
+    alias: '3B CS Student',
+    difficulty: 4,
+    hours: 12,
+    recommended: true,
+    overall:
+      'A theory course that rewards writing, not coding. Undecidability was the hardest week of the term.',
+    worked:
+      'The professor walked through one full reduction proof per lecture instead of skipping steps.',
+    challenging:
+      'The final had a reduction question unlike anything in the problem sets.',
+    advice:
+      'Keep a proof template for reductions and practise with the older midterms posted online.',
+    methods: ['past_exams', 'practice_problems', 'study_groups'],
+    helpful: ['past_exams'],
+    votes: 8,
+    created: '2024-12-21T09:15:00.000Z',
+    effort: 4,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs350-1',
+    courseId: 'cs-350',
+    term: 'Fall 2025',
+    professor: 'Prof. Viktor Hale (Demo)',
+    alias: '3B CS Student',
+    difficulty: 5,
+    hours: 14,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'The most time-consuming 300-level CS course in my term. Three large assignments plus a week of reading each.',
+    worked:
+      'Skeleton code and a working test harness meant the first assignment was approachable.',
+    challenging:
+      'Synchronization bugs in the second assignment took a full week to isolate.',
+    advice:
+      'Read the assignment spec twice, and keep a separate branch for each debugging attempt.',
+    methods: ['project_based', 'textbook_reading'],
+    helpful: ['project_based'],
+    votes: 19,
+    created: '2025-12-20T18:40:00.000Z',
+    effort: 5,
+    stress: 5,
+    targetGrade: '70-79',
+  }),
+  seedReview({
+    id: 'rev-cs350-2',
+    courseId: 'cs-350',
+    term: 'Winter 2025',
+    professor: 'Prof. Viktor Hale (Demo)',
+    ta: 'Sana Qureshi (Demo TA)',
+    alias: '4A CS Student',
+    difficulty: 4,
+    hours: 12,
+    recommended: true,
+    overall:
+      'Demanding in a good way: after this, you understand what your laptop is actually doing.',
+    worked:
+      'TA Sana held extra lab hours before each deadline and explained the test harness line by line.',
+    challenging:
+      'Virtual memory and page replacement accounting questions were easy to get off by one.',
+    advice:
+      'Draw the memory map from the previous assignment on paper before you start the next one.',
+    methods: ['project_based', 'tutorial_sessions'],
+    helpful: ['tutorial_sessions', 'project_based'],
+    votes: 12,
+    created: '2025-04-27T10:30:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-cs370-1',
+    courseId: 'cs-370',
+    term: 'Fall 2025',
+    professor: 'Prof. Elena Marsh (Demo)',
+    alias: '3A CS Student',
+    difficulty: 3,
+    hours: 9,
+    recommended: true,
+    overall:
+      'Numerical methods with short coding assignments in Python. The maths is gentle if you finished MATH 237.',
+    worked:
+      'Each technique was introduced with a demo notebook you could run before writing your own.',
+    challenging:
+      'Stability and conditioning questions needed more care than the assignments suggested.',
+    advice:
+      'Compare your implementation against the library function on a toy example before submitting.',
+    methods: ['project_based', 'practice_problems'],
+    helpful: ['project_based'],
+    votes: 9,
+    created: '2025-12-14T13:05:00.000Z',
+    effort: 3,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-cs370-2',
+    courseId: 'cs-370',
+    term: 'Winter 2025',
+    professor: 'Prof. Elena Marsh (Demo)',
+    alias: '3B Math Student',
+    difficulty: 3,
+    hours: 11,
+    recommended: true,
+    overall:
+      'A bridge course between maths and code. Intermediate level workload with no exams, only assignments and a project.',
+    worked:
+      'Assignments were graded with a clear error breakdown, so a wrong answer still showed where the method failed.',
+    challenging:
+      'Eigenvalue iterations and interpolation error bounds were the densest units.',
+    advice:
+      'Keep the error formulas on one page; they are reused in almost every later assignment.',
+    methods: ['practice_problems', 'textbook_reading'],
+    helpful: ['practice_problems'],
+    votes: 6,
+    created: '2025-04-24T15:50:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs480-1',
+    courseId: 'cs-480',
+    term: 'Fall 2025',
+    professor: 'Prof. Priyanka Raman (Demo)',
+    ta: 'Tomas Lindgren (Demo TA)',
+    alias: '4A CS / Stat Student',
+    difficulty: 4,
+    hours: 11,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'A broad tour of machine learning with assignments in Python. Grading is project-heavy: four assignments and a final project, no closed-book exam.',
+    worked:
+      'Assignments came with a reference notebook and an autograder, so correctness and report quality were both clear targets.',
+    challenging:
+      'The kernel-methods and Gaussian-process lectures move fast and assume comfort with linear algebra.',
+    advice:
+      'Write the report as you build each experiment; the final project is graded mostly on how you explain results.',
+    methods: ['project_based', 'practice_problems', 'textbook_reading'],
+    helpful: ['project_based', 'practice_problems'],
+    votes: 30,
+    created: '2025-12-22T16:20:00.000Z',
+    effort: 4,
+    stress: 3,
+    targetGrade: '85+',
+  }),
+  seedReview({
+    id: 'rev-cs480-2',
+    courseId: 'cs-480',
+    term: 'Winter 2025',
+    professor: 'Prof. Daniel Oyelaran (Demo)',
+    alias: '4B CS Student',
+    difficulty: 4,
+    hours: 10,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'The clearest introduction to ML I have taken. Even the deep learning weeks stayed grounded in the earlier derivations.',
+    worked:
+      'Weekly office hours were run as a Q&A on the current assignment rather than open questions, which kept everyone moving.',
+    challenging:
+      'Regularization derivations and cross-validation bookkeeping were easy places to lose marks.',
+    advice:
+      'Implement each method once from scratch before using the library version; the exam-free project expects that understanding.',
+    methods: ['project_based', 'lecture_attendance', 'practice_problems'],
+    helpful: ['project_based'],
+    votes: 17,
+    created: '2025-04-30T11:45:00.000Z',
+    effort: 4,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs480-3',
+    courseId: 'cs-480',
+    term: 'Fall 2024',
+    professor: 'Prof. Priyanka Raman (Demo)',
+    alias: '4A CS Student',
+    difficulty: 4,
+    hours: 13,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Great content, but the statistics assumed is much higher than the calendar suggests, and I spent most of the term catching up.',
+    worked:
+      'Lecture notes were complete and posted before class, which made reviewing possible without recording lectures.',
+    challenging:
+      'Maximum-likelihood and Bayesian derivations went well beyond the prerequisite courses.',
+    advice:
+      'Review STAT 230 material in the first two weeks, especially expectations and conditional probability.',
+    methods: ['textbook_reading', 'practice_problems'],
+    helpful: ['textbook_reading'],
+    votes: 12,
+    created: '2024-12-23T10:00:00.000Z',
+    effort: 5,
+    stress: 4,
+    targetGrade: '70-79',
+  }),
+  seedReview({
+    id: 'rev-cs485-1',
+    courseId: 'cs-485',
+    term: 'Fall 2025',
+    professor: 'Prof. Yuki Tanabe (Demo)',
+    alias: '4B CS / Math Student',
+    difficulty: 5,
+    hours: 12,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'The theoretical sibling of CS 480: generalization bounds and statistical learning theory, with weekly proof assignments.',
+    worked:
+      'The professor tied every bound back to a concrete experiment from CS 480.',
+    challenging:
+      'Concentration inequalities and Rademacher complexity are hard to learn from slides alone.',
+    advice:
+      'Take it only after CS 341 and a proof-based stats course; otherwise the first month is overwhelming.',
+    methods: ['textbook_reading', 'practice_problems'],
+    helpful: ['textbook_reading'],
+    votes: 8,
+    created: '2025-12-21T14:35:00.000Z',
+    effort: 5,
+    stress: 5,
+  }),
+  seedReview({
+    id: 'rev-cs485-2',
+    courseId: 'cs-485',
+    term: 'Winter 2025',
+    professor: 'Prof. Yuki Tanabe (Demo)',
+    ta: 'Hugo Mercier (Demo TA)',
+    alias: '4A CS Student',
+    difficulty: 4,
+    hours: 11,
+    recommended: true,
+    overall:
+      'Rewarding if you want the why behind ML results. The workload is steady rather than spiky.',
+    worked:
+      'TA Hugo walked through the proofs from the previous week in every tutorial, slowly and with examples.',
+    challenging:
+      'The final project required reading a recent paper and reproducing a small part of it.',
+    advice:
+      'Pair up for the paper reproduction; two readers catch much more of the notation.',
+    methods: ['textbook_reading', 'study_groups', 'tutorial_sessions'],
+    helpful: ['tutorial_sessions'],
+    votes: 7,
+    created: '2025-04-26T09:20:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-cs486-1',
+    courseId: 'cs-486',
+    term: 'Fall 2025',
+    professor: 'Prof. Amara Diallo (Demo)',
+    alias: '4A CS Student',
+    difficulty: 3,
+    hours: 10,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'Search, logic and probabilistic reasoning, taught with four programming assignments. Comfortable if you already finished CS 341.',
+    worked:
+      'Assignment specs were unusually precise, with worked examples for the expected output format.',
+    challenging:
+      'The Bayesian network assignment needed careful probability tables, and small errors were hard to trace.',
+    advice:
+      'Write a tiny test for each inference step instead of running the full network every time.',
+    methods: ['project_based', 'practice_problems'],
+    helpful: ['project_based'],
+    votes: 22,
+    created: '2025-12-17T17:00:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs486-2',
+    courseId: 'cs-486',
+    term: 'Winter 2025',
+    professor: 'Prof. Amara Diallo (Demo)',
+    alias: '4B CS Student',
+    difficulty: 4,
+    hours: 12,
+    recommended: true,
+    overall:
+      'A well-organised AI course with a fair final. The last assignment on reinforcement learning is the biggest time sink.',
+    worked:
+      'Past finals were posted with marking notes, and the midterm matched their style closely.',
+    challenging:
+      'Search heuristics questions required proving admissibility, not just running the algorithm.',
+    advice:
+      'Budget two weeks for the reinforcement learning assignment; the tuning takes longer than the coding.',
+    methods: ['past_exams', 'project_based'],
+    helpful: ['past_exams'],
+    votes: 9,
+    created: '2025-04-25T12:15:00.000Z',
+    effort: 4,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-cs486-3',
+    courseId: 'cs-486',
+    term: 'Fall 2024',
+    professor: 'Prof. Leo Fontaine (Demo)',
+    alias: '4A CS Student',
+    difficulty: 3,
+    hours: 9,
+    recommended: true,
+    overall:
+      'The most fun CS course of my term. Lectures are essentially worked examples of agents solving puzzles.',
+    worked:
+      'Live demos of each search algorithm made the trade-offs obvious before the assignment.',
+    challenging:
+      'Propositional logic resolution proofs were the one dry unit.',
+    advice:
+      'Keep the lecture demo code; adapting it for the assignments saves hours.',
+    methods: ['project_based', 'lecture_attendance'],
+    helpful: ['project_based'],
+    votes: 11,
+    created: '2024-12-18T15:35:00.000Z',
+    effort: 3,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-psych101-1',
+    courseId: 'psych-101',
+    term: 'Fall 2025',
+    professor: 'Dr. Helen Whitmore (Demo)',
+    alias: '1A Science Student',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'The classic bird course: online multiple-choice quizzes, two midterms and a final, no essays and no group work.',
+    worked:
+      'Quiz questions came straight from the lecture slides, and the lowest quiz was dropped.',
+    challenging:
+      'The research-methods unit has more terminology than the rest of the course combined.',
+    advice:
+      'Watch lectures at 1.5x and do the practice quiz the same day; the exam wording follows it closely.',
+    methods: ['lecture_attendance', 'spaced_repetition'],
+    helpful: ['spaced_repetition'],
+    votes: 34,
+    created: '2025-12-16T09:00:00.000Z',
+    effort: 2,
+    stress: 1,
+    targetGrade: '85+',
+  }),
+  seedReview({
+    id: 'rev-psych101-2',
+    courseId: 'psych-101',
+    term: 'Winter 2025',
+    professor: 'Dr. Helen Whitmore (Demo)',
+    alias: '2A Arts Student',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Genuinely light: about five hours a week including lectures, and everything is graded through multiple choice.',
+    worked:
+      'Lectures were recorded and the textbook was optional for a good grade.',
+    challenging:
+      'Statistics terminology in the methods lectures is the only dense part.',
+    advice:
+      'Do the optional practice exams before each midterm; several questions repeat almost verbatim.',
+    methods: ['past_exams', 'lecture_attendance'],
+    helpful: ['past_exams'],
+    votes: 18,
+    created: '2025-04-21T13:40:00.000Z',
+    effort: 2,
+    stress: 1,
+  }),
+  seedReview({
+    id: 'rev-psych101-3',
+    courseId: 'psych-101',
+    term: 'Spring 2025',
+    professor: 'Dr. Marcus Bell (Demo)',
+    alias: '1B Health Student',
+    difficulty: 2,
+    hours: 6,
+    recommended: true,
+    overall:
+      'Took it in the spring term alongside two heavy courses and it never competed for time.',
+    worked:
+      'Weekly quizzes kept the material fresh without a big exam week.',
+    challenging:
+      'Attendance-based participation marks caught a few people out.',
+    advice:
+      'Show up to the tutorials; participation is a free few percent.',
+    methods: ['lecture_attendance', 'tutorial_sessions'],
+    helpful: ['lecture_attendance'],
+    votes: 9,
+    created: '2025-08-14T11:10:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-econ102-1',
+    courseId: 'econ-102',
+    term: 'Fall 2025',
+    professor: 'Dr. Nora Alverez (Demo)',
+    alias: '1A Environment Student',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Macro paired with ECON 101: same structure, online quizzes, two midterms, no essays.',
+    worked:
+      'The professor used current policy debates to explain GDP and inflation, which made the graphs stick.',
+    challenging:
+      'The monetary policy unit introduces a lot of new vocabulary at once.',
+    advice:
+      'Draw every graph from memory once a week; the exams are mostly graph interpretation.',
+    methods: ['practice_problems', 'lecture_attendance'],
+    helpful: ['practice_problems'],
+    votes: 15,
+    created: '2025-12-15T12:30:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-econ102-2',
+    courseId: 'econ-102',
+    term: 'Winter 2025',
+    professor: 'Dr. Peter Nkemelu (Demo)',
+    alias: '2A Economics Student',
+    difficulty: 3,
+    hours: 6,
+    recommended: true,
+    overall:
+      'Slightly harder than ECON 101 because the models build on each other, but still a light elective.',
+    worked:
+      'Weekly tutorials walked through one past exam question end to end.',
+    challenging:
+      'The open-economy chapter assumes comfort with exchange rates.',
+    advice:
+      'Keep the formula sheet from ECON 101 handy; several results carry over directly.',
+    methods: ['practice_problems', 'tutorial_sessions', 'past_exams'],
+    helpful: ['tutorial_sessions'],
+    votes: 8,
+    created: '2025-04-23T16:00:00.000Z',
+    effort: 3,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-stat231-1',
+    courseId: 'stat-231',
+    term: 'Fall 2025',
+    professor: 'Prof. Grace Liu (Demo)',
+    alias: '2B Statistics Student',
+    difficulty: 3,
+    hours: 7,
+    recommended: true,
+    overall:
+      'Applied statistics with a real data project instead of a final exam. A good follow-up to STAT 230.',
+    worked:
+      'The project used a dataset you chose yourself, and the rubric rewarded a clear limitations section.',
+    challenging:
+      'Choosing the right test under time pressure is harder than the arithmetic.',
+    advice:
+      'Write a decision tree of which test applies to which design before the midterm.',
+    methods: ['project_based', 'practice_problems'],
+    helpful: ['project_based'],
+    votes: 12,
+    created: '2025-12-19T10:45:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-stat231-2',
+    courseId: 'stat-231',
+    term: 'Winter 2025',
+    professor: 'Prof. Omar Haddad (Demo)',
+    alias: '2A Math Student',
+    difficulty: 3,
+    hours: 8,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Fine course, but the project feedback arrived after the final submission window, so there was no chance to improve.',
+    worked:
+      'Lab sessions used R and gave a gentle introduction to the software.',
+    challenging:
+      'Interpreting confidence intervals in context was marked strictly.',
+    advice:
+      'Ask for project feedback early, even informally, before the final write-up.',
+    methods: ['project_based', 'tutorial_sessions'],
+    helpful: ['tutorial_sessions'],
+    votes: 6,
+    created: '2025-04-27T08:30:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
 ];
 
 type DemoReviewSignals = Pick<Review, 'mentalEffort' | 'stress' | 'targetGrade'>;
