@@ -1,4 +1,4 @@
-# CourseGlide 🛤️
+# CourseGlide 
 
 **Better feedback. Smarter course decisions.**
 
