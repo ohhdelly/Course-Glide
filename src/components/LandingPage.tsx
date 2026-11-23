@@ -36,45 +36,48 @@ interface FloatingChip {
   right?: string;
   delay: string;
   duration: string;
-  /** Base rotation, so the cloud reads as scattered notes rather than a row. */
+  /** Most chips sit level; a few keep a small hand-placed tilt. */
   tilt: string;
+  /** Keep only the core examples in the tablet cloud. */
+  desktopOnly?: boolean;
 }
 
 const FLOATING_CHIPS: FloatingChip[] = [
-  // Left side: two course codes, two advisor prompts.
-  { label: 'MATH 137', variant: 'course', top: '4%', left: '12%', delay: '-3s', duration: '26s', tilt: '-5deg' },
+  // A loose, asymmetric ring: five course codes and four advisor prompts.
+  { label: 'MATH 137', variant: 'course', top: '4%', left: '8%', delay: '-3s', duration: '28s', tilt: '-1.2deg' },
   {
-    label: 'bird course, under 10 hours a week',
+    label: 'bird course, under 10 hours',
     variant: 'advisor',
-    top: '18%',
-    left: '1.5%',
+    top: '33%',
+    left: '3.5%',
     delay: '-5s',
     duration: '30s',
-    tilt: '3deg',
+    tilt: '0deg',
   },
-  { label: 'CS 135', variant: 'course', top: '37%', left: '14%', delay: '-11s', duration: '31s', tilt: '4deg' },
+  { label: 'CS 135', variant: 'course', top: '8.5%', left: '27%', delay: '-11s', duration: '29s', tilt: '0.8deg' },
   {
-    label: 'writing elective with no final exam',
+    label: 'writing elective, no final exam',
     variant: 'advisor',
-    top: '57%',
-    left: '3%',
+    top: '27%',
+    right: '7%',
     delay: '-9s',
     duration: '27s',
-    tilt: '-4deg',
+    tilt: '-1.5deg',
   },
-  // Right side: two course codes, two advisor prompts.
-  { label: 'ECON 101', variant: 'course', top: '8%', right: '16%', delay: '-7s', duration: '28s', tilt: '5deg' },
-  { label: 'AI course for third year', variant: 'advisor', top: '44%', right: '1%', delay: '-20s', duration: '33s', tilt: '-3deg' },
-  { label: 'MAT 1320', variant: 'course', top: '26%', right: '16%', delay: '-7s', duration: '28s', tilt: '6deg' },
+  { label: 'ECON 101', variant: 'course', top: '52%', left: '13%', delay: '-7s', duration: '31s', tilt: '0deg' },
+  { label: 'AI course for third year', variant: 'advisor', top: '5.5%', right: '12%', delay: '-20s', duration: '33s', tilt: '1.2deg' },
   {
-    label: 'easy elective, no group projects',
+    label: 'easy elective, no group work',
     variant: 'advisor',
-    top: '66%',
-    right: '4%',
+    top: '79%',
+    left: '18%',
     delay: '-13s',
-    duration: '29s',
-    tilt: '-6deg',
+    duration: '30s',
+    tilt: '-0.8deg',
+    desktopOnly: true,
   },
+  { label: 'CSI 2110', variant: 'course', top: '58%', right: '8.5%', delay: '-12s', duration: '26s', tilt: '0deg', desktopOnly: true },
+  { label: 'MAT 1320', variant: 'course', top: '86%', left: '58%', delay: '-17s', duration: '32s', tilt: '0.6deg', desktopOnly: true },
 ];
 
 /**
@@ -320,7 +323,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--bg)]">
+      <section className="relative border-b border-[var(--border)] bg-[var(--bg)] xl:min-h-[420px]">
         {/* Theme-tinted wash behind everything: picks up yellow / garnet / blue per theme. */}
         <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
 
@@ -337,17 +340,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <h1 className="mt-4 min-h-[2lh] type-h1 sm:type-display text-[var(--text)] text-balance">
               See real course workload and student advice before you enroll.
             </h1>
-            <p className="mt-4 type-body text-[var(--text-muted)] text-pretty">
-              Compare workload, grades, and student reviews across Waterloo’s 2026–2027
-              calendar.
-            </p>
 
             {/* Elevated Search Bar with Autocomplete */}
             <form
               onSubmit={handleFormSubmit}
               className="pointer-events-auto mx-auto mt-8 max-w-2xl text-left"
               role="search"
-              aria-label="Search courses or describe what you want"
+              aria-label="Find a course or describe what you need"
             >
               {/* The popover is anchored here, not to the whole form, so it hugs the box */}
               <div className="relative">
@@ -375,13 +374,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
                     placeholder={
                       effectiveMode === 'advisor'
-                        ? 'Describe the course you want: workload, level, what to avoid'
-                        : 'Course code, title, or a question'
+                        ? 'Describe what you need'
+                        : 'Course code or question'
                     }
                     aria-label={
                       effectiveMode === 'advisor'
-                        ? 'Describe the course you are looking for'
-                        : 'Search courses, course codes, or instructors'
+                        ? 'Describe what you need in a course'
+                        : 'Course code, title, or instructor'
                     }
                     aria-expanded={suggestionsOpen}
                     aria-autocomplete={effectiveMode === 'catalogue' ? 'list' : 'none'}
@@ -410,7 +409,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 type-caption text-[var(--text-muted)]">
                       {trimmedQuery
                         ? remoteLoading && !hasFreshRemote
-                          ? 'Searching catalogue...'
+                          ? 'Finding courses...'
                           : 'Matching courses'
                         : 'Popular courses'}
                     </div>
@@ -451,9 +450,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                                     {course.universityName} · {course.department}
                                   </div>
                                 </div>
-                                <div className="shrink-0 text-left sm:text-right type-caption text-[var(--text-muted)] tabular-nums">
+                                <div className="hidden shrink-0 text-left type-caption text-[var(--text-muted)] tabular-nums sm:block sm:text-right">
                                   {hasReviews && s
-                                    ? `${s.avgWeeklyHours.toFixed(1)} hrs/wk · ${s.recommendationRate}% rec`
+                                    ? `${s.avgWeeklyHours.toFixed(1)} hrs/wk · ${s.recommendationRate}% recommend`
                                     : 'No reviews yet'}
                                 </div>
                               </button>
@@ -463,7 +462,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </ul>
                     ) : (
                       <div className="px-4 py-3 type-caption text-[var(--text-muted)]">
-                        Finding matching courses across Waterloo &amp; uOttawa...
+                        Checking both universities...
                       </div>
                     )}
                   </div>
@@ -474,7 +473,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="mt-2 flex items-center justify-end px-1">
                 <div
                   role="group"
-                  aria-label="Search mode"
+                  aria-label="Input mode"
                   className="inline-flex shrink-0 items-center rounded-control border border-[var(--border)] bg-[var(--surface)] p-0.5"
                 >
                   {(['catalogue', 'advisor'] as const).map((option) => (
@@ -486,7 +485,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       title={
                         mode === option
                           ? 'Following your wording again'
-                          : `Always use ${option === 'catalogue' ? 'course search' : 'the advisor'}`
+                          : `Always use ${option === 'catalogue' ? 'the course list' : 'the advisor'}`
                       }
                       className={`inline-flex min-h-[32px] items-center rounded-[6px] px-2.5 py-1 type-caption font-medium transition-colors ${
                         effectiveMode === option
@@ -509,32 +508,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Ambient examples: real buttons, dimmed and drifting, no longer a section.
             Kept after the hero copy in the DOM so the search box comes first in the
             tab order; layout is unaffected because these are absolutely placed. */}
-        <div className="chip-cloud pointer-events-none absolute inset-0 z-0">
-          {FLOATING_CHIPS.map((chip) => (
-            <button
-              key={chip.label}
-              type="button"
-              onClick={() => runSample(chip)}
-              style={
-                {
-                  top: chip.top,
-                  bottom: chip.bottom,
-                  left: chip.left,
-                  right: chip.right,
-                  // Custom properties rather than animation-* so the prism spin
-                  // on hover keeps its own 6s timing instead of inheriting these.
-                  '--chip-delay': chip.delay,
-                  '--chip-duration': chip.duration,
-                  '--chip-tilt': chip.tilt,
-                } as React.CSSProperties
-              }
-              className={`chip-float hidden md:inline-flex ${
-                chip.variant === 'course' ? 'chip-course tabular-nums' : 'chip-advisor'
-              } min-h-[44px] items-center rounded-control px-3 py-2 type-caption font-medium`}
-            >
-              {chip.label}
-            </button>
-          ))}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div className="chip-cloud pointer-events-none absolute inset-0">
+            {FLOATING_CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => runSample(chip)}
+                style={
+                  {
+                    top: chip.top,
+                    bottom: chip.bottom,
+                    left: chip.left,
+                    right: chip.right,
+                    // Custom properties rather than animation-* so each chip
+                    // keeps its own slow drift timing.
+                    '--chip-delay': chip.delay,
+                    '--chip-duration': chip.duration,
+                    '--chip-tilt': chip.tilt,
+                  } as React.CSSProperties
+                }
+                className={`chip-float ${
+                  chip.desktopOnly ? 'hidden xl:inline-flex' : 'hidden md:inline-flex'
+                } ${
+                  chip.variant === 'course' ? 'chip-course tabular-nums' : 'chip-advisor'
+                } min-h-[36px] items-center whitespace-nowrap rounded-full px-3.5 py-1.5 type-caption font-medium tracking-[0.01em]`}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -579,10 +582,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="border-t border-[var(--border)] bg-[var(--surface-2)] py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-6">
-            <span className="type-caption font-semibold uppercase tracking-[0.16em] text-[var(--chart-1)]">
-              Trust Lens
-            </span>
-            <h2 className="mt-2 type-h1 text-[var(--text)] text-balance">
+            <h2 className="type-h1 text-[var(--text)] text-balance">
               What students actually need to know before enrolling.
             </h2>
           </div>
@@ -662,7 +662,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="mt-2">
                       <CollapsibleText
                         maxLines={2}
-                        text="“Assignment 4 and the midterm tested inequality bounding never drilled in lecture. TA Devon Brooks explained counterexamples clearly during office hours—solve workbook proofs under timed conditions.”"
+                        text="“Assignment 4 and the midterm tested inequality bounding never drilled in lecture. TA Devon Brooks explained counterexamples clearly during office hours. Solve workbook proofs under timed conditions.”"
                         className="type-small text-[var(--text)] text-pretty"
                       />
                     </div>

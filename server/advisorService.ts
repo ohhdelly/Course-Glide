@@ -976,7 +976,7 @@ function evaluateCandidate(
       else {
         score -= 30;
         notes.push(
-          `Above your ≤${brief.maxHours} h/week target — students average ${stats.avgWeeklyHours.toFixed(
+          `Above your ≤${brief.maxHours} h/week target: students average ${stats.avgWeeklyHours.toFixed(
             1
           )} h/week over ${stats.responseCount} review${stats.responseCount === 1 ? '' : 's'}.`
         );
@@ -987,7 +987,7 @@ function evaluateCandidate(
       else {
         score -= 24;
         notes.push(
-          `Rated harder than your ≤${brief.maxDifficulty}/5 target — ${stats.avgDifficulty.toFixed(
+          `Rated harder than your ≤${brief.maxDifficulty}/5 target: ${stats.avgDifficulty.toFixed(
             1
           )}/5 across ${stats.responseCount} review${stats.responseCount === 1 ? '' : 's'}.`
         );

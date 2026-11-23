@@ -797,7 +797,7 @@ export function generateDeterministicInsights(
 
   const sampleNote =
     count < 4
-      ? `Based on ${count} substantive review${count === 1 ? '' : 's'} — limited sample size; treat patterns as preliminary.`
+      ? `Based on ${count} substantive review${count === 1 ? '' : 's'} (limited sample size; treat patterns as preliminary).`
       : `Synthesized directly from ${count} substantive, course-specific student reviews for ${course.code}.`;
 
   const appreciate: InsightItem[] = [];
@@ -1437,7 +1437,7 @@ export function generateDeterministicStaffDigest(
     .slice(0, 3)
     .map(
       ([label, mentions]) =>
-        `${label}: raised in ${mentions} of ${count} substantive responses — pick one concrete change and post it to the Feedback Loop.`
+        `${label}: raised in ${mentions} of ${count} substantive responses. Pick one concrete change and post it to the Feedback Loop.`
     );
 
   return {
@@ -1448,7 +1448,7 @@ export function generateDeterministicStaffDigest(
     eligibleReviewCount: count,
     sampleNote:
       count < 4
-        ? `Based on ${count} substantive review${count === 1 ? '' : 's'} — treat these buckets as preliminary.`
+        ? `Based on ${count} substantive review${count === 1 ? '' : 's'}; treat these buckets as preliminary.`
         : `Built from ${count} substantive ${course.code} reviews; student identities are never included.`,
     start,
     stop,

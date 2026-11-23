@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Bookmark, CalendarCheck2, CheckCircle2, Info, PenSquare } from 'lucide-react';
+import { ArrowLeft, Bookmark, CalendarCheck2, Info, PenSquare } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import type {
   Course,
@@ -212,23 +212,16 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
       <section className="surface-card rounded-card p-4 sm:p-6 mb-6">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
           <div className="max-w-3xl min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-[var(--text-muted)]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[var(--text-muted)]">
               <span className="font-semibold text-[var(--text)]">{course.universityName}</span>
-              <span aria-hidden="true">·</span>
               <span>{course.department}</span>
-              <span aria-hidden="true">·</span>
               <span>{course.credits}</span>
-              {course.termsOffered.length > 0 && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>{course.termsOffered.join(', ')}</span>
-                </>
-              )}
+              {course.termsOffered.length > 0 && <span>{course.termsOffered.join(', ')}</span>}
             </div>
 
             <h1 className="mt-2 type-h1 text-[var(--text)] text-balance">
               <span className="tabular-nums whitespace-nowrap">{course.code}</span>
-              <span className="mx-1 text-[var(--text-muted)] font-normal" aria-hidden="true">
+              <span className="text-[var(--text-muted)] font-normal" aria-hidden="true">
                 :{' '}
               </span>
               <span>{course.title}</span>
@@ -278,13 +271,13 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   <span className="text-sm font-normal text-[var(--text-muted)]"> / 5.0</span>
                 </>
               ) : (
-                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
+                <span className="text-xl font-semibold text-[var(--text-muted)]">N/A</span>
               )}
             </div>
           </div>
 
           <div className="border-l border-[var(--border)] p-3 sm:p-4 min-w-0">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Load index</div>
+            <div className="text-xs font-medium text-[var(--text-muted)]">Workload</div>
             <div className="mt-1 type-metric text-[var(--text)] tabular-nums">
               {hasReviews ? (
                 <>
@@ -292,7 +285,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   <span className="text-sm font-normal text-[var(--text-muted)]"> / 100</span>
                 </>
               ) : (
-                <span className="text-xl font-semibold text-[var(--text-muted)]">—</span>
+                <span className="text-xl font-semibold text-[var(--text-muted)]">N/A</span>
               )}
             </div>
             <div className="mt-0.5 text-[10px] text-[var(--text-muted)]">
@@ -313,7 +306,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   interactive
                 />
               ) : (
-                <span className="type-metric text-xl font-semibold text-[var(--text-muted)]">—</span>
+                <span className="type-metric text-xl font-semibold text-[var(--text-muted)]">N/A</span>
               )}
             </div>
           </div>
@@ -322,30 +315,30 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
             <div className="text-xs font-medium text-[var(--text-muted)]">Responses</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
               <span className="type-metric text-[var(--text)]">{stats.responseCount}</span>
-              <span className="text-xs font-normal text-[var(--text-muted)] tabular-nums">
-                {hasReviews ? `${stats.informativeCount} detailed` : 'No reviews yet'}
-              </span>
+              {!hasReviews && (
+                <span className="text-xs font-normal text-[var(--text-muted)] tabular-nums">
+                  No reviews yet
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         {/* Sample-size confidence note */}
-        {hasReviews && (
+        {hasReviews && stats.confidenceLevel === 'limited' && (
           <div className="mt-3.5 flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            {stats.confidenceLevel === 'limited' ? (
-              <Info className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden="true" />
-            )}
+            <Info className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
             <span>{stats.confidenceNote}</span>
           </div>
         )}
 
         {hasReviews && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-5 text-[11px] text-[var(--text-muted)]">
+          <div
+            className={`text-[11px] text-[var(--text-muted)] ${
+              stats.confidenceLevel === 'limited' ? 'mt-1.5 pl-5' : 'mt-3'
+            }`}
+          >
             <span className="font-medium text-[var(--text)]">As of {stats.asOf}</span>
-            <span aria-hidden="true">·</span>
-            <span>{stats.weightingNote}</span>
           </div>
         )}
       </section>

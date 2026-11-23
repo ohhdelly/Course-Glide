@@ -98,19 +98,19 @@ export const SavedCoursesPage: React.FC<SavedCoursesPageProps> = ({
                       <div>
                         <div className="type-caption text-[var(--text-muted)]">Difficulty</div>
                         <div className="font-semibold text-[var(--text)] tabular-nums">
-                          {hasReviews && s ? `${s.avgDifficulty.toFixed(1)}/5` : '—'}
+                          {hasReviews && s ? `${s.avgDifficulty.toFixed(1)}/5` : 'N/A'}
                         </div>
                       </div>
                       <div className="border-l border-[var(--border)] pl-2">
                         <div className="type-caption text-[var(--text-muted)]">Weekly</div>
                         <div className="font-semibold text-[var(--text)] tabular-nums">
-                          {hasReviews && s ? `${s.avgWeeklyHours.toFixed(1)}h` : '—'}
+                          {hasReviews && s ? `${s.avgWeeklyHours.toFixed(1)}h` : 'N/A'}
                         </div>
                       </div>
                       <div className="border-l border-[var(--border)] pl-2">
                         <div className="type-caption text-[var(--text-muted)]">Recommend</div>
                         <div className="font-semibold text-[var(--text)] tabular-nums">
-                          {hasReviews && s ? `${s.recommendationRate}%` : '—'}
+                          {hasReviews && s ? `${s.recommendationRate}%` : 'N/A'}
                         </div>
                       </div>
                     </div>
@@ -158,13 +158,13 @@ export const SavedCoursesPage: React.FC<SavedCoursesPageProps> = ({
                         </td>
                         <td className="px-4 py-3 text-[var(--text-muted)]">{course.universityName}</td>
                         <td className="px-4 py-3 text-right tabular-nums text-[var(--text)]">
-                          {hasReviews && s ? `${s.avgDifficulty.toFixed(1)} / 5` : '—'}
+                          {hasReviews && s ? `${s.avgDifficulty.toFixed(1)} / 5` : 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-[var(--text)]">
-                          {hasReviews && s ? `${s.avgWeeklyHours.toFixed(1)} hrs` : '—'}
+                          {hasReviews && s ? `${s.avgWeeklyHours.toFixed(1)} hrs` : 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-[var(--text)] font-semibold">
-                          {hasReviews && s ? `${s.recommendationRate}%` : '—'}
+                          {hasReviews && s ? `${s.recommendationRate}%` : 'N/A'}
                         </td>
                         <td className="px-4 py-3 type-caption text-[var(--text-muted)] tabular-nums">
                           {topStrategy

@@ -63,8 +63,7 @@ export const LoadProfileCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
     <section className={cardShell} aria-label="Course load index">
       <div className="flex items-baseline justify-between gap-2">
         <div>
-          <h2 className="font-display text-base font-bold text-[var(--text)]">Load index</h2>
-          <p className={muted}>Three axes, not one hours figure</p>
+          <h2 className="font-display text-base font-bold text-[var(--text)]">Workload</h2>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)]">
           <Gauge className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />

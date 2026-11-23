@@ -717,7 +717,7 @@ const DEMO_REVIEW_SEED: Review[] = [
     whatWasChallenging:
       'Trigonometric substitution and implicit differentiation problems on Midterm 2 were tight on time.',
     practicalAdvice:
-      'Do not skip the weekly DGD sessions—Lucas’s worked examples mirrored the exact structure of midterm long-answer questions.',
+      'Do not skip the weekly DGD sessions. Lucas’s worked examples mirrored the exact structure of midterm long-answer questions.',
     studyMethods: ['tutorial_sessions', 'practice_problems', 'past_exams', 'lecture_attendance'],
     helpfulMethods: ['tutorial_sessions', 'practice_problems', 'past_exams'],
     helpfulVotes: 21,

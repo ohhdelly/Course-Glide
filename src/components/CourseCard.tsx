@@ -77,7 +77,7 @@ const ExploreMetricsCluster: React.FC<ExploreMetricsProps> = ({
             aria-hidden="true"
             className="font-explore inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[11px] font-semibold leading-none tabular-nums text-[var(--text-muted)]"
           >
-            —
+            N/A
           </span>
         )}
       </button>

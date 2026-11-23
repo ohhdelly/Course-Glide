@@ -68,13 +68,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNav({ page: 'landing' })}
             className="flex min-h-[44px] items-center gap-2 rounded-control px-1 py-1 text-left whitespace-nowrap shrink-0 hover:bg-[var(--surface-2)]"
           >
-            <img
-              src="/logo.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 shrink-0 rounded-control object-cover ring-1 ring-[var(--border)]"
-            />
+            <span className="logo-tile relative inline-flex h-8 w-8 shrink-0 overflow-hidden rounded-control ring-1 ring-[var(--border)]">
+              <img
+                src="/logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+              />
+              {/* 90%-transparent university accent wash over the logo's pale tile */}
+              <span aria-hidden="true" className="logo-theme-wash absolute inset-0" />
+            </span>
             <span className="type-h2 text-[var(--text)]">
               Course<span className="brand-glide">Glide</span>
             </span>

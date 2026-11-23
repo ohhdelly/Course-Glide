@@ -803,7 +803,7 @@ app.post('/api/pulse', (req, res) => {
   if (alreadySent >= 2) {
     res.status(409).json({
       error:
-        'You have already sent two mid-term pulses for this course this term. That is the cap — thanks for answering.',
+        'You have already sent two mid-term pulses for this course this term. That is the cap. Thanks for answering.',
       promptsRemaining: 0,
     });
     return;
