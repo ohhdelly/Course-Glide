@@ -2130,9 +2130,35 @@ export const DEMO_FACULTY_RESPONSES: FacultyResponse[] = [
     term: 'Fall 2025',
     themeAddressed: 'Inequality bounding & midterm proof expectations (aggregated theme)',
     responseText:
-      'Thank you for the constructive aggregate feedback on Weeks 3–5 proof transitions. For upcoming terms, our teaching team has added a dedicated 45-minute inequality-bounding workshop in Week 3 tutorials and published an annotated partial-credit rubric before Midterm 1 so students can calibrate proof rigor early.',
+      'Thank you for the constructive aggregate feedback on Weeks 3–5 proof transitions. For upcoming terms, our teaching team has added a dedicated 45-minute inequality-bounding workshop in Week 3 tutorials, where TAs work through two exam-level proofs step by step. We have also published an annotated partial-credit rubric before Midterm 1 that shows exactly where marks are awarded for setup, justification, and final conclusion, so students can calibrate proof rigor early instead of guessing.',
     status: 'changed',
     updatedAt: '2026-01-15T10:00:00.000Z',
+    isDemo: true,
+  },
+  {
+    id: 'fac-resp-3',
+    courseId: 'math-137',
+    instructorName: 'Dr. Elena Vance (Demo)',
+    role: 'professor',
+    term: 'Fall 2025',
+    themeAddressed: 'Proof difficulty jump in Weeks 3–5 (aggregated theme)',
+    responseText:
+      'Students told us that the switch from computation-heavy problems to formal proofs felt sudden, and that proof problem sets in Weeks 3–5 arrived in the same week as the midterm review. We have logged this as a course-level priority and are reviewing the Week 3–5 pacing with the tutorial team this term. No schedule or marking change has been made yet, and we will post an update here once the review is complete.',
+    status: 'heard',
+    updatedAt: '2026-01-14T10:00:00.000Z',
+    isDemo: true,
+  },
+  {
+    id: 'fac-resp-4',
+    courseId: 'math-137',
+    instructorName: 'Dr. Elena Vance (Demo)',
+    role: 'professor',
+    term: 'Fall 2025',
+    themeAddressed: 'Why Midterm 1 cannot move earlier or become optional (calendar constraint)',
+    responseText:
+      'We cannot move Midterm 1 earlier than Week 5 or make it optional. MATH 137 is a prerequisite for MATH 138 and a required course in several engineering plans, so the Faculty of Mathematics calendar fixes the assessment window for all first-year math courses. An earlier date would also collide with the CS 135 assignment deadline that most of this class shares. Instead, we kept the same date and moved the review session one week earlier, so students still get feedback before the exam.',
+    status: 'explained',
+    updatedAt: '2026-01-13T10:00:00.000Z',
     isDemo: true,
   },
   {

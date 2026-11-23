@@ -86,6 +86,19 @@ function mergeSeedReviews(stored: Review[]): Review[] {
   return added.length > 0 ? [...stored, ...structuredClone(added)] : stored;
 }
 
+// Seeded demo responses are authoritative: refresh their wording from the seed and
+// append any new ones, while leaving responses a presenter added untouched.
+function mergeSeedFacultyResponses(stored: FacultyResponse[]): FacultyResponse[] {
+  const seedById = new Map(DEMO_FACULTY_RESPONSES.map((item) => [item.id, item]));
+  const refreshed = stored.map((response) => {
+    const seed = seedById.get(response.id);
+    return seed ? structuredClone(seed) : response;
+  });
+  const known = new Set(refreshed.map((response) => response.id));
+  const added = DEMO_FACULTY_RESPONSES.filter((response) => !known.has(response.id));
+  return [...refreshed, ...structuredClone(added)].map(normalizeFacultyResponse);
+}
+
 function loadStore(): DemoStore {
   try {
     if (fs.existsSync(STORE_PATH)) {
@@ -97,7 +110,7 @@ function loadStore(): DemoStore {
         const loaded: DemoStore = {
           reviews: mergeSeedReviews(parsed.reviews.map(withDemoReviewSignals)),
           facultyResponses: Array.isArray(parsed.facultyResponses)
-            ? parsed.facultyResponses.map(normalizeFacultyResponse)
+            ? mergeSeedFacultyResponses(parsed.facultyResponses)
             : structuredClone(DEMO_FACULTY_RESPONSES),
           moderationReports: Array.isArray(parsed.moderationReports)
             ? parsed.moderationReports
