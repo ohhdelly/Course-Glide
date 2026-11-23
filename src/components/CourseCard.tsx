@@ -129,9 +129,7 @@ const ExploreMetricsCluster: React.FC<ExploreMetricsProps> = ({
               </div>
             </dl>
           ) : (
-            <p className="text-[var(--text-muted)]">
-              Recommend %, difficulty dots (1–5), and weekly hours appear once students submit reviews.
-            </p>
+            <p className="text-[var(--text-muted)]">No student reviews yet.</p>
           )}
         </div>
       )}
@@ -388,7 +386,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               onClick={() => onOpenCourse(course.id)}
               className="btn-primary inline-flex flex-1 sm:flex-initial min-h-[44px] items-center justify-center gap-1 rounded-control px-3 py-2 type-caption font-semibold whitespace-nowrap"
             >
-              <span>{hasReviews ? 'Open profile' : 'Be first to review'}</span>
+              <span>{hasReviews ? 'View course' : 'Be first to review'}</span>
               <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
@@ -485,7 +483,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             onClick={() => onOpenCourse(course.id)}
             className="btn-soft inline-flex min-h-[44px] items-center gap-1 rounded-control px-3 py-2 type-caption font-semibold whitespace-nowrap shrink-0"
           >
-            <span>{hasReviews ? 'Open profile' : 'Be first to review'}</span>
+            <span>{hasReviews ? 'View course' : 'Be first to review'}</span>
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>

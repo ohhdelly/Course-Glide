@@ -226,7 +226,7 @@ export const TermWorkloadMeter: React.FC<TermWorkloadMeterProps> = ({
           className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text)] flex flex-wrap items-center justify-between gap-2 tabular-nums"
         >
           <span className="font-semibold text-[var(--text)]">
-            {activeSegment.code} — {activeSegment.title}
+            {activeSegment.code}: {activeSegment.title}
           </span>
           <span className="text-[var(--text-muted)]">
             {formatHoursCompact(activeSegment.weeklyHours)} h/wk ({activeSegment.sharePercent}% of saved total)

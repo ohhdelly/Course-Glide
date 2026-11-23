@@ -50,9 +50,6 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
         <h2 className="type-h2 text-[var(--text)]">
           No study strategy reports yet for {courseCode}
         </h2>
-        <p className="mx-auto max-w-md text-sm text-[var(--text-muted)]">
-          Share which study habits helped you succeed in {courseCode}.
-        </p>
         {onOpenWriteReview && (
           <button
             type="button"
@@ -75,9 +72,6 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
             <h2 className="type-h2 text-[var(--text)]">
               Study Strategies &amp; Preparation Fit
             </h2>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
-              Filter reported preparation habits for {courseCode} by study approach.
-            </p>
           </div>
 
           <div
@@ -152,9 +146,6 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
             <h3 className="text-base font-semibold text-[var(--text)]">
               Reported Strategy Usage &amp; Helpfulness
             </h3>
-            <p className="text-xs text-[var(--text-muted)]">
-              Exact respondent counts alongside the share who found each strategy helpful.
-            </p>
           </div>
           <span className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs text-[var(--text-muted)] tabular-nums">
             {displayedStrategies.length} strategies tracked

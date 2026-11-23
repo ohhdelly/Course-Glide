@@ -288,9 +288,6 @@ export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
               <h3 className="text-sm font-semibold text-[var(--text)]">
                 Additional Course Breakdowns
               </h3>
-              <p className="text-xs text-[var(--text-muted)]">
-                Usefulness distribution, multi-term trends, and typical assessment weights.
-              </p>
             </div>
             <button
               type="button"

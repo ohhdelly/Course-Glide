@@ -44,7 +44,7 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
 
       {cappedSample && (
         <p className="mt-2 text-[11px] font-medium text-[var(--accent-strong)]">
-          Limited sample — treat this band as a hint, not a verdict.
+          Limited sample: treat this band as a hint, not a verdict.
         </p>
       )}
     </section>
@@ -207,7 +207,7 @@ export const EffortToSuccessCard: React.FC<{ stats: CourseStats; reviews: Review
                 <div className={muted}>How to read this</div>
                 <p className="mt-1 text-[11px] leading-relaxed text-[var(--text)]">
                   Effort is a lever, not a verdict. The card shows what students in this band actually
-                  did — never an "easy A" shortcut.
+                  did, never an "easy A" shortcut.
                 </p>
               </div>
             </div>

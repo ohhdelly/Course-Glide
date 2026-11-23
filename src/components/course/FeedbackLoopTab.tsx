@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Ear, MessageSquare, ShieldCheck, Wrench } from 'lucide-react';
+import { Ear, MessageSquare, ShieldCheck, Wrench } from 'lucide-react';
 import type { FacultyResponse, FacultyResponseStatus } from '../../types/course';
 
 interface FeedbackLoopTabProps {
@@ -52,23 +52,12 @@ export const FeedbackLoopTab: React.FC<FeedbackLoopTabProps> = ({ courseCode, fa
     <div className="space-y-6">
       <section className="surface-card rounded-2xl p-5 sm:p-6">
         <h2 className="font-display text-lg font-bold text-[var(--text)]">
-          The feedback loop — {courseCode}
+          The feedback loop: {courseCode}
         </h2>
-        <p className="mt-1.5 max-w-3xl text-xs leading-relaxed text-[var(--text)]">
-          Every entry below is dated and attached to an aggregate theme, not to a student. This is the
-          part students rarely get to see: what was heard, what is being kept, and what is actually
-          changing next offering. Collecting mid-term feedback only helps when it is acted on — and
-          said out loud.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-muted)]">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-muted)]">
           <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-2)] px-2 py-1">
             <MessageSquare className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
             {facultyResponses.length} teaching-team {facultyResponses.length === 1 ? 'entry' : 'entries'}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            Aggregated themes only
-            <ArrowRight className="h-3 w-3" aria-hidden="true" />
-            never individual students
           </span>
         </div>
       </section>
@@ -78,10 +67,6 @@ export const FeedbackLoopTab: React.FC<FeedbackLoopTabProps> = ({ courseCode, fa
           <h3 className="font-display text-base font-semibold text-[var(--text)]">
             No teaching-team response logged yet
           </h3>
-          <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-[var(--text)]">
-            Nothing is invented here. When the teaching team posts a response on the Teaching Team
-            tab, it appears in this ledger with a date and a status.
-          </p>
         </section>
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">

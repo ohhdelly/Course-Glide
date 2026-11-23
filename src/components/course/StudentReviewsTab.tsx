@@ -80,12 +80,7 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <p className="text-sm text-[var(--text-muted)]">
-                Highlights specific, evidence-backed reviews first — positive and negative ratings score equally.
-              </p>
-              <TrustLensInfo />
-            </div>
+            <TrustLensInfo />
           </div>
 
           {/* Simple Sort & Rating Filter Controls */}
@@ -190,9 +185,6 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
           <h3 className="text-base font-semibold text-[var(--text)]">
             No student reviews yet.
           </h3>
-          <p className="mt-2 text-sm text-[var(--text-muted)] max-w-md mx-auto">
-            Share assessment details, weekly hours, and study tips to help students choosing this course.
-          </p>
           <button
             type="button"
             onClick={onOpenWriteReview}
@@ -206,9 +198,6 @@ export const StudentReviewsTab: React.FC<StudentReviewsTabProps> = ({
           <h3 className="text-base font-semibold text-[var(--text)]">
             No reviews match this rating filter
           </h3>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Reset the rating filter to view all reviews for this course.
-          </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"

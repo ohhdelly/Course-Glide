@@ -299,7 +299,7 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
     for (const s of availableSubjects) {
       base.push({
         value: s.code,
-        label: `${s.code} — ${s.department} (${s.count})`,
+        label: `${s.code}: ${s.department} (${s.count})`,
       });
     }
     return base;
@@ -480,9 +480,7 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
           }
           setAdvisorNote(
             advisorOnlyLimits.length > 0
-              ? `Catalogue filters can include but not exclude, so ${advisorOnlyLimits.join(
-                  ' and '
-                )} stays enforced in the advisor list above only.`
+              ? `${advisorOnlyLimits.join(' and ')} apply to the advisor list only.`
               : null
           );
           setQuery('');
@@ -561,7 +559,7 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
               onKeyDown={handleSearchKeyDown}
               onFocus={() => setAutocompleteOpen(true)}
               onBlur={() => setTimeout(() => setAutocompleteOpen(false), 180)}
-              placeholder="Search by course code, name, or instructor"
+              placeholder="Course code, name, or instructor"
               aria-label="Search courses"
               aria-autocomplete="list"
               className="min-h-[44px] w-full min-w-0 bg-transparent pl-2 pr-1 py-2 type-small sm:type-body text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
@@ -837,11 +835,8 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
       {displayedCourses.length === 0 ? (
         <div className="rounded-card border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-12 text-center">
           <h2 className="type-h2 text-[var(--text)]">
-            No courses match your current filters
+            No courses match
           </h2>
-          <p className="mt-2 type-small text-[var(--text-muted)]">
-            Try widening your term, faculty, or clearing the search query.
-          </p>
           <button
             type="button"
             onClick={resetFilters}

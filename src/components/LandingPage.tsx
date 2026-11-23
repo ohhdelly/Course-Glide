@@ -36,30 +36,44 @@ interface FloatingChip {
   right?: string;
   delay: string;
   duration: string;
+  /** Base rotation, so the cloud reads as scattered notes rather than a row. */
+  tilt: string;
 }
 
 const FLOATING_CHIPS: FloatingChip[] = [
-  { label: 'MATH 137', variant: 'course', top: '12%', left: '1.5%', delay: '-3s', duration: '26s' },
-  { label: 'CS 135', variant: 'course', top: '34%', left: '3%', delay: '-11s', duration: '31s' },
-  { label: 'ECON 101', variant: 'course', top: '60%', left: '1%', delay: '-7s', duration: '28s' },
-  { label: 'MAT 1320', variant: 'course', top: '79%', left: '9%', delay: '-16s', duration: '34s' },
-  { label: 'GNG 1105', variant: 'course', top: '6%', right: '3%', delay: '-13s', duration: '29s' },
+  // Left side: two course codes, two advisor prompts.
+  { label: 'MATH 137', variant: 'course', top: '4%', left: '12%', delay: '-3s', duration: '26s', tilt: '-5deg' },
   {
     label: 'bird course, under 10 hours a week',
     variant: 'advisor',
     top: '18%',
-    right: '1.5%',
+    left: '1.5%',
     delay: '-5s',
     duration: '30s',
+    tilt: '3deg',
   },
-  { label: 'AI course for third year', variant: 'advisor', top: '44%', right: '2%', delay: '-20s', duration: '33s' },
+  { label: 'CS 135', variant: 'course', top: '37%', left: '14%', delay: '-11s', duration: '31s', tilt: '4deg' },
   {
     label: 'writing elective with no final exam',
     variant: 'advisor',
-    bottom: '6%',
-    right: '3%',
+    top: '57%',
+    left: '3%',
     delay: '-9s',
     duration: '27s',
+    tilt: '-4deg',
+  },
+  // Right side: two course codes, two advisor prompts.
+  { label: 'ECON 101', variant: 'course', top: '8%', right: '16%', delay: '-7s', duration: '28s', tilt: '5deg' },
+  { label: 'AI course for third year', variant: 'advisor', top: '44%', right: '1%', delay: '-20s', duration: '33s', tilt: '-3deg' },
+  { label: 'MAT 1320', variant: 'course', top: '26%', right: '16%', delay: '-7s', duration: '28s', tilt: '6deg' },
+  {
+    label: 'easy elective, no group projects',
+    variant: 'advisor',
+    top: '66%',
+    right: '4%',
+    delay: '-13s',
+    duration: '29s',
+    tilt: '-6deg',
   },
 ];
 
@@ -240,20 +254,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [catalogueMeta, selectedUniversity]);
 
   const heroSourceLabel = useMemo(() => {
-    const calendarVersion = catalogueMeta?.waterlooCalendarVersion ?? '2026–2027 Academic Calendar';
     if (selectedUniversity === 'uottawa') {
       return catalogueMeta
         ? `University of Ottawa · ${catalogueMeta.uottawaCourseCount} demo courses`
-        : 'University of Ottawa · Seeded demo courses';
+        : 'University of Ottawa demo courses';
     }
     if (selectedUniversity === 'uwaterloo') {
       return catalogueMeta
-        ? `Waterloo ${calendarVersion} (${catalogueMeta.waterlooCourseCount.toLocaleString()} courses)`
-        : `Waterloo ${calendarVersion}`;
+        ? `${catalogueMeta.waterlooCourseCount.toLocaleString()} Waterloo courses`
+        : 'Waterloo courses';
     }
     return catalogueMeta
-      ? `Waterloo ${calendarVersion} (${catalogueMeta.waterlooCourseCount.toLocaleString()} courses) · uOttawa (${catalogueMeta.uottawaCourseCount} demo courses)`
-      : `Waterloo ${calendarVersion} · uOttawa demo courses`;
+      ? `${catalogueMeta.waterlooCourseCount.toLocaleString()} Waterloo courses · ${catalogueMeta.uottawaCourseCount} uOttawa demos`
+      : 'Waterloo and uOttawa courses';
   }, [catalogueMeta, selectedUniversity]);
 
   const runSample = (chip: FloatingChip) => {
@@ -325,8 +338,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               See real course workload and student advice before you enroll.
             </h1>
             <p className="mt-4 type-body text-[var(--text-muted)] text-pretty">
-              Compare weekly hours, grading breakdowns, and detailed student reviews across
-              Waterloo’s 2026–2027 calendar.
+              Compare workload, grades, and student reviews across Waterloo’s 2026–2027
+              calendar.
             </p>
 
             {/* Elevated Search Bar with Autocomplete */}
@@ -362,8 +375,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
                     placeholder={
                       effectiveMode === 'advisor'
-                        ? 'Describe the course you want — workload, level, what to avoid'
-                        : 'Search a course code, title, or instructor — or describe what you want'
+                        ? 'Describe the course you want: workload, level, what to avoid'
+                        : 'Course code, title, or a question'
                     }
                     aria-label={
                       effectiveMode === 'advisor'
@@ -377,29 +390,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button
                     type="submit"
                     disabled={effectiveMode === 'advisor' && trimmedQuery.length < 3}
-                    className="btn-primary inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap disabled:opacity-60 sm:min-w-[9.5rem]"
+                    className="btn-primary inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-control px-4 py-2 type-small font-semibold whitespace-nowrap disabled:opacity-60"
                   >
-                    {/* Both labels share one grid cell, so the button is always as wide as the
-                        longer one and the input beside it never resizes when the mode flips.
-                        visibility:hidden keeps the unused label out of the a11y tree. */}
-                    <span className="grid">
-                      <span
-                        className={`col-start-1 row-start-1 ${
-                          effectiveMode === 'advisor' ? 'visible' : 'invisible'
-                        }`}
-                      >
-                        {/* Phones get the short verb so the button doesn't crowd the input. */}
-                        <span className="sm:hidden">Find</span>
-                        <span className="hidden sm:inline">Find my courses</span>
-                      </span>
-                      <span
-                        className={`col-start-1 row-start-1 ${
-                          effectiveMode === 'advisor' ? 'invisible' : 'visible'
-                        }`}
-                      >
-                        Search
-                      </span>
-                    </span>
+                    <span>Search</span>
                     {effectiveMode === 'advisor' ? (
                       <Sparkles className="h-4 w-4" aria-hidden="true" />
                     ) : (
@@ -478,14 +471,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
 
               {/* Mode follows the sentence until the student pins one */}
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1">
-                {/* flex-1 pins the hint's box to the space beside the mode toggle, so the
-                    sentence changing length rewraps inside a static rect. */}
-                <span className="min-h-[36px] min-w-0 flex-1 sm:min-h-[18px] type-caption text-[var(--text-muted)] text-pretty">
-                  {effectiveMode === 'advisor'
-                    ? 'Plain language → ranked matches from the calendar and real reviews.'
-                    : 'Exact course lookup across the catalogue.'}
-                </span>
+              <div className="mt-2 flex items-center justify-end px-1">
                 <div
                   role="group"
                   aria-label="Search mode"
@@ -539,6 +525,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   // on hover keeps its own 6s timing instead of inheriting these.
                   '--chip-delay': chip.delay,
                   '--chip-duration': chip.duration,
+                  '--chip-tilt': chip.tilt,
                 } as React.CSSProperties
               }
               className={`chip-float hidden md:inline-flex ${
@@ -555,15 +542,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end mb-8">
           <div>
-            <span className="type-caption font-semibold uppercase tracking-[0.16em] text-[var(--chart-1)]">
-              Sample comparison
-            </span>
-            <h2 className="mt-2 type-h1 text-[var(--text)]">
+            <h2 className="type-h1 text-[var(--text)]">
               Compare sample courses
             </h2>
-            <p className="mt-1 type-small text-[var(--text-muted)] text-pretty">
-              See how weekly hours, difficulty, and student recommendations differ before you enroll.
-            </p>
           </div>
           <button
             type="button"
@@ -613,7 +594,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-control border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]">
                   <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <span>Interactive preview: CourseGlide Trust Lens on MATH 137</span>
+                <span>Trust Lens preview: MATH 137</span>
               </div>
 
               <div
@@ -737,7 +718,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={() => onOpenCourse('math-137', 'reviews')}
                 className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-3 py-2 type-caption font-semibold whitespace-nowrap"
               >
-                <span>Test Trust Lens on MATH 137</span>
+                <span>Open MATH 137</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>

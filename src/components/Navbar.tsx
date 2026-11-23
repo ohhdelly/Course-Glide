@@ -68,9 +68,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNav({ page: 'landing' })}
             className="flex min-h-[44px] items-center gap-2 rounded-control px-1 py-1 text-left whitespace-nowrap shrink-0 hover:bg-[var(--surface-2)]"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-control bg-[var(--text)] text-[var(--surface)] type-small font-semibold">
-              CG
-            </span>
+            <img
+              src="/logo.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-control object-cover ring-1 ring-[var(--border)]"
+            />
             <span className="type-h2 text-[var(--text)]">
               Course<span className="brand-glide">Glide</span>
             </span>
@@ -251,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
               }`}
             >
-              How CourseGlide Works &amp; Trust Lens
+              How it works
             </button>
           </nav>
         </div>

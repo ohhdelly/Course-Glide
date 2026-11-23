@@ -161,11 +161,11 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
 
   const linterChecks = [
     {
-      label: 'Name the assessment that mattered — midterm, lab, problem set, final.',
+      label: 'Name the assessment that mattered: midterm, lab, problem set, final.',
       done: linter.signals.hasAssessmentOrWorkloadContext,
     },
     {
-      label: 'Reference something course-specific — topics, rubrics, tutorials.',
+      label: 'Reference something course-specific: topics, rubrics, tutorials.',
       done: linter.signals.hasCourseSpecificDetails,
     },
     {
@@ -173,7 +173,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
       done: linter.signals.hasActionableAdvice,
     },
     {
-      label: 'Give it a few sentences — detail is what reaches the next student.',
+      label: 'Give it a few sentences: detail is what reaches the next student.',
       done: !linter.signals.isLowInformation,
     },
   ];
@@ -820,8 +820,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
                   ))}
                 </ul>
                 <p className="text-xs text-[var(--text-muted)]">
-                  This is the same score reviewers see after submitting — there is no separate
-                  hidden grade, and nothing here blocks you from posting.
+                  This is the score reviewers see after submitting. Nothing here blocks you from posting.
                 </p>
               </div>
             </div>

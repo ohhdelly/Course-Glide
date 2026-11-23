@@ -84,12 +84,8 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
         <div>
           <h2 className="flex items-center gap-2 font-display text-base font-bold text-[var(--text)]">
             <Timer className="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
-            Mid-term pulse — {courseCode}
+            Mid-term pulse: {courseCode}
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
-            Three questions, weeks 4–8, capped at two sends per term. Answers stay sealed until the
-            term ends, so nobody can act on them mid-course in a way that identifies you.
-          </p>
         </div>
         <label className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
           <span>Demo week</span>
@@ -149,7 +145,7 @@ export const MidTermPulseCard: React.FC<{ courseId: string; courseCode: string }
       ) : promptsRemaining === 0 ? (
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-xs text-[var(--text)]">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />
-          <span>You have used both of your pulses for this term. Thanks — that is the cap by design.</span>
+          <span>You have used both of your pulses for this term. That is the cap by design.</span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
@@ -271,7 +267,7 @@ export const PulseStaffPanel: React.FC<{ courseId: string }> = ({ courseId }) =>
           <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
           <span>
             {pulse.responseCount} response{pulse.responseCount === 1 ? '' : 's'} collected for{' '}
-            {pulse.term}. Themes unlock after {pulse.sealedUntil ?? 'the term ends'} — mid-term answers
+            {pulse.term}. Themes unlock after {pulse.sealedUntil ?? 'the term ends'}: mid-term answers
             are not shown to staff while students still have to sit the exam.
           </span>
         </div>

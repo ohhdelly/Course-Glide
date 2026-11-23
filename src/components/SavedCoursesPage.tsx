@@ -29,9 +29,6 @@ export const SavedCoursesPage: React.FC<SavedCoursesPageProps> = ({
         <h1 className="type-h1 text-[var(--text)]">
           Saved Courses
         </h1>
-        <p className="mt-1 type-small text-[var(--text-muted)]">
-          Compare workload expectations and jump directly into saved course profiles.
-        </p>
       </div>
 
       {savedCourses.length > 0 && (
@@ -43,10 +40,6 @@ export const SavedCoursesPage: React.FC<SavedCoursesPageProps> = ({
           <h2 className="type-h2 text-[var(--text)]">
             No courses saved yet
           </h2>
-          <p className="mx-auto mt-2 max-w-md type-small text-[var(--text-muted)]">
-            Bookmark courses while browsing to compare weekly study hours, difficulty ratings, and
-            recommended study strategies side by side.
-          </p>
           <button
             type="button"
             onClick={onGoExplore}

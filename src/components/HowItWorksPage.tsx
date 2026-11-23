@@ -75,7 +75,7 @@ const FICTIONAL_DEMO_REVIEWS: DemoTrustReview[] = [
     signals: [
       'Contains strong opinion without naming specific assessments, lectures, or workload',
       'Offers no actionable study advice for incoming students',
-      'Still accessible in All Reviews—never deleted for being negative',
+      'Still accessible in All Reviews, never deleted for being negative',
     ],
   },
   {
@@ -117,7 +117,7 @@ const FICTIONAL_DEMO_REVIEWS: DemoTrustReview[] = [
     segments: [
       { text: '' },
       { text: 'Midterm 1 tested inequality proofs', highlight: 'detail' },
-      { text: ' faster than lecture examples, and assignments spiked in week 5—' },
+      { text: ' faster than lecture examples, and assignments spiked in week 5: ' },
       { text: 'start workbook proofs early and use TA office hours', highlight: 'advice' },
       { text: '.' },
     ],
@@ -594,7 +594,7 @@ export const HowItWorksPage: React.FC<HowItWorksPageProps> = ({
                     </p>
                     <p>
                       <strong className="text-[var(--text)]">Honest limitations:</strong>{' '}
-                      Automated scoring and AI synthesis surface recurring patterns in submitted experiences—they cannot guarantee objective truth or eliminate individual bias, and sample sizes are always shown.
+                      Automated scoring and AI synthesis surface recurring patterns in submitted experiences. They cannot guarantee objective truth or eliminate individual bias, and sample sizes are always shown.
                     </p>
                   </div>
                 </motion.div>

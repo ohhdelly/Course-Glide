@@ -29,7 +29,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       <div className="w-full max-w-md rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-6 py-4">
           <h2 id="profile-modal-title" className="type-body font-semibold text-[var(--text)]">
-            {currentUser ? 'Student Profile (Demo Mode)' : 'Sign In to CourseGlide'}
+            {currentUser ? 'Student Profile' : 'Sign In'}
           </h2>
           <button
             type="button"
@@ -42,15 +42,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         <div className="p-6 space-y-6">
-          <div className="rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4 type-caption text-[var(--text-muted)]">
-            <div className="font-semibold text-[var(--text)] mb-1">
-              Labeled Demonstration Authentication
-            </div>
-            Firebase Google Sign-In is not provisioned in this preview session. You can sign in as a
-            demonstration student profile to test saved courses, helpfulness voting, and review
-            submissions persisted by the CourseGlide server.
-          </div>
-
           {currentUser ? (
             <div className="space-y-4">
               <div className="rounded-control border border-[var(--border)] p-4">
@@ -106,7 +97,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   className="btn-secondary inline-flex min-h-[44px] items-center gap-2 rounded-control px-4 py-2 type-caption font-semibold"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
-                  <span>Sign Out Demo Session</span>
+                  <span>Sign out</span>
                 </button>
               </div>
             </div>
@@ -121,7 +112,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <span>Continue as Demo Student</span>
               </button>
               <p className="text-center type-caption text-[var(--text-muted)]">
-                Uses local session demo account without real university credentials.
+                No university credentials required.
               </p>
             </div>
           )}

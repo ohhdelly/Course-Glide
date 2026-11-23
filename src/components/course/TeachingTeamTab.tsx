@@ -170,9 +170,6 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
             <h2 className="type-h2 text-[var(--text)]">
               Teaching Team &amp; TA Feedback
             </h2>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
-              Category breakdowns for professors and teaching assistants (demo profiles). Small samples are shown without ranking.
-            </p>
           </div>
 
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
@@ -223,7 +220,7 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                 <span>Demonstration Mode · Aggregated anonymous feedback only</span>
               </div>
               <h3 className="mt-1 type-h2 text-[var(--text)]">
-                Instructor &amp; TA Feedback Console — {courseCode}
+                Instructor &amp; TA Feedback Console: {courseCode}
               </h3>
             </div>
             <div className="rounded-control border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-right text-xs text-[var(--text-muted)] tabular-nums">
@@ -631,9 +628,6 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
           <h3 className="text-base font-semibold text-[var(--text)]">
             No instructor or TA feedback logged for {courseCode} yet
           </h3>
-          <p className="mx-auto max-w-md text-xs text-[var(--text-muted)]">
-            Submit a course review to share feedback on lectures, labs, or TA support.
-          </p>
           {onOpenWriteReview && (
             <button
               type="button"

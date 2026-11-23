@@ -42,7 +42,7 @@ const DEMO_STUDENT_PROFILE: DemoUser = {
   name: 'Alex Morgan (Demo)',
   email: 'alex.demo@student.courseglide.edu',
   universityId: 'uwaterloo',
-  program: 'Honours Computer Science & Mathematics (Demonstration Account)',
+  program: 'Honours Computer Science & Mathematics',
   role: 'student',
 };
 

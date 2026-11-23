@@ -228,8 +228,8 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
 
             <h1 className="mt-2 type-h1 text-[var(--text)] text-balance">
               <span className="tabular-nums whitespace-nowrap">{course.code}</span>
-              <span className="mx-2 text-[var(--text-muted)] font-normal" aria-hidden="true">
-                —
+              <span className="mx-1 text-[var(--text-muted)] font-normal" aria-hidden="true">
+                :{' '}
               </span>
               <span>{course.title}</span>
             </h1>
@@ -330,18 +330,16 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         </div>
 
         {/* Sample-size confidence note */}
-        <div className="mt-3.5 flex items-center gap-2 text-xs text-[var(--text-muted)]">
-          {!hasReviews || stats.confidenceLevel === 'limited' ? (
-            <Info className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
-          ) : (
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden="true" />
-          )}
-          <span>
-            {hasReviews
-              ? stats.confidenceNote
-              : 'No student reviews recorded yet. Official academic calendar information is displayed below without fabricated student averages.'}
-          </span>
-        </div>
+        {hasReviews && (
+          <div className="mt-3.5 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+            {stats.confidenceLevel === 'limited' ? (
+              <Info className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" aria-hidden="true" />
+            )}
+            <span>{stats.confidenceNote}</span>
+          </div>
+        )}
 
         {hasReviews && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-5 text-[11px] text-[var(--text-muted)]">

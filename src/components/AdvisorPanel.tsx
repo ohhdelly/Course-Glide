@@ -148,11 +148,6 @@ export const AdvisorPanel: React.FC<AdvisorPanelProps> = ({
         )}
       </div>
 
-      <p className="mt-1 type-caption text-[var(--text-muted)] text-pretty">
-        Plain language is fine — workload, level, subject, what to avoid. Matches come from the
-        official calendar plus real student reviews.
-      </p>
-
       <form
         className="mt-3 flex flex-col gap-2 sm:flex-row"
         onSubmit={(e) => {
@@ -331,7 +326,7 @@ export const AdvisorPanel: React.FC<AdvisorPanelProps> = ({
                   {result.evidenceReviewIds.length > 0 && (
                     <p className="mt-1 type-caption text-[var(--text-muted)] tabular-nums">
                       {result.evidenceReviewIds.length} cited review
-                      {result.evidenceReviewIds.length === 1 ? '' : 's'} on the course page.
+                      {result.evidenceReviewIds.length === 1 ? '' : 's'}
                     </p>
                   )}
                 </li>

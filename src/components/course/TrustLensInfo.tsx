@@ -112,7 +112,7 @@ export const TrustLensInfo: React.FC<TrustLensInfoProps> = ({
             {evaluation ? `Trust Lens score: ${evaluation.score}/100` : 'How Trust Lens calculates scores'}
           </div>
           <p className="mt-1 text-[var(--text-muted)]">
-            Measures review specificity and usefulness — positive and critical reviews are scored equally.
+            Measures review specificity and usefulness. Positive and critical reviews score equally.
           </p>
           <ul className="mt-2.5 space-y-1.5 border-t border-[var(--border)] pt-2.5">
             {signalRows.map((row) => (

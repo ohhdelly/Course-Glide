@@ -42,7 +42,7 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
       <div className="w-full max-w-md rounded-card border border-[var(--border)] bg-[var(--surface)] shadow-dialog overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-6 py-4">
           <h2 id="report-modal-title" className="type-body font-semibold text-[var(--text)]">
-            Report Review for Moderation
+            Report Review
           </h2>
           <button
             type="button"
@@ -56,8 +56,8 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <p className="type-caption text-[var(--text-muted)]">
-            CourseGlide preserves legitimate negative criticism. Report reviews only if they
-            contain spam, threats/harassment, personal identifying information, or off-topic content.
+            Negative feedback is welcome. Report only spam, harassment, personal information, or
+            off-topic content.
           </p>
 
           <div>
@@ -79,14 +79,14 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
 
           <div>
             <label htmlFor="rep-details" className="block type-caption font-semibold text-[var(--text)] mb-1">
-              Additional context (optional)
+              Details (optional)
             </label>
             <textarea
               id="rep-details"
               rows={3}
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              placeholder="Briefly explain what moderation rule applies..."
+              placeholder="Briefly explain the issue..."
               className="w-full rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 type-small text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-strong)]"
             />
           </div>

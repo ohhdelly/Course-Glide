@@ -1023,7 +1023,7 @@ function evaluateCandidate(
       `${Math.round(stats.recommendationRate)}% recommend it · difficulty ${stats.avgDifficulty.toFixed(1)}/5.`
     );
   } else {
-    matchReasons.push('No student reviews yet — this is a calendar match, not student evidence.');
+    matchReasons.push('No student reviews yet.');
   }
 
   if (course.prerequisites) {

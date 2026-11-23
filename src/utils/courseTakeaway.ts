@@ -8,8 +8,8 @@ export function buildOverviewTakeaway(course: Course, stats: CourseStats): strin
   if (stats.responseCount === 0) {
     const hasPrereqs = Boolean(course.prerequisites && course.prerequisites.trim().length > 0);
     return hasPrereqs
-      ? `No student reviews yet for ${course.code}; check the prerequisites and official calendar record below before enrolling.`
-      : `No student reviews yet for ${course.code}; check the official calendar record below or add the first student report.`;
+      ? 'Check the prerequisites and official calendar record below before enrolling.'
+      : 'Check the official calendar record below, or add the first student report.';
   }
 
   const difficultyLabel =
