@@ -325,7 +325,9 @@ test('CatalogueService loads full Waterloo 2026-2027 catalogue and keeps uOttawa
   const meta = service.getMetadata();
 
   assert.ok(meta.waterlooCourseCount >= 4000, `Expected 4000+ Waterloo courses, got ${meta.waterlooCourseCount}`);
-  assert.equal(meta.uottawaCourseCount, 3);
+  // uOttawa has no external catalogue snapshot: every uOttawa course is a demo seed.
+  const expectedUottawa = DEMO_COURSES.filter((c) => c.universityId === 'uottawa').length;
+  assert.equal(meta.uottawaCourseCount, expectedUottawa);
   assert.equal(meta.totalCourses, meta.waterlooCourseCount + meta.uottawaCourseCount);
 
   const ece105 = service.getCourseById('ece-105');
@@ -364,7 +366,7 @@ test('CatalogueService loads full Waterloo 2026-2027 catalogue and keeps uOttawa
     page: 1,
     limit: 24,
   });
-  assert.equal(uottawaPage.total, 3);
+  assert.equal(uottawaPage.total, expectedUottawa);
   assert.ok(uottawaPage.courses.every((c) => c.universityId === 'uottawa'));
 });
 
@@ -423,7 +425,19 @@ test('Term filter matches courses by termsOffered in local and catalogue queries
     limit: 24,
   });
   assert.ok(springPage.total >= 1);
-  assert.ok(springPage.courses.every((c) => c.termsOffered.includes('Spring')));
+  // The catalogue filter matches a term when the course is offered then **or**
+  // when a review was written in that term (see catalogueService.queryCourses),
+  // so the assertion mirrors that OR rather than requiring termsOffered alone.
+  assert.ok(
+    springPage.courses.every(
+      (c) =>
+        c.termsOffered.some((term) => term.toLowerCase().includes('spring')) ||
+        DEMO_REVIEWS.some(
+          (review) => review.courseId === c.id && review.term.toLowerCase().includes('spring')
+        )
+    ),
+    'Every Spring result must either be offered in Spring or have a Spring review'
+  );
 });
 
 test('sortAndFilterReviews supports most_helpful, most_recent, rating sort, and rating filters', () => {
