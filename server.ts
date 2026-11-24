@@ -17,6 +17,7 @@ import {
 } from './src/data/demoDataset.ts';
 import { CatalogueService } from './server/catalogueService.ts';
 import { checkAdvisorRateLimit, runAdvisor } from './server/advisorService.ts';
+import { collectDepartmentPrior } from './src/utils/departmentPrior.ts';
 import { resolveLlmConfig } from './server/llm.ts';
 import {
   GRADE_BANDS,
@@ -426,25 +427,10 @@ app.get('/api/courses/:id', async (req, res) => {
 
   const courseReviews = store.reviews.filter((r) => r.courseId === course.id);
 
-  // Same department anchor the client uses, so the API and the UI cannot disagree.
-  const departmentReviews = store.reviews.filter((review) => {
-    if (review.moderationStatus === 'hidden') return false;
-    const owner = catalogue.getCourseById(review.courseId);
-    return owner?.universityId === course.universityId && owner?.department === course.department;
-  });
-  const departmentPrior =
-    departmentReviews.length > 0
-      ? {
-          priorRating:
-            departmentReviews.reduce((sum, review) => sum + review.usefulness, 0) /
-            departmentReviews.length,
-          priorWeight: Math.min(
-            8,
-            Math.max(2, new Set(departmentReviews.map((review) => review.courseId)).size)
-          ),
-          priorLabel: course.department,
-        }
-      : undefined;
+  // Same department anchor the client uses, from one shared definition.
+  const departmentPrior = collectDepartmentPrior(course, store.reviews, (courseId) =>
+    catalogue.getCourseById(courseId)
+  );
 
   const stats = computeCourseStats(courseReviews, departmentPrior);
   const instructors = DEMO_INSTRUCTORS.filter((i) => i.courseId === course.id);

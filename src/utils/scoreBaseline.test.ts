@@ -11,7 +11,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DEMO_COURSES, DEMO_REVIEWS } from '../data/demoDataset.ts';
-import type { AdvisorBrief, AdvisorResult, Course, CourseStats, Review } from '../types/course.ts';
+import type { AdvisorBrief, AdvisorResult, CourseStats, Review } from '../types/course.ts';
+import { buildDepartmentPriors } from './departmentPrior.ts';
 import { advisorMatchPercent } from './advisorMatch.ts';
 import {
   computeCourseStats,
@@ -50,42 +51,6 @@ function groupByCourse(reviews: Review[]): Map<string, Review[]> {
     map.set(review.courseId, list);
   }
   return map;
-}
-
-/**
- * The department prior exactly as `App.tsx` computed it when the fixture was
- * captured: mean raw usefulness in the same university + department, shrunk with
- * a pseudo-count between 2 and 8 equal to the number of reviewed courses.
- */
-function buildDepartmentPriors(
-  courses: Course[],
-  reviewsByCourse: Map<string, Review[]>
-): Map<string, { priorRating: number; priorWeight: number; priorLabel: string }> {
-  const totals = new Map<string, { sum: number; count: number; courses: number }>();
-  for (const course of courses) {
-    const visible = (reviewsByCourse.get(course.id) ?? []).filter(
-      (review) => review.moderationStatus !== 'hidden'
-    );
-    if (visible.length === 0) continue;
-    const key = `${course.universityId}::${course.department}`;
-    const entry = totals.get(key) ?? { sum: 0, count: 0, courses: 0 };
-    entry.sum += visible.reduce((sum, review) => sum + review.usefulness, 0);
-    entry.count += visible.length;
-    entry.courses += 1;
-    totals.set(key, entry);
-  }
-
-  const priors = new Map<string, { priorRating: number; priorWeight: number; priorLabel: string }>();
-  for (const course of courses) {
-    const entry = totals.get(`${course.universityId}::${course.department}`);
-    if (!entry) continue;
-    priors.set(`${course.universityId}::${course.department}`, {
-      priorRating: entry.sum / entry.count,
-      priorWeight: Math.min(8, Math.max(2, entry.courses)),
-      priorLabel: course.department,
-    });
-  }
-  return priors;
 }
 
 function statsSnapshot(stats: CourseStats) {

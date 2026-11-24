@@ -17,6 +17,7 @@ import type {
   UniversityId,
 } from './types/course';
 import { computeCourseStats } from './utils/trustLens';
+import { buildDepartmentPriors, departmentPriorKey } from './utils/departmentPrior';
 import {
   DEMO_COURSES,
   DEMO_FACULTY_RESPONSES,
@@ -272,34 +273,15 @@ export default function App() {
       reviewsByCourse.set(review.courseId, list);
     }
 
-    // Department rating priors, from raw review usefulness rather than the already-shrunk stats.
-    const departmentTotals = new Map<string, { sum: number; count: number; courses: number }>();
-    for (const course of courses) {
-      const visible = (reviewsByCourse.get(course.id) ?? []).filter(
-        (review) => review.moderationStatus !== 'hidden'
-      );
-      if (visible.length === 0) continue;
-      const key = `${course.universityId}::${course.department}`;
-      const entry = departmentTotals.get(key) ?? { sum: 0, count: 0, courses: 0 };
-      entry.sum += visible.reduce((sum, review) => sum + review.usefulness, 0);
-      entry.count += visible.length;
-      entry.courses += 1;
-      departmentTotals.set(key, entry);
-    }
+    // The department rating prior has one shared definition, also used by the API.
+    const departmentPriors = buildDepartmentPriors(courses, reviewsByCourse);
 
     // One stats pass per course; courses with no reviews keep the empty, unanchored shape.
     const map: Record<string, CourseStats> = {};
     for (const course of courses) {
-      const totals = departmentTotals.get(`${course.universityId}::${course.department}`);
       map[course.id] = computeCourseStats(
         reviewsByCourse.get(course.id) ?? [],
-        totals
-          ? {
-              priorRating: totals.sum / totals.count,
-              priorWeight: Math.min(8, Math.max(2, totals.courses)),
-              priorLabel: course.department,
-            }
-          : undefined
+        departmentPriors.get(departmentPriorKey(course.universityId, course.department))
       );
     }
 
