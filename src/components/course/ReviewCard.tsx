@@ -15,7 +15,8 @@ import {
   STUDY_METHOD_CATALOG,
 } from '../../utils/trustLens';
 import { CollapsibleText } from './CollapsibleText';
-import { TrustLensInfo } from './TrustLensInfo';
+import { ScoreInfo } from '../ScoreInfo';
+import { explainTrust } from '../../utils/scoreExplanations';
 
 interface ReviewCardProps {
   review: EnrichedReview;
@@ -143,7 +144,11 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         </div>
 
         <div className="shrink-0">
-          <TrustLensInfo evaluation={review.trustLens} align="right" />
+          <ScoreInfo
+            explanation={explainTrust(review.trustLens)}
+            align="right"
+            request={{ courseId: review.courseId, score: 'trust', reviewId: review.id }}
+          />
         </div>
       </div>
 

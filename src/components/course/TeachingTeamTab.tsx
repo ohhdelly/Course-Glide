@@ -543,6 +543,17 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                 </div>
 
                 <div className="space-y-3 rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
+                      Category scores
+                    </span>
+                    <span
+                      className="rounded-[4px] border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)]"
+                      title="Seeded demo values. These are not calculated from student reviews."
+                    >
+                      Sample data
+                    </span>
+                  </div>
                   {prof.categories.map((cat) => (
                     <div key={cat.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
@@ -593,6 +604,17 @@ export const TeachingTeamTab: React.FC<TeachingTeamTabProps> = ({
                 </div>
 
                 <div className="space-y-3 rounded-control border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
+                      Category scores
+                    </span>
+                    <span
+                      className="rounded-[4px] border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)]"
+                      title="Seeded demo values. These are not calculated from student reviews."
+                    >
+                      Sample data
+                    </span>
+                  </div>
                   {ta.categories.map((cat) => (
                     <div key={cat.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">

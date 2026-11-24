@@ -34,7 +34,8 @@ export interface ScoreExplanation {
     | 'rating'
     | 'trust'
     | 'match'
-    | 'peak_week';
+    | 'peak_week'
+    | 'study_method';
   label: string;
   /** The exact displayed value, e.g. "4.2 / 5". */
   value: string;

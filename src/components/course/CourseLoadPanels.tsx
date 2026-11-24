@@ -2,12 +2,21 @@ import React, { useMemo, useState } from 'react';
 import { Activity, CalendarRange, Gauge, Quote, Target } from 'lucide-react';
 import type { Course, CourseStats, GradeBand, Review } from '../../types/course';
 import { GRADE_BAND_LABELS, computePeakWeekMap } from '../../utils/trustLens';
+import {
+  explainPeakWeek,
+  explainRating,
+  explainWorkload,
+} from '../../utils/scoreExplanations';
+import { ScoreInfo } from '../ScoreInfo';
 import { useUniversityTheme } from '../../theme/ThemeContext';
 
 const cardShell = 'surface-card rounded-2xl p-5 sm:p-6';
 const muted = 'text-xs text-[var(--text-muted)]';
 
-export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => {
+export const RatingRangeCard: React.FC<{ stats: CourseStats; courseId?: string }> = ({
+  stats,
+  courseId,
+}) => {
   const { rating } = stats;
   const cappedSample = rating.sampleSize < 4;
 
@@ -18,9 +27,17 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
           <h2 className="font-display text-base font-bold text-[var(--text)]">Student rating</h2>
           <p className={muted}>Perceived usefulness, shown as an honest range</p>
         </div>
-        <span className="rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)] tabular-nums">
-          n = {rating.sampleSize}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)] tabular-nums">
+            n = {rating.sampleSize}
+          </span>
+          <ScoreInfo
+            compact
+            align="right"
+            explanation={explainRating(stats)}
+            request={courseId ? { courseId, score: 'rating' } : undefined}
+          />
+        </div>
       </div>
 
       <div className="mt-3 flex items-end gap-2">
@@ -51,7 +68,10 @@ export const RatingRangeCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
   );
 };
 
-export const LoadProfileCard: React.FC<{ stats: CourseStats }> = ({ stats }) => {
+export const LoadProfileCard: React.FC<{ stats: CourseStats; courseId?: string }> = ({
+  stats,
+  courseId,
+}) => {
   const { load } = stats;
   const axes = [
     { label: 'Time', value: load.avgWeeklyHours, max: 25, suffix: 'hrs/wk' },
@@ -65,10 +85,18 @@ export const LoadProfileCard: React.FC<{ stats: CourseStats }> = ({ stats }) => 
         <div>
           <h2 className="font-display text-base font-bold text-[var(--text)]">Workload</h2>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)]">
-          <Gauge className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
-          {load.loadIndex}/100
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--surface-2)] px-2 py-0.5 font-mono text-xs text-[var(--text)]">
+            <Gauge className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden="true" />
+            {load.loadIndex}/100
+          </span>
+          <ScoreInfo
+            compact
+            align="right"
+            explanation={explainWorkload(stats)}
+            request={courseId ? { courseId, score: 'workload' } : undefined}
+          />
+        </div>
       </div>
 
       <div className="mt-3 flex items-end gap-2">
@@ -257,12 +285,20 @@ export const PeakWeekPanel: React.FC<{ course: Course; reviews: Review[] }> = ({
           </h2>
           <p className={muted}>Where the crunch actually lands during the term</p>
         </div>
-        {hasSignal && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent-strong)]">
-            <Activity className="h-3.5 w-3.5" aria-hidden="true" />
-            Busiest: {map.busiestLabel}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {hasSignal && (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-[11px] font-semibold text-[var(--accent-strong)]">
+              <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+              Busiest: {map.busiestLabel}
+            </span>
+          )}
+          <ScoreInfo
+            compact
+            align="right"
+            explanation={explainPeakWeek(map)}
+            request={{ courseId: course.id, score: 'peak_week' }}
+          />
+        </div>
       </div>
 
       <div className="mt-4 grid grid-cols-7 gap-1.5">

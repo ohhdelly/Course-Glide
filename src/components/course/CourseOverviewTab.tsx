@@ -93,8 +93,8 @@ export const CourseOverviewTab: React.FC<CourseOverviewTabProps> = ({
 
           {/* Honest headline numbers: a range, not a point; three load axes, not one */}
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-            <RatingRangeCard stats={stats} />
-            <LoadProfileCard stats={stats} />
+            <RatingRangeCard stats={stats} courseId={course.id} />
+            <LoadProfileCard stats={stats} courseId={course.id} />
           </div>
 
           {/* Real workload breakdown (or plain-text weekly hours when no split exists) */}

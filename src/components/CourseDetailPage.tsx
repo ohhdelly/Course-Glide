@@ -17,6 +17,12 @@ import { TeachingTeamTab } from './course/TeachingTeamTab';
 import { StudyStrategiesTab } from './course/StudyStrategiesTab';
 import { FeedbackLoopTab } from './course/FeedbackLoopTab';
 import { RecommendRing } from './charts/RecommendRing';
+import { ScoreInfo } from './ScoreInfo';
+import {
+  explainDifficulty,
+  explainRecommend,
+  explainWorkload,
+} from '../utils/scoreExplanations';
 
 export type CourseDetailTab =
   | 'overview'
@@ -263,7 +269,14 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         {/* 4 Headline Metrics — single row on desktop, 2 columns on mobile */}
         <div className="mt-6 grid grid-cols-2 rounded-control border border-[var(--border)] bg-[var(--surface-2)] sm:grid-cols-4">
           <div className="p-3 sm:p-4 min-w-0">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Difficulty</div>
+            <div className="flex items-center gap-1 text-xs font-medium text-[var(--text-muted)]">
+              <span>Difficulty</span>
+              <ScoreInfo
+                compact
+                explanation={explainDifficulty(stats)}
+                request={{ courseId: course.id, score: 'difficulty' }}
+              />
+            </div>
             <div className="mt-1 type-metric text-[var(--text)]">
               {hasReviews ? (
                 <>
@@ -277,7 +290,14 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
           </div>
 
           <div className="border-l border-[var(--border)] p-3 sm:p-4 min-w-0">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Workload</div>
+            <div className="flex items-center gap-1 text-xs font-medium text-[var(--text-muted)]">
+              <span>Workload</span>
+              <ScoreInfo
+                compact
+                explanation={explainWorkload(stats)}
+                request={{ courseId: course.id, score: 'workload' }}
+              />
+            </div>
             <div className="mt-1 type-metric text-[var(--text)] tabular-nums">
               {hasReviews ? (
                 <>
@@ -296,7 +316,14 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
           </div>
 
           <div className="border-t border-[var(--border)] sm:border-t-0 sm:border-l p-3 sm:p-4 min-w-0 flex flex-col justify-between">
-            <div className="text-xs font-medium text-[var(--text-muted)]">Recommend</div>
+            <div className="flex items-center gap-1 text-xs font-medium text-[var(--text-muted)]">
+              <span>Recommend</span>
+              <ScoreInfo
+                compact
+                explanation={explainRecommend(stats)}
+                request={{ courseId: course.id, score: 'recommend' }}
+              />
+            </div>
             <div className="mt-2 flex items-center">
               {hasReviews ? (
                 <RecommendRing

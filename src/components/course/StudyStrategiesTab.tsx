@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Info } from 'lucide-react';
 import type { CourseStats, Review, StudyPreference } from '../../types/course';
 import { computeStudyFit, rankAndFilterReviews } from '../../utils/trustLens';
+import { explainStudyMethod } from '../../utils/scoreExplanations';
+import { ScoreInfo } from '../ScoreInfo';
 import { CollapsibleText } from './CollapsibleText';
 
 interface StudyStrategiesTabProps {
@@ -165,7 +167,12 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-sm font-medium text-[var(--text)]">{stat.label}</span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums">
+                  <div className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] tabular-nums">
+                    <ScoreInfo
+                      compact
+                      align="right"
+                      explanation={explainStudyMethod(stat, stats)}
+                    />
                     <strong className="font-semibold text-[var(--text)]">
                       {stat.helpfulPercentage}%
                     </strong>{' '}
@@ -175,7 +182,7 @@ export const StudyStrategiesTab: React.FC<StudyStrategiesTabProps> = ({
                     </strong>{' '}
                     respondent{stat.usedCount === 1 ? '' : 's'} who used this reported finding it
                     helpful
-                  </span>
+                  </div>
                 </div>
                 <div className="h-2.5 w-full overflow-hidden rounded-[4px] bg-[var(--surface)]">
                   <div
