@@ -1,0 +1,5287 @@
+{
+  "capturedAt": "2026-11-24T01:53:05.663Z",
+  "note": "Produced by scripts/captureScoreBaseline.ts against the pre-refactor scoring code.",
+  "courseCount": 20,
+  "reviewCount": 82,
+  "courseScores": [
+    {
+      "id": "math-137",
+      "withoutPrior": {
+        "responseCount": 8,
+        "informativeCount": 5,
+        "avgDifficulty": 3.8,
+        "avgWeeklyHours": 11.9,
+        "recommendationRate": 56,
+        "avgUsefulness": 3.6,
+        "confidenceLevel": "strong",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 11.9,
+          "avgMentalEffort": 3.9,
+          "avgStress": 3.7,
+          "loadIndex": 64,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.6,
+          "low": 2.6,
+          "high": 4.6,
+          "sampleSize": 8,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          1,
+          0,
+          1,
+          3,
+          3
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          4,
+          1
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 10.5,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 4.5,
+            "avgWeeklyHours": 12.5,
+            "recommendationRate": 50
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 4,
+            "avgDifficulty": 3.8,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 5,
+            "helpfulCount": 3,
+            "helpfulPercentage": 60
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 4,
+            "helpfulCount": 4,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 3,
+            "helpfulCount": 1,
+            "helpfulPercentage": 33
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": [
+          {
+            "band": "85+",
+            "reviewCount": 3,
+            "avgWeeklyHours": 13.7,
+            "minWeeklyHours": 10,
+            "maxWeeklyHours": 20,
+            "topMethods": [
+              "Weekly practice problems",
+              "Weekly tutorial sessions"
+            ]
+          },
+          {
+            "band": "80-84",
+            "reviewCount": 2,
+            "avgWeeklyHours": 13.5,
+            "minWeeklyHours": 12,
+            "maxWeeklyHours": 15,
+            "topMethods": [
+              "Timed past examinations",
+              "Weekly practice problems"
+            ]
+          },
+          {
+            "band": "70-79",
+            "reviewCount": 2,
+            "avgWeeklyHours": 5.5,
+            "minWeeklyHours": 2,
+            "maxWeeklyHours": 9,
+            "topMethods": [
+              "Timed past examinations",
+              "Live lecture attendance"
+            ]
+          }
+        ]
+      },
+      "withDepartmentPrior": {
+        "responseCount": 8,
+        "informativeCount": 5,
+        "avgDifficulty": 3.8,
+        "avgWeeklyHours": 11.9,
+        "recommendationRate": 56,
+        "avgUsefulness": 3.6,
+        "confidenceLevel": "strong",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 11.9,
+          "avgMentalEffort": 3.9,
+          "avgStress": 3.7,
+          "loadIndex": 64,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 2.6,
+          "high": 4.7,
+          "sampleSize": 8,
+          "anchoredToDepartment": true,
+          "priorLabel": "Mathematics"
+        },
+        "difficultyDistribution": [
+          1,
+          0,
+          1,
+          3,
+          3
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          4,
+          1
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 10.5,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 4.5,
+            "avgWeeklyHours": 12.5,
+            "recommendationRate": 50
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 4,
+            "avgDifficulty": 3.8,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 5,
+            "helpfulCount": 3,
+            "helpfulPercentage": 60
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 4,
+            "helpfulCount": 4,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 3,
+            "helpfulCount": 1,
+            "helpfulPercentage": 33
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": [
+          {
+            "band": "85+",
+            "reviewCount": 3,
+            "avgWeeklyHours": 13.7,
+            "minWeeklyHours": 10,
+            "maxWeeklyHours": 20,
+            "topMethods": [
+              "Weekly practice problems",
+              "Weekly tutorial sessions"
+            ]
+          },
+          {
+            "band": "80-84",
+            "reviewCount": 2,
+            "avgWeeklyHours": 13.5,
+            "minWeeklyHours": 12,
+            "maxWeeklyHours": 15,
+            "topMethods": [
+              "Timed past examinations",
+              "Weekly practice problems"
+            ]
+          },
+          {
+            "band": "70-79",
+            "reviewCount": 2,
+            "avgWeeklyHours": 5.5,
+            "minWeeklyHours": 2,
+            "maxWeeklyHours": 9,
+            "topMethods": [
+              "Timed past examinations",
+              "Live lecture attendance"
+            ]
+          }
+        ]
+      },
+      "prior": {
+        "priorRating": 3.75,
+        "priorWeight": 2,
+        "priorLabel": "Mathematics"
+      }
+    },
+    {
+      "id": "cs-135",
+      "withoutPrior": {
+        "responseCount": 4,
+        "informativeCount": 3,
+        "avgDifficulty": 3.2,
+        "avgWeeklyHours": 10.2,
+        "recommendationRate": 63,
+        "avgUsefulness": 4.5,
+        "confidenceLevel": "moderate",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 10.2,
+          "avgMentalEffort": 3.2,
+          "avgStress": 3.2,
+          "loadIndex": 51,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.4,
+          "high": 4.6,
+          "sampleSize": 4,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          1,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 11.5,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 3,
+            "helpfulCount": 3,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 4,
+        "informativeCount": 3,
+        "avgDifficulty": 3.2,
+        "avgWeeklyHours": 10.2,
+        "recommendationRate": 63,
+        "avgUsefulness": 4.5,
+        "confidenceLevel": "moderate",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 10.2,
+          "avgMentalEffort": 3.2,
+          "avgStress": 3.2,
+          "loadIndex": 51,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4.6,
+          "low": 4.1,
+          "high": 5,
+          "sampleSize": 4,
+          "anchoredToDepartment": true,
+          "priorLabel": "Computer Science"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          1,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 11.5,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 3,
+            "helpfulCount": 3,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4.666666666666667,
+        "priorWeight": 2,
+        "priorLabel": "Computer Science"
+      }
+    },
+    {
+      "id": "econ-101",
+      "withoutPrior": {
+        "responseCount": 3,
+        "informativeCount": 3,
+        "avgDifficulty": 2.2,
+        "avgWeeklyHours": 4.9,
+        "recommendationRate": 82,
+        "avgUsefulness": 3.8,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.9,
+          "avgMentalEffort": 2.2,
+          "avgStress": 2.2,
+          "loadIndex": 27,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.6,
+          "low": 3.2,
+          "high": 4,
+          "sampleSize": 3,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "spaced_repetition",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 3,
+        "informativeCount": 3,
+        "avgDifficulty": 2.2,
+        "avgWeeklyHours": 4.9,
+        "recommendationRate": 82,
+        "avgUsefulness": 3.8,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.9,
+          "avgMentalEffort": 2.2,
+          "avgStress": 2.2,
+          "loadIndex": 27,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.3,
+          "high": 4.1,
+          "sampleSize": 3,
+          "anchoredToDepartment": true,
+          "priorLabel": "Economics"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "spaced_repetition",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 3.6666666666666665,
+        "priorWeight": 2,
+        "priorLabel": "Economics"
+      }
+    },
+    {
+      "id": "mat-1320",
+      "withoutPrior": {
+        "responseCount": 4,
+        "informativeCount": 3,
+        "avgDifficulty": 3.4,
+        "avgWeeklyHours": 8.6,
+        "recommendationRate": 85,
+        "avgUsefulness": 4.2,
+        "confidenceLevel": "moderate",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.6,
+          "avgMentalEffort": 3.4,
+          "avgStress": 3.4,
+          "loadIndex": 52,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.8,
+          "low": 3.2,
+          "high": 4.5,
+          "sampleSize": 4,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          1,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 3,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 11,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 3,
+            "helpfulCount": 2,
+            "helpfulPercentage": 67
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 4,
+        "informativeCount": 3,
+        "avgDifficulty": 3.4,
+        "avgWeeklyHours": 8.6,
+        "recommendationRate": 85,
+        "avgUsefulness": 4.2,
+        "confidenceLevel": "moderate",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.6,
+          "avgMentalEffort": 3.4,
+          "avgStress": 3.4,
+          "loadIndex": 52,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4.1,
+          "low": 3.4,
+          "high": 4.7,
+          "sampleSize": 4,
+          "anchoredToDepartment": true,
+          "priorLabel": "Mathematics & Statistics"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          2,
+          1,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 3,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 11,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3.5,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 3,
+            "helpfulCount": 2,
+            "helpfulPercentage": 67
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 3.8333333333333335,
+        "priorWeight": 2,
+        "priorLabel": "Mathematics & Statistics"
+      }
+    },
+    {
+      "id": "gng-1105",
+      "withoutPrior": {
+        "responseCount": 3,
+        "informativeCount": 3,
+        "avgDifficulty": 3.8,
+        "avgWeeklyHours": 10.9,
+        "recommendationRate": 76,
+        "avgUsefulness": 4.8,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 10.9,
+          "avgMentalEffort": 3.8,
+          "avgStress": 3.8,
+          "loadIndex": 62,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.1,
+          "high": 4.8,
+          "sampleSize": 3,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          1,
+          2,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 11,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 3,
+            "helpfulCount": 3,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 3,
+        "informativeCount": 3,
+        "avgDifficulty": 3.8,
+        "avgWeeklyHours": 10.9,
+        "recommendationRate": 76,
+        "avgUsefulness": 4.8,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 10.9,
+          "avgMentalEffort": 3.8,
+          "avgStress": 3.8,
+          "loadIndex": 62,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4.7,
+          "low": 4.3,
+          "high": 5,
+          "sampleSize": 3,
+          "anchoredToDepartment": true,
+          "priorLabel": "Engineering"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          1,
+          2,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2024",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 0
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 11,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 3,
+            "helpfulCount": 3,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4.666666666666667,
+        "priorWeight": 2,
+        "priorLabel": "Engineering"
+      }
+    },
+    {
+      "id": "cs-240",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 4,
+        "avgWeeklyHours": 12.3,
+        "recommendationRate": 100,
+        "avgUsefulness": 5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 12.3,
+          "avgMentalEffort": 4,
+          "avgStress": 4,
+          "loadIndex": 67,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3,
+          "high": 4.9,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          0,
+          2,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 13,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 4,
+        "avgWeeklyHours": 12.3,
+        "recommendationRate": 100,
+        "avgUsefulness": 5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 12.3,
+          "avgMentalEffort": 4,
+          "avgStress": 4,
+          "loadIndex": 67,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4.8,
+          "low": 4.6,
+          "high": 5,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Computer Science"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          0,
+          2,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 13,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 12,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4.666666666666667,
+        "priorWeight": 2,
+        "priorLabel": "Computer Science"
+      }
+    },
+    {
+      "id": "csi-2110",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3,
+        "avgWeeklyHours": 8.7,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.7,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.7,
+          "avgMentalEffort": 3,
+          "avgStress": 3,
+          "loadIndex": 45,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.9,
+          "low": 3,
+          "high": 4.8,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3,
+        "avgWeeklyHours": 8.7,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.7,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.7,
+          "avgMentalEffort": 3,
+          "avgStress": 3,
+          "loadIndex": 45,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4.6,
+          "low": 4.1,
+          "high": 5,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Computer Science"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "past_exams",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4.5,
+        "priorWeight": 2,
+        "priorLabel": "Computer Science"
+      }
+    },
+    {
+      "id": "stat-230",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.3,
+        "avgWeeklyHours": 8.3,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.7,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.3,
+          "avgMentalEffort": 3.3,
+          "avgStress": 3.3,
+          "loadIndex": 50,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.9,
+          "low": 3,
+          "high": 4.8,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.3,
+        "avgWeeklyHours": 8.3,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.7,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.3,
+          "avgMentalEffort": 3.3,
+          "avgStress": 3.3,
+          "loadIndex": 50,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4.6,
+          "low": 4.1,
+          "high": 5,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Statistics"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Winter 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "spaced_repetition",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4.5,
+        "priorWeight": 2,
+        "priorLabel": "Statistics"
+      }
+    },
+    {
+      "id": "eco-1102",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 6,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 33,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 7,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 6,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 33,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Economics"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 7,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Economics"
+      }
+    },
+    {
+      "id": "eco-1104",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 6,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 33,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 6,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 33,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Economics"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Economics"
+      }
+    },
+    {
+      "id": "psy-1101",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 5.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 5.5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 3,
+          "loadIndex": 36,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "spaced_repetition",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 5.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 5.5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 3,
+          "loadIndex": 36,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Psychology"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "spaced_repetition",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Psychology"
+      }
+    },
+    {
+      "id": "hss-1101",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2,
+          "loadIndex": 23,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4.5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2,
+          "loadIndex": 23,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Health Sciences"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4.5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Health Sciences"
+      }
+    },
+    {
+      "id": "adm-1100",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2.5,
+          "loadIndex": 26,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.5,
+          "low": 3.1,
+          "high": 3.9,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 0
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2.5,
+          "loadIndex": 26,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.8,
+          "low": 3.2,
+          "high": 4.3,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Telfer School of Management"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 0
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Telfer School of Management"
+      }
+    },
+    {
+      "id": "adm-4326",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3,
+        "avgWeeklyHours": 6.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6.5,
+          "avgMentalEffort": 3,
+          "avgStress": 3.5,
+          "loadIndex": 46,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.9,
+          "low": 3.2,
+          "high": 4.6,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6.5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3,
+        "avgWeeklyHours": 6.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 6.5,
+          "avgMentalEffort": 3,
+          "avgStress": 3.5,
+          "loadIndex": 46,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4.3,
+          "low": 3.7,
+          "high": 4.8,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Telfer School of Management"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 6.5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Telfer School of Management"
+      }
+    },
+    {
+      "id": "mus-2310",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 1.5,
+        "avgWeeklyHours": 3.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 3.5,
+          "avgMentalEffort": 1.5,
+          "avgStress": 1.5,
+          "loadIndex": 13,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 1,
+            "avgWeeklyHours": 3,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 1.5,
+        "avgWeeklyHours": 3.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 3.5,
+          "avgMentalEffort": 1.5,
+          "avgStress": 1.5,
+          "loadIndex": 13,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Music"
+        },
+        "difficultyDistribution": [
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 1,
+            "avgWeeklyHours": 3,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Music"
+      }
+    },
+    {
+      "id": "cmn-2152",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 32,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 2.5,
+          "loadIndex": 32,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Communication"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "practice_problems",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "project_based",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Communication"
+      }
+    },
+    {
+      "id": "mat-1341",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.5,
+        "avgWeeklyHours": 8.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.5,
+          "avgMentalEffort": 4,
+          "avgStress": 4,
+          "loadIndex": 63,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.5,
+          "low": 3.1,
+          "high": 3.9,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 0
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.5,
+        "avgWeeklyHours": 8.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.5,
+          "avgMentalEffort": 4,
+          "avgStress": 4,
+          "loadIndex": 63,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.2,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Mathematics & Statistics"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 0
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 2,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 3.8333333333333335,
+        "priorWeight": 2,
+        "priorLabel": "Mathematics & Statistics"
+      }
+    },
+    {
+      "id": "chm-1311",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.5,
+        "avgWeeklyHours": 8.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.5,
+          "avgMentalEffort": 3.5,
+          "avgStress": 3.5,
+          "loadIndex": 54,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 3.5,
+        "avgWeeklyHours": 8.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 8.5,
+          "avgMentalEffort": 3.5,
+          "avgStress": 3.5,
+          "loadIndex": 54,
+          "label": "Demanding"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Chemistry"
+        },
+        "difficultyDistribution": [
+          0,
+          0,
+          1,
+          1,
+          0
+        ],
+        "hoursDistribution": [
+          0,
+          2,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 4,
+            "avgWeeklyHours": 9,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 3,
+            "avgWeeklyHours": 8,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "practice_problems",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "tutorial_sessions",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "past_exams",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Chemistry"
+      }
+    },
+    {
+      "id": "phi-2394",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2,
+          "loadIndex": 23,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 3.7,
+          "low": 3.4,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "textbook_reading",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 100,
+        "avgUsefulness": 4,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2,
+          "avgStress": 2,
+          "loadIndex": 23,
+          "label": "Light"
+        },
+        "rating": {
+          "point": 4,
+          "low": 3.8,
+          "high": 4.2,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "Philosophy"
+        },
+        "difficultyDistribution": [
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 4,
+            "recommendationRate": 100
+          },
+          {
+            "term": "Winter 2026",
+            "reviewCount": 1,
+            "avgDifficulty": 2,
+            "avgWeeklyHours": 5,
+            "recommendationRate": 100
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "textbook_reading",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "study_groups",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 4,
+        "priorWeight": 2,
+        "priorLabel": "Philosophy"
+      }
+    },
+    {
+      "id": "eng-1120",
+      "withoutPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 3,
+          "loadIndex": 35,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.5,
+          "low": 3.1,
+          "high": 3.9,
+          "sampleSize": 2,
+          "anchoredToDepartment": false,
+          "priorLabel": "department"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 4.5,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "withDepartmentPrior": {
+        "responseCount": 2,
+        "informativeCount": 2,
+        "avgDifficulty": 2.5,
+        "avgWeeklyHours": 4.5,
+        "recommendationRate": 50,
+        "avgUsefulness": 3.5,
+        "confidenceLevel": "limited",
+        "asOf": "Fall 2025",
+        "load": {
+          "avgWeeklyHours": 4.5,
+          "avgMentalEffort": 2.5,
+          "avgStress": 3,
+          "loadIndex": 35,
+          "label": "Manageable"
+        },
+        "rating": {
+          "point": 3.5,
+          "low": 3,
+          "high": 4,
+          "sampleSize": 2,
+          "anchoredToDepartment": true,
+          "priorLabel": "English"
+        },
+        "difficultyDistribution": [
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "hoursDistribution": [
+          2,
+          0,
+          0,
+          0
+        ],
+        "termTrends": [
+          {
+            "term": "Fall 2025",
+            "reviewCount": 2,
+            "avgDifficulty": 2.5,
+            "avgWeeklyHours": 4.5,
+            "recommendationRate": 50
+          }
+        ],
+        "studyStrategyStats": [
+          {
+            "key": "project_based",
+            "usedCount": 2,
+            "helpfulCount": 1,
+            "helpfulPercentage": 50
+          },
+          {
+            "key": "textbook_reading",
+            "usedCount": 1,
+            "helpfulCount": 1,
+            "helpfulPercentage": 100
+          },
+          {
+            "key": "lecture_attendance",
+            "usedCount": 1,
+            "helpfulCount": 0,
+            "helpfulPercentage": 0
+          }
+        ],
+        "effortToSuccess": []
+      },
+      "prior": {
+        "priorRating": 3.5,
+        "priorWeight": 2,
+        "priorLabel": "English"
+      }
+    }
+  ],
+  "reviewScores": [
+    {
+      "id": "rev-math137-1",
+      "courseId": "math-137",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-math137-2",
+      "courseId": "math-137",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-math137-3",
+      "courseId": "math-137",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice"
+      ]
+    },
+    {
+      "id": "rev-math137-4",
+      "courseId": "math-137",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-math137-5",
+      "courseId": "math-137",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice"
+      ]
+    },
+    {
+      "id": "rev-math137-6",
+      "courseId": "math-137",
+      "score": 5,
+      "tier": "limited",
+      "labels": [
+        "Limited Context"
+      ]
+    },
+    {
+      "id": "rev-math137-7",
+      "courseId": "math-137",
+      "score": 5,
+      "tier": "limited",
+      "labels": [
+        "Limited Context"
+      ]
+    },
+    {
+      "id": "rev-math137-8",
+      "courseId": "math-137",
+      "score": 63,
+      "tier": "limited",
+      "labels": [
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Possible Duplicate"
+      ]
+    },
+    {
+      "id": "rev-cs135-1",
+      "courseId": "cs-135",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs135-2",
+      "courseId": "cs-135",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs135-3",
+      "courseId": "cs-135",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs135-4",
+      "courseId": "cs-135",
+      "score": 22,
+      "tier": "limited",
+      "labels": [
+        "Course-Specific",
+        "Limited Context"
+      ]
+    },
+    {
+      "id": "rev-econ101-1",
+      "courseId": "econ-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-econ101-2",
+      "courseId": "econ-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-econ101-3",
+      "courseId": "econ-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique"
+      ]
+    },
+    {
+      "id": "rev-mat1320-1",
+      "courseId": "mat-1320",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mat1320-2",
+      "courseId": "mat-1320",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mat1320-3",
+      "courseId": "mat-1320",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique"
+      ]
+    },
+    {
+      "id": "rev-mat1320-4",
+      "courseId": "mat-1320",
+      "score": 5,
+      "tier": "limited",
+      "labels": [
+        "Limited Context"
+      ]
+    },
+    {
+      "id": "rev-gng1105-1",
+      "courseId": "gng-1105",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-gng1105-2",
+      "courseId": "gng-1105",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-gng1105-3",
+      "courseId": "gng-1105",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs240-1",
+      "courseId": "cs-240",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs240-2",
+      "courseId": "cs-240",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-csi2110-1",
+      "courseId": "csi-2110",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-csi2110-2",
+      "courseId": "csi-2110",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-stat230-1",
+      "courseId": "stat-230",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-stat230-2",
+      "courseId": "stat-230",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs349-1",
+      "courseId": "cs-349",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs349-2",
+      "courseId": "cs-349",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs348-1",
+      "courseId": "cs-348",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs348-2",
+      "courseId": "cs-348",
+      "score": 97,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs341-1",
+      "courseId": "cs-341",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs341-2",
+      "courseId": "cs-341",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs341-3",
+      "courseId": "cs-341",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs343-1",
+      "courseId": "cs-343",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs343-2",
+      "courseId": "cs-343",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs360-1",
+      "courseId": "cs-360",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs360-2",
+      "courseId": "cs-360",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs350-1",
+      "courseId": "cs-350",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs350-2",
+      "courseId": "cs-350",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs370-1",
+      "courseId": "cs-370",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs370-2",
+      "courseId": "cs-370",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs480-1",
+      "courseId": "cs-480",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs480-2",
+      "courseId": "cs-480",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs480-3",
+      "courseId": "cs-480",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs485-1",
+      "courseId": "cs-485",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs485-2",
+      "courseId": "cs-485",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs486-1",
+      "courseId": "cs-486",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs486-2",
+      "courseId": "cs-486",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cs486-3",
+      "courseId": "cs-486",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-psych101-1",
+      "courseId": "psych-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-psych101-2",
+      "courseId": "psych-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-psych101-3",
+      "courseId": "psych-101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-econ102-1",
+      "courseId": "econ-102",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-econ102-2",
+      "courseId": "econ-102",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-stat231-1",
+      "courseId": "stat-231",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-stat231-2",
+      "courseId": "stat-231",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eco1102-1",
+      "courseId": "eco-1102",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eco1102-2",
+      "courseId": "eco-1102",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eco1104-1",
+      "courseId": "eco-1104",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eco1104-2",
+      "courseId": "eco-1104",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-psy1101-1",
+      "courseId": "psy-1101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-psy1101-2",
+      "courseId": "psy-1101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-hss1101-1",
+      "courseId": "hss-1101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-hss1101-2",
+      "courseId": "hss-1101",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-adm1100-1",
+      "courseId": "adm-1100",
+      "score": 87,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-adm1100-2",
+      "courseId": "adm-1100",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-adm4326-1",
+      "courseId": "adm-4326",
+      "score": 97,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-adm4326-2",
+      "courseId": "adm-4326",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mus2310-1",
+      "courseId": "mus-2310",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mus2310-2",
+      "courseId": "mus-2310",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cmn2152-1",
+      "courseId": "cmn-2152",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-cmn2152-2",
+      "courseId": "cmn-2152",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mat1341-1",
+      "courseId": "mat-1341",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-mat1341-2",
+      "courseId": "mat-1341",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-chm1311-1",
+      "courseId": "chm-1311",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-chm1311-2",
+      "courseId": "chm-1311",
+      "score": 85,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-phi2394-1",
+      "courseId": "phi-2394",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-phi2394-2",
+      "courseId": "phi-2394",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eng1120-1",
+      "courseId": "eng-1120",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Enrollment Verified"
+      ]
+    },
+    {
+      "id": "rev-eng1120-2",
+      "courseId": "eng-1120",
+      "score": 100,
+      "tier": "most_informative",
+      "labels": [
+        "Detailed Feedback",
+        "Course-Specific",
+        "Actionable Advice",
+        "Balanced Critique",
+        "Enrollment Verified"
+      ]
+    }
+  ],
+  "loadIndexSamples": [
+    {
+      "hours": 0,
+      "effort": 1,
+      "stress": 1,
+      "index": 0
+    },
+    {
+      "hours": 5,
+      "effort": 2,
+      "stress": 2,
+      "index": 24
+    },
+    {
+      "hours": 12.5,
+      "effort": 3,
+      "stress": 3,
+      "index": 50
+    },
+    {
+      "hours": 20,
+      "effort": 4,
+      "stress": 5,
+      "index": 83
+    },
+    {
+      "hours": 25,
+      "effort": 5,
+      "stress": 5,
+      "index": 100
+    },
+    {
+      "hours": 40,
+      "effort": 5,
+      "stress": 5,
+      "index": 100
+    }
+  ],
+  "peakWeeks": [
+    {
+      "id": "math-137",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        12,
+        54,
+        54,
+        54,
+        100,
+        12,
+        12,
+        12,
+        51,
+        12,
+        12,
+        42
+      ]
+    },
+    {
+      "id": "cs-135",
+      "busiestWeek": 5,
+      "intensities": [
+        0,
+        18,
+        18,
+        18,
+        100,
+        18,
+        18,
+        18,
+        87,
+        18,
+        18,
+        18,
+        57
+      ]
+    },
+    {
+      "id": "econ-101",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        13,
+        13,
+        13,
+        13,
+        100,
+        13,
+        13,
+        13,
+        87,
+        13,
+        13,
+        51
+      ]
+    },
+    {
+      "id": "mat-1320",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        13,
+        13,
+        13,
+        13,
+        100,
+        13,
+        13,
+        13,
+        87,
+        13,
+        13,
+        51
+      ]
+    },
+    {
+      "id": "gng-1105",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        59,
+        15,
+        15,
+        15,
+        100,
+        15,
+        15,
+        15,
+        87,
+        15,
+        15,
+        65
+      ]
+    },
+    {
+      "id": "cs-240",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        24,
+        24,
+        24,
+        24,
+        100,
+        24,
+        24,
+        24,
+        88,
+        24,
+        24,
+        63
+      ]
+    },
+    {
+      "id": "csi-2110",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        24,
+        24,
+        24,
+        24,
+        100,
+        24,
+        24,
+        24,
+        88,
+        24,
+        24,
+        63
+      ]
+    },
+    {
+      "id": "stat-230",
+      "busiestWeek": 5,
+      "intensities": [
+        0,
+        13,
+        13,
+        13,
+        100,
+        13,
+        13,
+        13,
+        87,
+        13,
+        13,
+        13,
+        51
+      ]
+    },
+    {
+      "id": "eco-1102",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        15,
+        15,
+        15,
+        15,
+        100,
+        15,
+        15,
+        15,
+        87,
+        15,
+        15,
+        65
+      ]
+    },
+    {
+      "id": "eco-1104",
+      "busiestWeek": 5,
+      "intensities": [
+        0,
+        13,
+        13,
+        13,
+        100,
+        13,
+        13,
+        13,
+        87,
+        13,
+        13,
+        13,
+        51
+      ]
+    },
+    {
+      "id": "psy-1101",
+      "busiestWeek": 5,
+      "intensities": [
+        0,
+        9,
+        9,
+        9,
+        100,
+        9,
+        9,
+        9,
+        86,
+        9,
+        9,
+        9,
+        47
+      ]
+    },
+    {
+      "id": "hss-1101",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        24,
+        24,
+        24,
+        24,
+        100,
+        24,
+        24,
+        24,
+        88,
+        24,
+        24,
+        63
+      ]
+    },
+    {
+      "id": "adm-1100",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        85,
+        77,
+        0,
+        92
+      ]
+    },
+    {
+      "id": "adm-4326",
+      "busiestWeek": 11,
+      "intensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        26
+      ]
+    },
+    {
+      "id": "mus-2310",
+      "busiestWeek": 12,
+      "intensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        98
+      ]
+    },
+    {
+      "id": "cmn-2152",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        27,
+        27,
+        27,
+        27,
+        100,
+        27,
+        27,
+        27,
+        89,
+        27,
+        27,
+        54
+      ]
+    },
+    {
+      "id": "mat-1341",
+      "busiestWeek": 5,
+      "intensities": [
+        0,
+        13,
+        13,
+        13,
+        100,
+        13,
+        13,
+        13,
+        87,
+        13,
+        13,
+        13,
+        51
+      ]
+    },
+    {
+      "id": "chm-1311",
+      "busiestWeek": 6,
+      "intensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        85,
+        51,
+        0,
+        77
+      ]
+    },
+    {
+      "id": "phi-2394",
+      "busiestWeek": 12,
+      "intensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        98
+      ]
+    },
+    {
+      "id": "eng-1120",
+      "busiestWeek": 13,
+      "intensities": [
+        0,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        68,
+        100
+      ]
+    }
+  ],
+  "advisorMatches": [
+    {
+      "briefIndex": 0,
+      "results": [
+        {
+          "courseId": "math-137",
+          "percent": 16,
+          "percentWithCaution": 10
+        },
+        {
+          "courseId": "cs-135",
+          "percent": 40,
+          "percentWithCaution": 34
+        },
+        {
+          "courseId": "econ-101",
+          "percent": 10,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "mat-1320",
+          "percent": 13,
+          "percentWithCaution": 7
+        },
+        {
+          "courseId": "gng-1105",
+          "percent": 10,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "cs-240",
+          "percent": 34,
+          "percentWithCaution": 28
+        },
+        {
+          "courseId": "csi-2110",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "stat-230",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "eco-1102",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "eco-1104",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "psy-1101",
+          "percent": 20,
+          "percentWithCaution": 14
+        },
+        {
+          "courseId": "hss-1101",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "adm-1100",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "adm-4326",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "mus-2310",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "cmn-2152",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "mat-1341",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "chm-1311",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "phi-2394",
+          "percent": 6,
+          "percentWithCaution": 5
+        },
+        {
+          "courseId": "eng-1120",
+          "percent": 6,
+          "percentWithCaution": 5
+        }
+      ]
+    },
+    {
+      "briefIndex": 1,
+      "results": [
+        {
+          "courseId": "math-137",
+          "percent": 90,
+          "percentWithCaution": 79
+        },
+        {
+          "courseId": "cs-135",
+          "percent": 39,
+          "percentWithCaution": 33
+        },
+        {
+          "courseId": "econ-101",
+          "percent": 46,
+          "percentWithCaution": 40
+        },
+        {
+          "courseId": "mat-1320",
+          "percent": 96,
+          "percentWithCaution": 85
+        },
+        {
+          "courseId": "gng-1105",
+          "percent": 36,
+          "percentWithCaution": 30
+        },
+        {
+          "courseId": "cs-240",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "csi-2110",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "stat-230",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "eco-1102",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "eco-1104",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "psy-1101",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "hss-1101",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "adm-1100",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "adm-4326",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "mus-2310",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "cmn-2152",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "mat-1341",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "chm-1311",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "phi-2394",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "eng-1120",
+          "percent": 43,
+          "percentWithCaution": 37
+        }
+      ]
+    },
+    {
+      "briefIndex": 2,
+      "results": [
+        {
+          "courseId": "math-137",
+          "percent": 41,
+          "percentWithCaution": 35
+        },
+        {
+          "courseId": "cs-135",
+          "percent": 39,
+          "percentWithCaution": 33
+        },
+        {
+          "courseId": "econ-101",
+          "percent": 84,
+          "percentWithCaution": 74
+        },
+        {
+          "courseId": "mat-1320",
+          "percent": 39,
+          "percentWithCaution": 33
+        },
+        {
+          "courseId": "gng-1105",
+          "percent": 36,
+          "percentWithCaution": 30
+        },
+        {
+          "courseId": "cs-240",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "csi-2110",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "stat-230",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "eco-1102",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "eco-1104",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "psy-1101",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "hss-1101",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "adm-1100",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "adm-4326",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "mus-2310",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "cmn-2152",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "mat-1341",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "chm-1311",
+          "percent": 33,
+          "percentWithCaution": 27
+        },
+        {
+          "courseId": "phi-2394",
+          "percent": 43,
+          "percentWithCaution": 37
+        },
+        {
+          "courseId": "eng-1120",
+          "percent": 33,
+          "percentWithCaution": 27
+        }
+      ]
+    }
+  ]
+}
