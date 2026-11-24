@@ -18,6 +18,11 @@ import {
 import { CatalogueService } from './server/catalogueService.ts';
 import { checkAdvisorRateLimit, runAdvisor } from './server/advisorService.ts';
 import { collectDepartmentPrior } from './src/utils/departmentPrior.ts';
+import {
+  EXPLAINABLE_SCORES,
+  explainScore,
+  type ExplainableScore,
+} from './server/scoreExplainService.ts';
 import { resolveLlmConfig } from './server/llm.ts';
 import {
   GRADE_BANDS,
@@ -308,6 +313,49 @@ app.post('/api/advisor', async (req, res) => {
     res.status(500).json({
       error: 'The advisor could not finish that search. Try rephrasing it.',
     });
+  }
+});
+
+app.post('/api/score-explanation', async (req, res) => {
+  const courseId = sanitizeText(req.body?.courseId, 64);
+  const score = sanitizeText(req.body?.score, 32) as ExplainableScore;
+  if (!courseId || !EXPLAINABLE_SCORES.includes(score)) {
+    res.status(400).json({ error: 'Unknown course or score.' });
+    return;
+  }
+
+  // The deterministic breakdown is free; only spend a model call when one is
+  // configured and the caller is inside the shared advisor rate limit.
+  const forwarded = req.headers['x-forwarded-for'];
+  const clientId =
+    sanitizeText(typeof forwarded === 'string' ? forwarded.split(',')[0] : '', 64) ||
+    sanitizeText(req.ip, 64) ||
+    'anonymous';
+  const allowAi = resolveLlmConfig() ? checkAdvisorRateLimit(clientId) : false;
+
+  try {
+    const result = await explainScore(
+      {
+        courseId,
+        score,
+        ...(sanitizeText(req.body?.reviewId, 64)
+          ? { reviewId: sanitizeText(req.body?.reviewId, 64) }
+          : {}),
+        brief: req.body?.brief,
+        cautionApplied: req.body?.cautionApplied === true,
+        allowAi,
+      },
+      { catalogue, reviews: store.reviews }
+    );
+
+    if ('error' in result) {
+      res.status(result.status).json({ error: result.error });
+      return;
+    }
+    res.json(result);
+  } catch (err) {
+    console.warn('Score explanation failed:', err);
+    res.status(500).json({ error: 'The explanation could not be built right now.' });
   }
 });
 

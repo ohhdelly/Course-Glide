@@ -692,8 +692,8 @@ function coerceTerm(value: unknown): AdvisorBrief['term'] | null {
   return match ?? null;
 }
 
-/** Validates a partial brief coming from the model or from client-side chip edits. */
-function sanitizeBriefPatch(
+/** Validates a partial brief coming from the model, client-side chip edits, or the explainer. */
+export function sanitizeBriefPatch(
   patch: unknown,
   availableSubjects: string[]
 ): Partial<AdvisorBrief> {
