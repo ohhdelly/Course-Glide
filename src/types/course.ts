@@ -7,6 +7,46 @@ export interface University {
   location: string;
 }
 
+/**
+ * How much trust a score deserves, shown next to every explanation.
+ * - reported: an average of what students said, not independently verified.
+ * - estimate: a heuristic model over reported data, not validated.
+ * - sample_data: seeded demo values that were never calculated.
+ */
+export type ScoreBasis = 'reported' | 'estimate' | 'sample_data';
+
+export interface ScoreComponent {
+  label: string;
+  /** The real input, as it entered the calculation. */
+  input: string;
+  /** How that input was weighted, e.g. "45% of the index". */
+  weight: string;
+  /** What it contributed, in the score's own units. */
+  contribution: string;
+}
+
+/** Rendered verbatim by the score popover and by the explanation endpoint. */
+export interface ScoreExplanation {
+  key:
+    | 'difficulty'
+    | 'workload'
+    | 'recommend'
+    | 'rating'
+    | 'trust'
+    | 'match'
+    | 'peak_week';
+  label: string;
+  /** The exact displayed value, e.g. "4.2 / 5". */
+  value: string;
+  summary: string;
+  formula: string;
+  basis: ScoreBasis;
+  components: ScoreComponent[];
+  /** Factors explicitly excluded from this calculation. */
+  exclusions: string[];
+  caveat?: string;
+}
+
 export interface AssessmentComponent {
   name: string;
   weightPercent: number;
@@ -123,10 +163,18 @@ export type TrustLabel =
 
 export type TrustLensMode = 'most_informative' | 'most_recent' | 'all';
 
+export interface ReviewScoreContribution {
+  label: string;
+  points: number;
+  detail: string;
+}
+
 export interface TrustLensEvaluation {
   score: number;
   tier: 'most_informative' | 'standard' | 'limited';
   labels: TrustLabel[];
+  /** Every point added or removed, in the order the score was assembled. */
+  contributions: ReviewScoreContribution[];
   signals: {
     hasCourseSpecificDetails: boolean;
     hasAssessmentOrWorkloadContext: boolean;
@@ -157,6 +205,18 @@ export interface TermTrendPoint {
   recommendationRate: number;
 }
 
+export interface RatingBreakdown {
+  priorRating: number;
+  priorWeight: number;
+  weightedUsefulnessSum: number;
+  totalWeight: number;
+  shrunk: number;
+  standardError: number;
+  margin: number;
+  low: number;
+  high: number;
+}
+
 export interface RatingRange {
   point: number;
   low: number;
@@ -164,6 +224,24 @@ export interface RatingRange {
   sampleSize: number;
   anchoredToDepartment: boolean;
   priorLabel: string;
+  /** Inputs of the shrinkage that produced point/low/high. */
+  breakdown?: RatingBreakdown;
+}
+
+export interface LoadIndexComponent {
+  key: 'hours' | 'effort' | 'stress';
+  label: string;
+  input: number;
+  inputMax: number;
+  weight: number;
+  normalized: number;
+  points: number;
+}
+
+export interface LoadIndexBreakdown {
+  index: number;
+  formula: string;
+  components: LoadIndexComponent[];
 }
 
 export interface LoadProfile {
@@ -172,6 +250,8 @@ export interface LoadProfile {
   avgStress: number;
   loadIndex: number;
   label: 'Light' | 'Manageable' | 'Demanding' | 'Very demanding';
+  /** Inputs of the 0-100 index, straight from the calculation. */
+  breakdown?: LoadIndexBreakdown;
 }
 
 export interface EffortToSuccessBand {
@@ -191,11 +271,21 @@ export interface PeakWeekCell {
   drivers: string[];
 }
 
+export interface PeakWeekSource {
+  label: string;
+  kind: 'assessment' | 'student_mention';
+  weeks: string;
+  weight?: number;
+  weightPercent?: number;
+}
+
 export interface PeakWeekMap {
   cells: PeakWeekCell[];
   busiestWeek: number;
   busiestLabel: string;
   note: string;
+  /** Catalogue weights and student mentions that produced the intensities. */
+  sources?: PeakWeekSource[];
 }
 
 export interface CourseStats {
@@ -217,6 +307,31 @@ export interface CourseStats {
   effortToSuccess: EffortToSuccessBand[];
   asOf: string;
   weightingNote: string;
+  /** Raw inputs behind each score, emitted by the same pass that computes them. */
+  scoreBreakdowns?: CourseScoreBreakdowns;
+}
+
+export interface TermWeightRow {
+  term: string;
+  reviews: number;
+  weight: number;
+  weightPercent: number;
+}
+
+export interface FreshnessWeighting {
+  referenceTerm: string;
+  decayPerTerm: number;
+  floor: number;
+  totalWeight: number;
+  terms: TermWeightRow[];
+}
+
+export interface CourseScoreBreakdowns {
+  weighting: FreshnessWeighting;
+  difficulty: { reviews: number; weightedSum: number; avg: number };
+  recommend: { reviews: number; recommends: number; weightedRecommended: number };
+  load: LoadIndexBreakdown;
+  rating: RatingBreakdown;
 }
 
 export interface InstructorCategoryScore {
@@ -440,6 +555,28 @@ export interface AdvisorBrief {
   constraints: string[];
 }
 
+export interface AdvisorMatchCheck {
+  key: 'topic' | 'level' | 'hours' | 'difficulty' | 'reviews' | 'evidence';
+  label: string;
+  weight: number;
+  /** 0-1 fit on this check. */
+  fit: number;
+  input: string;
+  points: number;
+}
+
+export interface AdvisorMatchBreakdown {
+  percent: number;
+  rawPercent: number;
+  checks: AdvisorMatchCheck[];
+  totalWeight: number;
+  earned: number;
+  cautionApplied: boolean;
+  cautionPenalty: number;
+  minPercent: number;
+  maxPercent: number;
+}
+
 export interface AdvisorResult {
   course: Course;
   stats: CourseStats;
@@ -451,6 +588,9 @@ export interface AdvisorResult {
   rationale?: string;
   /** Set when a match stretches one of the student's limits. */
   caution?: string;
+  /** Fit percentage shown in the UI, computed from the same checks as the breakdown. */
+  matchPercent?: number;
+  matchBreakdown?: AdvisorMatchBreakdown;
 }
 
 export interface AdvisorResponse {

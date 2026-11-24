@@ -21,6 +21,7 @@ import type {
 } from '../src/types/course.ts';
 import type { CatalogueService } from './catalogueService.ts';
 import { rankAndFilterReviews } from '../src/utils/trustLens.ts';
+import { advisorMatchBreakdown } from '../src/utils/advisorMatch.ts';
 import { generateLlmJson, resolveLlmConfig, type LlmConfig } from './llm.ts';
 
 export const ADVISOR_EXAMPLES = [
@@ -1236,6 +1237,13 @@ export async function runAdvisor(request: AdvisorRequest, deps: AdvisorDeps): Pr
       'Term offerings are recorded for a subset of courses in this snapshot; check the official timetable before enrolling.'
     );
   }
+
+  // The displayed fit percentage is computed here from the same checks the
+  // explanation renders, so the UI never re-derives a different number.
+  results = results.map((result) => {
+    const matchBreakdown = advisorMatchBreakdown(brief, result);
+    return { ...result, matchPercent: matchBreakdown.percent, matchBreakdown };
+  });
 
   const universityLabel =
     request.universityId === 'uwaterloo'

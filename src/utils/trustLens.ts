@@ -5,12 +5,16 @@ import type {
   CourseStats,
   EffortToSuccessBand,
   EnrichedReview,
+  FreshnessWeighting,
   GradeBand,
   InsightItem,
   InstructorProfile,
+  LoadIndexBreakdown,
   LoadProfile,
   PeakWeekMap,
+  PeakWeekSource,
   RatingRange,
+  ReviewScoreContribution,
   Review,
   StaffDigest,
   StaffDigestItem,
@@ -112,12 +116,20 @@ function termDistance(term: string, reference: string): number {
   return Math.max(0, (b.year - a.year) * 4 + (b.seasonRank - a.seasonRank));
 }
 
+/** Each earlier term counts this share of the next-newer term. */
+export const TERM_FRESHNESS_DECAY = 0.75;
+/** Older terms never fall below this share, so real history still counts. */
+export const TERM_FRESHNESS_FLOOR = 0.3;
+
 /**
  * Freshness weight: the newest term counts fully and each earlier term counts
  * less, floored so older but still-relevant history contributes.
  */
 export function termFreshnessWeight(term: string, reference: string): number {
-  return Math.max(0.3, Math.pow(0.75, termDistance(term, reference)));
+  return Math.max(
+    TERM_FRESHNESS_FLOOR,
+    Math.pow(TERM_FRESHNESS_DECAY, termDistance(term, reference))
+  );
 }
 
 function round1(value: number): number {
@@ -130,22 +142,69 @@ function weightedMean(pairs: Array<{ value: number; weight: number }>): number {
   return pairs.reduce((sum, pair) => sum + pair.value * pair.weight, 0) / totalWeight;
 }
 
+export const LOAD_INDEX_FORMULA =
+  '100 × (0.30 × time + 0.45 × effort + 0.25 × stress)';
+
 /**
  * Three-axis workload index (0-100). Raw hours are only part of the cost:
  * mental effort is weighted above time because effort is what students price
  * a term by, with stress as the third axis.
+ *
+ * Returns the components that produced the index, so the UI and the AI advisor
+ * can explain the exact number without re-deriving it.
  */
+export function computeLoadIndexBreakdown(
+  avgWeeklyHours: number,
+  avgMentalEffort: number,
+  avgStress: number
+): LoadIndexBreakdown {
+  const hoursComponent = Math.min(1, Math.max(0, avgWeeklyHours / 25));
+  const effortComponent = Math.min(1, Math.max(0, (avgMentalEffort - 1) / 4));
+  const stressComponent = Math.min(1, Math.max(0, (avgStress - 1) / 4));
+  const index = Math.round(
+    100 * (0.3 * hoursComponent + 0.45 * effortComponent + 0.25 * stressComponent)
+  );
+  return {
+    index,
+    formula: LOAD_INDEX_FORMULA,
+    components: [
+      {
+        key: 'hours',
+        label: 'Weekly time',
+        input: avgWeeklyHours,
+        inputMax: 25,
+        weight: 0.3,
+        normalized: hoursComponent,
+        points: 100 * 0.3 * hoursComponent,
+      },
+      {
+        key: 'effort',
+        label: 'Mental effort',
+        input: avgMentalEffort,
+        inputMax: 5,
+        weight: 0.45,
+        normalized: effortComponent,
+        points: 100 * 0.45 * effortComponent,
+      },
+      {
+        key: 'stress',
+        label: 'Stress',
+        input: avgStress,
+        inputMax: 5,
+        weight: 0.25,
+        normalized: stressComponent,
+        points: 100 * 0.25 * stressComponent,
+      },
+    ],
+  };
+}
+
 export function computeLoadIndex(
   avgWeeklyHours: number,
   avgMentalEffort: number,
   avgStress: number
 ): number {
-  const hoursComponent = Math.min(1, Math.max(0, avgWeeklyHours / 25));
-  const effortComponent = Math.min(1, Math.max(0, (avgMentalEffort - 1) / 4));
-  const stressComponent = Math.min(1, Math.max(0, (avgStress - 1) / 4));
-  return Math.round(
-    100 * (0.3 * hoursComponent + 0.45 * effortComponent + 0.25 * stressComponent)
-  );
+  return computeLoadIndexBreakdown(avgWeeklyHours, avgMentalEffort, avgStress).index;
 }
 
 function loadIndexLabel(index: number): LoadProfile['label'] {
@@ -258,27 +317,107 @@ export function evaluateReviewQuality(
     matchesSpamPattern ||
     (!hasCourseSpecificDetails && wordCount < 25 && !hasActionableAdvice);
 
-  // 5. Sentiment-neutral scoring (0 - 100)
-  let score = 20;
-  if (wordCount >= 25) score += 15;
-  if (wordCount >= 50) score += 12;
-  if (matchedKeywords.length >= 2) score += 16;
-  if (matchedKeywords.length >= 4) score += 8;
-  if (hasAssessmentOrWorkloadContext) score += 10;
-  if (hasWellAndChallenge) score += 10;
-  if (hasActionableAdvice) score += 10;
-  if (review.verifiedEnrollment) score += 5;
+  // 5. Sentiment-neutral scoring (0 - 100). Every step is recorded so the
+  // popover and the AI advisor can show the same points that produced the total.
+  const contributions: ReviewScoreContribution[] = [
+    { label: 'Baseline', points: 20, detail: 'Every submission starts at 20.' },
+  ];
+  if (wordCount >= 25) {
+    contributions.push({
+      label: 'Substantial length',
+      points: 15,
+      detail: `${wordCount} words (at least 25).`,
+    });
+  }
+  if (wordCount >= 50) {
+    contributions.push({
+      label: 'Long-form detail',
+      points: 12,
+      detail: `${wordCount} words (at least 50).`,
+    });
+  }
+  if (matchedKeywords.length >= 2) {
+    contributions.push({
+      label: 'Course-specific vocabulary',
+      points: 16,
+      detail: `Matched ${matchedKeywords.slice(0, 4).join(', ')}.`,
+    });
+  }
+  if (matchedKeywords.length >= 4) {
+    contributions.push({
+      label: 'Rich course vocabulary',
+      points: 8,
+      detail: `${matchedKeywords.length} course terms matched.`,
+    });
+  }
+  if (hasAssessmentOrWorkloadContext) {
+    contributions.push({
+      label: 'Assessment/workload context',
+      points: 10,
+      detail: 'Names an assessment and reports weekly hours.',
+    });
+  }
+  if (hasWellAndChallenge) {
+    contributions.push({
+      label: 'Strengths and challenges',
+      points: 10,
+      detail: 'Both free-text fields are at least 18 characters.',
+    });
+  }
+  if (hasActionableAdvice) {
+    contributions.push({
+      label: 'Actionable advice',
+      points: 10,
+      detail: `Advice is ${review.practicalAdvice.trim().length} characters or ${review.studyMethods.length} study methods are listed.`,
+    });
+  }
+  if (review.verifiedEnrollment) {
+    contributions.push({
+      label: 'Verified enrollment',
+      points: 5,
+      detail: 'The review is marked as enrollment-verified.',
+    });
+  }
 
   const helpfulnessNet = review.helpfulVotes - review.notHelpfulVotes;
-  score += Math.max(-8, Math.min(10, helpfulnessNet * 1.5));
+  const helpfulnessPoints = Math.max(-8, Math.min(10, helpfulnessNet * 1.5));
+  contributions.push({
+    label: 'Helpfulness votes',
+    points: helpfulnessPoints,
+    detail: `${review.helpfulVotes} helpful − ${review.notHelpfulVotes} not helpful = ${helpfulnessNet} net, ×1.5 (capped −8…+10).`,
+  });
 
   const recencyScore = parseTermRecencyScore(review.term);
-  score += Math.min(6, recencyScore * 0.5);
+  const recencyPoints = Math.min(6, recencyScore * 0.5);
+  contributions.push({
+    label: 'Recency',
+    points: recencyPoints,
+    detail: `${review.term} scores ${recencyScore.toFixed(1)} on the term clock, ×0.5 (capped +6).`,
+  });
 
-  if (isDuplicateOrRepetitive) score -= 35;
-  if (isLowInformation) score -= 28;
-  if (matchesSpamPattern) score -= 40;
+  if (isDuplicateOrRepetitive) {
+    contributions.push({
+      label: 'Duplicate penalty',
+      points: -35,
+      detail: 'At least 72% word overlap with an earlier or more helpful review.',
+    });
+  }
+  if (isLowInformation) {
+    contributions.push({
+      label: 'Low-information penalty',
+      points: -28,
+      detail: 'Under 16 words, a spam pattern, or too little course-specific detail.',
+    });
+  }
+  if (matchesSpamPattern) {
+    contributions.push({
+      label: 'Spam penalty',
+      points: -40,
+      detail: 'The text matches a known spam or off-topic pattern.',
+    });
+  }
 
+  const score = contributions.reduce((sum, entry) => sum + entry.points, 0);
   const clampedScore = Math.max(5, Math.min(100, Math.round(score)));
 
   // 6. Evidence-backed contextual labels (never fabricated)
@@ -335,6 +474,7 @@ export function evaluateReviewQuality(
     score: clampedScore,
     tier,
     labels,
+    contributions,
     signals: {
       hasCourseSpecificDetails,
       hasAssessmentOrWorkloadContext,
@@ -601,11 +741,40 @@ export function computeCourseStats(
   const effortOf = (r: Review) => r.mentalEffort ?? r.difficulty;
   const stressOf = (r: Review) => r.stress ?? r.difficulty;
 
+  // Term-level weights share the same object the averages use, so an explanation
+  // can list exactly how much each term counted.
+  const termBuckets = new Map<string, { weight: number; reviews: number }>();
+  for (const review of visible) {
+    const weight = weightFor(review);
+    const bucket = termBuckets.get(review.term) ?? { weight: 0, reviews: 0 };
+    bucket.weight += weight;
+    bucket.reviews += 1;
+    termBuckets.set(review.term, bucket);
+  }
+  const weighting: FreshnessWeighting = {
+    referenceTerm,
+    decayPerTerm: TERM_FRESHNESS_DECAY,
+    floor: TERM_FRESHNESS_FLOOR,
+    totalWeight: round1(totalWeight),
+    terms: Array.from(termBuckets.entries())
+      .sort((a, b) => b[1].weight - a[1].weight)
+      .map(([term, bucket]) => ({
+        term,
+        reviews: bucket.reviews,
+        weight: round1(bucket.weight),
+        weightPercent: totalWeight > 0 ? Math.round((bucket.weight / totalWeight) * 100) : 0,
+      })),
+  };
+
   const avgDifficulty = round1(
     weightedMean(visible.map((r) => ({ value: r.difficulty, weight: weightFor(r) })))
   );
   const avgWeeklyHours = round1(
     weightedMean(visible.map((r) => ({ value: r.weeklyHours, weight: weightFor(r) })))
+  );
+  const weightedRecommended = visible.reduce(
+    (sum, r) => sum + (r.recommended ? 100 : 0) * weightFor(r),
+    0
   );
   const recommendationRate = Math.round(
     weightedMean(visible.map((r) => ({ value: r.recommended ? 100 : 0, weight: weightFor(r) })))
@@ -619,13 +788,18 @@ export function computeCourseStats(
   const avgStress = round1(
     weightedMean(visible.map((r) => ({ value: stressOf(r), weight: weightFor(r) })))
   );
-  const loadIndex = computeLoadIndex(avgWeeklyHours, avgMentalEffort, avgStress);
+  const loadBreakdown = computeLoadIndexBreakdown(avgWeeklyHours, avgMentalEffort, avgStress);
+  const loadIndex = loadBreakdown.index;
 
   // Shrink the rating toward a prior so a three-review course cannot masquerade as precise.
   const priorRating = options?.priorRating ?? 3.5;
   const priorWeight = Math.max(0, options?.priorWeight ?? 3);
+  const weightedUsefulnessSum = visible.reduce(
+    (sum, r) => sum + r.usefulness * weightFor(r),
+    0
+  );
   const shrunkRating =
-    (visible.reduce((sum, r) => sum + r.usefulness * weightFor(r), 0) + priorRating * priorWeight) /
+    (weightedUsefulnessSum + priorRating * priorWeight) /
     Math.max(0.001, totalWeight + priorWeight);
   const ratingVariance =
     visible.reduce(
@@ -643,6 +817,17 @@ export function computeCourseStats(
     sampleSize: n,
     anchoredToDepartment: typeof options?.priorRating === 'number',
     priorLabel: options?.priorLabel ?? 'department',
+    breakdown: {
+      priorRating: round1(priorRating),
+      priorWeight: round1(priorWeight),
+      weightedUsefulnessSum: round1(weightedUsefulnessSum),
+      totalWeight: round1(totalWeight),
+      shrunk: round1(shrunkRating),
+      standardError: round1(standardError),
+      margin: round1(margin),
+      low: Math.min(ratingPoint, round1(Math.max(1, shrunkRating - margin))),
+      high: Math.max(ratingPoint, round1(Math.min(5, shrunkRating + margin))),
+    },
   };
 
   // Effort-to-success: study-hour bands by the grade students were aiming for.
@@ -780,10 +965,28 @@ export function computeCourseStats(
       avgStress,
       loadIndex,
       label: loadIndexLabel(loadIndex),
+      breakdown: loadBreakdown,
     },
     effortToSuccess,
     asOf: referenceTerm,
     weightingNote: `Averages are weighted toward ${referenceTerm}; each earlier term counts about 25% less.`,
+    scoreBreakdowns: {
+      weighting,
+      difficulty: {
+        reviews: n,
+        weightedSum: round1(
+          visible.reduce((sum, r) => sum + r.difficulty * weightFor(r), 0)
+        ),
+        avg: avgDifficulty,
+      },
+      recommend: {
+        reviews: n,
+        recommends: visible.filter((r) => r.recommended).length,
+        weightedRecommended: round1(weightedRecommended),
+      },
+      load: loadBreakdown,
+      rating: rating.breakdown!,
+    },
   };
 }
 
@@ -1276,6 +1479,13 @@ export function computeTeachingTeamView(
   };
 }
 
+function formatWeekList(weeks: number[]): string {
+  if (weeks.length === 0) return '';
+  const labels = weeks.map((week) => (week === 13 ? 'Finals' : `W${week}`));
+  const isContiguous = weeks.length >= 3 && weeks[weeks.length - 1] - weeks[0] === weeks.length - 1;
+  return isContiguous ? `${labels[0]}–${labels[labels.length - 1]}` : labels.join(', ');
+}
+
 /**
  * Peak-week map: where the crunch lands, estimated from catalogue assessment
  * weights plus the weeks students explicitly mention. Planning aid, not a syllabus.
@@ -1293,26 +1503,49 @@ export function computePeakWeekMap(course: Course, reviews: Review[]): PeakWeekM
     }
   };
 
+  const sources: PeakWeekSource[] = [];
+
   for (const component of course.assessmentBreakdown ?? []) {
     const name = component.name;
     const lower = name.toLowerCase();
     const weight = Math.max(0.5, Math.min(2, component.weightPercent / 25));
+    let weeks: number[] = [];
+    let appliedWeight = weight;
     if (/final/.test(lower)) {
       // The exam period is real, but the map is about in-term collisions.
       add(13, weight * 0.6, name);
+      weeks = [13];
+      appliedWeight = weight * 0.6;
     } else if (/midterm/.test(lower)) {
       const twoMidterms = /\b(2|two)\b/.test(lower);
-      add(twoMidterms ? 5 : 6, weight * 1.3, name);
-      add(twoMidterms ? 9 : 10, weight * 1.1, name);
+      const first = twoMidterms ? 5 : 6;
+      const second = twoMidterms ? 9 : 10;
+      add(first, weight * 1.3, name);
+      add(second, weight * 1.1, name);
+      weeks = [first, second];
+      appliedWeight = weight * 1.1;
     } else if (/project|report|paper|presentation/.test(lower)) {
       add(11, weight, name);
+      weeks = [11];
     } else if (/quiz|assignment|problem set|lab|homework|exercise/.test(lower)) {
       for (let week = 2; week <= 12; week += 1) add(week, weight * 0.35, name);
+      weeks = Array.from({ length: 11 }, (_, index) => index + 2);
+      appliedWeight = weight * 0.35;
     } else {
       add(12, weight * 0.5, name);
+      weeks = [12];
+      appliedWeight = weight * 0.5;
     }
+    sources.push({
+      label: name,
+      kind: 'assessment',
+      weightPercent: component.weightPercent,
+      weight: Math.round(appliedWeight * 100) / 100,
+      weeks: formatWeekList(weeks),
+    });
   }
 
+  const mentionWeeks = new Set<number>();
   for (const review of reviews) {
     if (review.moderationStatus === 'hidden') continue;
     const text = `${review.overallExperience} ${review.whatWasChallenging} ${review.practicalAdvice}`;
@@ -1323,13 +1556,24 @@ export function computePeakWeekMap(course: Course, reviews: Review[]): PeakWeekM
       const end = Number(rangeMatch[2]);
       for (let week = Math.min(start, end); week <= Math.max(start, end); week += 1) {
         add(week, 1.2, 'Student mentions');
+        mentionWeeks.add(week);
       }
     }
     const singlePattern = /\bweek\s*(\d{1,2})\b/gi;
     let singleMatch: RegExpExecArray | null;
     while ((singleMatch = singlePattern.exec(text)) !== null) {
-      add(Number(singleMatch[1]), 0.8, 'Student mentions');
+      const week = Number(singleMatch[1]);
+      add(week, 0.8, 'Student mentions');
+      mentionWeeks.add(week);
     }
+  }
+
+  if (mentionWeeks.size > 0) {
+    sources.push({
+      label: 'Student week mentions',
+      kind: 'student_mention',
+      weeks: formatWeekList([...mentionWeeks].sort((a, b) => a - b)),
+    });
   }
 
   const peak = Math.max(...scores);
@@ -1351,6 +1595,7 @@ export function computePeakWeekMap(course: Course, reviews: Review[]): PeakWeekM
     cells,
     busiestWeek: peak > 0 ? busiest.week : 0,
     busiestLabel: peak > 0 ? busiest.label : '',
+    sources,
     note:
       peak > 0
         ? 'Estimated from catalogue assessment weights plus the weeks students mention. A planning aid, not a syllabus.'
