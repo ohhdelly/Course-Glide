@@ -184,11 +184,258 @@ export const DEMO_COURSES: Course[] = [
       { name: 'Final Exam', weightPercent: 45 },
     ],
   },
+
+  // ── University of Ottawa: widely taken catalogue courses ─────────────────
+  // Codes, titles and descriptions follow the official uOttawa course catalogue
+  // (catalogue.uottawa.ca, 2026–2027). Assessment weights are demonstration
+  // splits, matching the rest of this dataset.
+  {
+    id: 'eco-1102',
+    code: 'ECO 1102',
+    title: 'Introduction to Macroeconomics',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Economics',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Macro versus micro, national accounting, components of aggregate demand, income determination and multiplier theory, business cycles, fiscal and monetary policy, banking, unemployment and inflation.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: a lecture-format survey of Canadian macroeconomic policy; check the current syllabus for section-specific weights.',
+    assessmentBreakdown: [
+      { name: 'Online Quizzes', weightPercent: 20 },
+      { name: 'Midterm Examination', weightPercent: 30 },
+      { name: 'Final Examination', weightPercent: 50 },
+    ],
+  },
+  {
+    id: 'eco-1104',
+    code: 'ECO 1104',
+    title: 'Introduction to Microeconomics',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Economics',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Scarcity and choice, the market mechanism, demand and supply shifts, elasticity, consumer behaviour, production and cost curves, perfect competition, monopoly, price discrimination and government regulation.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture course open to all faculties and the usual prerequisite for 2000-level economics.',
+    assessmentBreakdown: [
+      { name: 'Online Quizzes', weightPercent: 20 },
+      { name: 'Midterm Examinations (2)', weightPercent: 35 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'psy-1101',
+    code: 'PSY 1101',
+    title: 'Introduction to Psychology: Foundations',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Psychology',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Object and method of psychology, historical perspective, the nervous system, consciousness, sensory processes, perception, cognition, memory, language, emotion, motivation and learning.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: the gateway lecture course for psychology programs and a common elective across faculties.',
+    assessmentBreakdown: [
+      { name: 'Online Chapter Quizzes', weightPercent: 15 },
+      { name: 'Midterm Examinations (2)', weightPercent: 40 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'hss-1101',
+    code: 'HSS 1101',
+    title: 'Determinants of Health',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Health Sciences',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Introduction to health sciences: models and concepts of health and wellness, illness and disease, and the biological, psychobehavioural, socio-political and environmental determinants of health.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture course required in the health sciences programs and popular as a faculty elective.',
+    assessmentBreakdown: [
+      { name: 'Written Assignments', weightPercent: 30 },
+      { name: 'Midterm Examination', weightPercent: 25 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'adm-1100',
+    code: 'ADM 1100',
+    title: 'Introduction to Business',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Telfer School of Management',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Functions of business and management: the manager’s role and how planning, organizing, leading and controlling oversee human, financial, material and commercial resources, with communication and teamwork skills.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: equivalent to ADM 1300; cannot be combined with it for units and is not open to BCom students.',
+    assessmentBreakdown: [
+      { name: 'Team Project', weightPercent: 25 },
+      { name: 'Midterm Examination', weightPercent: 25 },
+      { name: 'Final Examination', weightPercent: 50 },
+    ],
+  },
+  {
+    id: 'adm-4326',
+    code: 'ADM 4326',
+    title: 'Digital Marketing Technologies',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Telfer School of Management',
+    level: 400,
+    credits: '3.0 units',
+    description:
+      'Strategic and tactical use of digital marketing technologies in business intelligence, competitive and customer analysis, CRM, supply chains, product development, branding, positioning, promotion, advertising and e-commerce.',
+    termsOffered: ['Fall'],
+    officialNote:
+      'Official uOttawa catalogue overview: hands-on experience with selected tools may be provided; expect a project-based deliverable.',
+    assessmentBreakdown: [
+      { name: 'Case Presentations', weightPercent: 30 },
+      { name: 'Digital Campaign Project', weightPercent: 40 },
+      { name: 'Final Report', weightPercent: 30 },
+    ],
+  },
+  {
+    id: 'mus-2310',
+    code: 'MUS 2310',
+    title: 'Music in the Movies',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Music',
+    level: 200,
+    credits: '3.0 units',
+    description:
+      'Study and critical appreciation of music chosen and composed for films, from orchestral scoring to popular soundtrack placement.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture course with no music-reading prerequisite; listening journals do the heavy lifting.',
+    assessmentBreakdown: [
+      { name: 'Listening Journals', weightPercent: 30 },
+      { name: 'Film Score Essay', weightPercent: 25 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'cmn-2152',
+    code: 'CMN 2152',
+    title: 'Image and Communication',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Communication',
+    level: 200,
+    credits: '3.0 units',
+    description:
+      'Analysis of pictorial, photographic, cinematographic, videographic and computerized images, their meanings and functions, through a communicational approach with exploration and exercises.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: reserved for students in department of communication programs.',
+    assessmentBreakdown: [
+      { name: 'Visual Analysis Exercises', weightPercent: 35 },
+      { name: 'Midterm Examination', weightPercent: 25 },
+      { name: 'Final Project', weightPercent: 40 },
+    ],
+  },
+  {
+    id: 'mat-1341',
+    code: 'MAT 1341',
+    title: 'Introduction to Linear Algebra',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Mathematics & Statistics',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Complex numbers, vector and scalar products, vector spaces, linear independence and bases, systems of linear equations, matrix algebra, determinants, eigenvalues, Gram-Schmidt and linear transformations.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture plus DGD; cannot be combined with MAT 1302 for units.',
+    assessmentBreakdown: [
+      { name: 'Weekly Assignments', weightPercent: 20 },
+      { name: 'Midterm Examinations (2)', weightPercent: 35 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'chm-1311',
+    code: 'CHM 1311',
+    title: 'Principles of Chemistry',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Chemistry',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Atoms, orbitals, bonding and molecular geometry; stoichiometry; solutions and redox reactions; gas laws; thermochemistry, thermodynamics and kinetics; equilibrium, acids and bases, pH and buffers, with labs in alternate weeks.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture, DGD and biweekly laboratory; students without 4U chemistry must also register in CHM 1301.',
+    assessmentBreakdown: [
+      { name: 'Laboratory Reports', weightPercent: 20 },
+      { name: 'Midterm Examination', weightPercent: 30 },
+      { name: 'Final Examination', weightPercent: 50 },
+    ],
+  },
+  {
+    id: 'phi-2394',
+    code: 'PHI 2394',
+    title: 'Scientific Thought and Social Values',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'Philosophy',
+    level: 200,
+    credits: '3.0 units',
+    description:
+      'The nature of scientific thought and the relationships between science, culture, religion, politics, technology and society at large.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: lecture course with no prerequisites, commonly taken as a science-and-society elective.',
+    assessmentBreakdown: [
+      { name: 'Reading Responses', weightPercent: 25 },
+      { name: 'Argumentative Essay', weightPercent: 30 },
+      { name: 'Final Examination', weightPercent: 45 },
+    ],
+  },
+  {
+    id: 'eng-1120',
+    code: 'ENG 1120',
+    title: 'Selected Topics in Literature and Composition',
+    universityId: 'uottawa',
+    universityName: 'University of Ottawa',
+    department: 'English',
+    level: 100,
+    credits: '3.0 units',
+    description:
+      'Critical reading skills and coherent discourse, proper use and acknowledgement of sources, and topic-based readings in multiple genres that feed frequent written assignments.',
+    termsOffered: ['Fall', 'Winter'],
+    officialNote:
+      'Official uOttawa catalogue overview: not repeatable for credit and not intended for English majors or honours students.',
+    assessmentBreakdown: [
+      { name: 'Written Assignments', weightPercent: 40 },
+      { name: 'Seminar Participation', weightPercent: 10 },
+      { name: 'Final Essay', weightPercent: 50 },
+    ],
+  },
 ];
 
 type DemoReviewSeed = {
   id: string;
   courseId: string;
+  /** Defaults to Waterloo so existing seeds stay untouched. */
+  university?: Review['universityId'];
   term: string;
   professor: string;
   ta?: string;
@@ -219,7 +466,7 @@ type DemoReviewSeed = {
 const seedReview = (seed: DemoReviewSeed): Review => ({
   id: seed.id,
   courseId: seed.courseId,
-  universityId: 'uwaterloo',
+  universityId: seed.university ?? 'uwaterloo',
   term: seed.term,
   instructorName: seed.professor,
   ...(seed.ta ? { taName: seed.ta } : {}),
@@ -1842,6 +2089,612 @@ const DEMO_REVIEW_SEED: Review[] = [
     helpful: ['tutorial_sessions'],
     votes: 6,
     created: '2025-04-27T08:30:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+
+  // ── uOttawa catalogue courses (two reviews each) ─────────────────────────
+  seedReview({
+    id: 'rev-eco1102-1',
+    courseId: 'eco-1102',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Marc-André Pelletier (Demo)',
+    alias: '1st Year Economics',
+    difficulty: 3,
+    hours: 7,
+    recommended: true,
+    overall:
+      'The multiplier arithmetic only clicks once you draw the circular flow yourself; after that the exams are fair.',
+    worked:
+      'Weekly problem sets were posted with full solutions a week before each quiz.',
+    challenging:
+      'The final pushed a lot of chapters into two long-answer questions.',
+    advice:
+      'Draw the aggregate expenditure model by hand for every practice question instead of reading the solutions.',
+    methods: ['practice_problems', 'lecture_attendance', 'past_exams'],
+    helpful: ['practice_problems', 'past_exams'],
+    votes: 9,
+    created: '2025-12-18T14:10:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-eco1102-2',
+    courseId: 'eco-1102',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Dr. Sofia Marchetti (Demo)',
+    alias: '2nd Year Political Science',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'A gentle introduction to macro for a non-economics student; the policy discussions kept lectures interesting.',
+    worked:
+      'Every model was tied to a Bank of Canada announcement from that week.',
+    challenging:
+      'Shifting the aggregate demand curves stayed abstract until the last month.',
+    advice:
+      'Keep the formula sheet from ECO 1104 handy; several results carry over directly.',
+    methods: ['lecture_attendance', 'textbook_reading'],
+    helpful: ['lecture_attendance'],
+    votes: 5,
+    created: '2026-04-14T09:20:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-eco1104-1',
+    courseId: 'eco-1104',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Priya Raman (Demo)',
+    alias: '1st Year BCom',
+    difficulty: 3,
+    hours: 7,
+    recommended: true,
+    overall:
+      'Elasticity and cost curves are basically the whole course, and the weekly quizzes make you learn them early.',
+    worked:
+      'Quiz feedback named the exact slide that explained a missed concept.',
+    challenging:
+      'Midterm 2 had three monopoly pricing questions in a row.',
+    advice:
+      'Redo the midterm practice set under time; the final reuses the same question styles.',
+    methods: ['practice_problems', 'past_exams', 'tutorial_sessions'],
+    helpful: ['past_exams'],
+    votes: 11,
+    created: '2025-12-20T11:05:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-eco1104-2',
+    courseId: 'eco-1104',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Marc-André Pelletier (Demo)',
+    alias: '2nd Year Environmental Science',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Straightforward intro micro; the applied case studies on carbon pricing were the best part.',
+    worked:
+      'DGD sessions worked through one past exam question per concept.',
+    challenging:
+      'Graph labelling loses part marks fast if you skip axis titles.',
+    advice:
+      'Label every axis and curve on the first pass; markers check them explicitly.',
+    methods: ['tutorial_sessions', 'practice_problems'],
+    helpful: ['tutorial_sessions'],
+    votes: 7,
+    created: '2026-01-09T16:40:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-psy1101-1',
+    courseId: 'psy-1101',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Camille Ouellet (Demo)',
+    alias: '1st Year Nursing',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Huge lecture hall, but the online chapter quizzes keep you honest and the exams come straight from the slides.',
+    worked:
+      'Each midterm blueprint listed the exact textbook sections and lecture numbers being tested.',
+    challenging:
+      'Two hundred slides per unit made it easy to fall behind.',
+    advice:
+      'Do the chapter quizzes twice: once open-book to learn, once closed-book before the midterm.',
+    methods: ['spaced_repetition', 'lecture_attendance', 'practice_problems'],
+    helpful: ['spaced_repetition'],
+    votes: 14,
+    created: '2025-12-15T10:30:00.000Z',
+    effort: 2,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-psy1101-2',
+    courseId: 'psy-1101',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Dr. Daniel Whitfield (Demo)',
+    alias: '1st Year Criminology',
+    difficulty: 3,
+    hours: 6,
+    recommended: true,
+    overall:
+      'More neuroscience than I expected, but the study guides were accurate and the final was fair.',
+    worked:
+      'Optional review sessions walked through the trickiest memory and perception questions.',
+    challenging:
+      'The statistics unit appeared only on the final and felt rushed.',
+    advice:
+      'Make flashcards for the brain structures early; they show up on both midterms.',
+    methods: ['spaced_repetition', 'textbook_reading'],
+    helpful: ['spaced_repetition', 'textbook_reading'],
+    votes: 8,
+    created: '2026-04-11T13:15:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-hss1101-1',
+    courseId: 'hss-1101',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Amara Nwosu (Demo)',
+    alias: '1st Year Health Sciences',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'Genuinely one of the lighter first-year courses: two short papers, a midterm and a final built from lecture material.',
+    worked:
+      'Assignment rubrics were posted with the prompt, so marking held no surprises.',
+    challenging:
+      'The social-determinants readings were long and repetitive week to week.',
+    advice:
+      'Reuse the same two examples across your papers; the marker rewards depth over breadth.',
+    methods: ['lecture_attendance', 'textbook_reading'],
+    helpful: ['lecture_attendance'],
+    votes: 12,
+    created: '2025-12-12T09:00:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-hss1101-2',
+    courseId: 'hss-1101',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Louis Chartrand (Demo)',
+    alias: '2nd Year Sociology',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Popular elective for a reason: clear slides, guest speakers from public health, and a fair final.',
+    worked:
+      'Guest lectures connected each determinant to a real Ottawa program.',
+    challenging:
+      'The final asked for specific Canadian policy examples that lectures mentioned only once.',
+    advice:
+      'Note every policy example a guest speaker mentions; they turn up as short-answer prompts.',
+    methods: ['lecture_attendance', 'study_groups'],
+    helpful: ['study_groups'],
+    votes: 6,
+    created: '2026-01-06T15:45:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-adm1100-1',
+    courseId: 'adm-1100',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Renée Bouchard (Demo)',
+    alias: '1st Year BCom',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'Most of the grade comes from the team project, so pick your group early and the course stays light.',
+    worked:
+      'The team project used a real Ottawa small business whose owner answered questions directly.',
+    challenging:
+      'Free riders are only handled through peer evaluation at the end.',
+    advice:
+      'Set a written group charter in week two and log every meeting; the peer form asks for dates.',
+    methods: ['project_based', 'study_groups'],
+    helpful: ['project_based'],
+    votes: 10,
+    created: '2025-12-11T12:25:00.000Z',
+    effort: 2,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-adm1100-2',
+    courseId: 'adm-1100',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Prof. Mark Sullivan (Demo)',
+    alias: '1st Year Political Science',
+    difficulty: 2,
+    hours: 5,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Fine content, but the weekly discussion posts felt like busywork and the final repeated the textbook.',
+    worked:
+      'Lectures used short case studies instead of straight definitions.',
+    challenging:
+      'Grading on discussion posts was inconsistent between TAs.',
+    advice:
+      'Keep posts short and cite the textbook section you are responding to.',
+    methods: ['textbook_reading', 'lecture_attendance'],
+    helpful: ['textbook_reading'],
+    votes: 4,
+    created: '2026-04-16T17:30:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-adm4326-1',
+    courseId: 'adm-4326',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Nadia Haddad (Demo)',
+    alias: '4th Year Marketing',
+    difficulty: 3,
+    hours: 6,
+    recommended: true,
+    overall:
+      'The most useful Telfer elective I took: you build a real campaign in the tools instead of memorizing frameworks.',
+    worked:
+      'Every class had a hands-on lab with an analytics or advertising platform, licences provided.',
+    challenging:
+      'Group deliverables stacked up in the last three weeks before the report.',
+    advice:
+      'Start the campaign project in week three; the data needs a month to say anything.',
+    methods: ['project_based', 'study_groups'],
+    helpful: ['project_based'],
+    votes: 18,
+    created: '2025-12-19T18:00:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-adm4326-2',
+    courseId: 'adm-4326',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Nadia Haddad (Demo)',
+    alias: '4th Year BCom',
+    difficulty: 3,
+    hours: 7,
+    recommended: true,
+    usefulness: 5,
+    overall:
+      'Heavy but rewarding; the case presentations are marked like a client pitch and the feedback is specific.',
+    worked:
+      'Practitioners came in to critique two of the presentations.',
+    challenging:
+      'The platform documentation reading load was high in the first month.',
+    advice:
+      'Book a practice pitch with your group’s TA a week before presenting.',
+    methods: ['project_based', 'past_exams'],
+    helpful: ['project_based'],
+    votes: 9,
+    created: '2026-01-14T10:10:00.000Z',
+    effort: 3,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-mus2310-1',
+    courseId: 'mus-2310',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Élodie Gagnon (Demo)',
+    alias: '3rd Year Biology',
+    difficulty: 1,
+    hours: 3,
+    recommended: true,
+    overall:
+      'Exactly the light elective people say it is: weekly listening journals, one essay and a final drawn straight from lectures.',
+    worked:
+      'Every film clip was posted after class, so nobody had to memorize music from one viewing.',
+    challenging:
+      'The essay rewards precise musical vocabulary, not plot description.',
+    advice:
+      'Write the listening journals as you watch, not the night before they are due.',
+    methods: ['lecture_attendance', 'project_based'],
+    helpful: ['lecture_attendance'],
+    votes: 16,
+    created: '2025-12-10T14:35:00.000Z',
+    effort: 1,
+    stress: 1,
+  }),
+  seedReview({
+    id: 'rev-mus2310-2',
+    courseId: 'mus-2310',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Prof. Élodie Gagnon (Demo)',
+    alias: '2nd Year Commerce',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'Light but not empty: you leave knowing why a score works, and the final is a short listening analysis.',
+    worked:
+      'Scenes were screened with and without score so the difference was audible.',
+    challenging:
+      'Two written pieces were due in the same week as midterms in other courses.',
+    advice:
+      'Pick a film you already know for the essay; the analysis goes much faster.',
+    methods: ['lecture_attendance', 'textbook_reading'],
+    helpful: ['textbook_reading'],
+    votes: 7,
+    created: '2026-04-09T11:50:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-cmn2152-1',
+    courseId: 'cmn-2152',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Julie Fortin (Demo)',
+    alias: '2nd Year Communication',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'The visual analysis exercises are the entire course, and they are genuinely fun if you like images.',
+    worked:
+      'Each week analysed one advertisement or film still together before the exercise went out.',
+    challenging:
+      'Nothing explains how the rubric separates description from analysis.',
+    advice:
+      'Ask in week one for an example of an A-level analysis; it changes how you write.',
+    methods: ['lecture_attendance', 'practice_problems'],
+    helpful: ['lecture_attendance'],
+    votes: 6,
+    created: '2025-12-14T16:05:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-cmn2152-2',
+    courseId: 'cmn-2152',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Julie Fortin (Demo)',
+    alias: '3rd Year Fine Arts',
+    difficulty: 3,
+    hours: 6,
+    recommended: true,
+    overall:
+      'Comfortable pace, but the final project asks for more theory than the weekly exercises suggest.',
+    worked:
+      'Feedback on the first exercise was detailed enough to fix everything for the next one.',
+    challenging:
+      'Reading semiotics papers without the vocabulary took extra hours every week.',
+    advice:
+      'Keep a glossary of semiotic terms and add the course example next to each.',
+    methods: ['textbook_reading', 'project_based'],
+    helpful: ['textbook_reading'],
+    votes: 5,
+    created: '2026-01-12T09:40:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-mat1341-1',
+    courseId: 'mat-1341',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Simon Leclerc (Demo)',
+    alias: '1st Year Mathematics',
+    difficulty: 4,
+    hours: 9,
+    recommended: true,
+    overall:
+      'Proof-heavy for a 1000-level course, but the structure is consistent: one concept a week and a DGD that solves it.',
+    worked:
+      'The DGD ran the same exercise type that appeared on the next assignment.',
+    challenging:
+      'Row-reduction by hand with fractions is where most marks disappear on midterms.',
+    advice:
+      'Practice matrix computations until they are automatic; the conceptual questions then have room.',
+    methods: ['practice_problems', 'tutorial_sessions', 'past_exams'],
+    helpful: ['practice_problems'],
+    votes: 15,
+    created: '2025-12-16T13:00:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-mat1341-2',
+    courseId: 'mat-1341',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Dr. Ana Kovač (Demo)',
+    alias: '1st Year Physics',
+    difficulty: 3,
+    hours: 8,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Well taught but fast; the second midterm covered four chapters in one week of lectures.',
+    worked:
+      'Worked solutions were posted within a day of every assignment deadline.',
+    challenging:
+      'Abstract vector-space proofs were graded strictly on justification steps.',
+    advice:
+      'Write the justification before the calculation in every proof question; partial marks live there.',
+    methods: ['practice_problems', 'textbook_reading'],
+    helpful: ['practice_problems', 'textbook_reading'],
+    votes: 8,
+    created: '2026-04-15T12:20:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-chm1311-1',
+    courseId: 'chm-1311',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Dr. Hélène Côté (Demo)',
+    alias: '1st Year Biochemistry',
+    difficulty: 4,
+    hours: 9,
+    recommended: true,
+    overall:
+      'The lab is what makes this course heavy: a report every two weeks on top of weekly problem sets.',
+    worked:
+      'Pre-lab videos demonstrated each technique before the bench session.',
+    challenging:
+      'Thermodynamics problems combine three chapters and appear as one long final question.',
+    advice:
+      'Do the lab calculations before leaving the lab; the report then takes half as long.',
+    methods: ['practice_problems', 'tutorial_sessions', 'textbook_reading'],
+    helpful: ['practice_problems'],
+    votes: 17,
+    created: '2025-12-13T10:15:00.000Z',
+    effort: 4,
+    stress: 4,
+  }),
+  seedReview({
+    id: 'rev-chm1311-2',
+    courseId: 'chm-1311',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Dr. Peter Anyang (Demo)',
+    alias: '1st Year Biomedical Science',
+    difficulty: 3,
+    hours: 8,
+    recommended: true,
+    overall:
+      'A standard first-year chemistry course with fair exams if you keep up with the DGD problems.',
+    worked:
+      'DGD worksheets came with answers, which made the exam style predictable.',
+    challenging:
+      'Buffer and titration calculations lose marks on significant figures.',
+    advice:
+      'Track units and sig figs through every stoichiometry problem from week one.',
+    methods: ['practice_problems', 'tutorial_sessions', 'past_exams'],
+    helpful: ['tutorial_sessions', 'past_exams'],
+    votes: 11,
+    created: '2026-04-10T08:55:00.000Z',
+    effort: 3,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-phi2394-1',
+    courseId: 'phi-2394',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Étienne Roy (Demo)',
+    alias: '2nd Year Engineering',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'A reading-and-essay course that made ethics of technology feel concrete; the final was two essays, no multiple choice.',
+    worked:
+      'Every reading had three discussion questions posted in advance.',
+    challenging:
+      'The essay rubric is vague about how much summary is acceptable.',
+    advice:
+      'Email the professor a one-paragraph outline before each essay; feedback comes back quickly.',
+    methods: ['textbook_reading', 'lecture_attendance'],
+    helpful: ['lecture_attendance'],
+    votes: 6,
+    created: '2025-12-18T09:05:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-phi2394-2',
+    courseId: 'phi-2394',
+    university: 'uottawa',
+    term: 'Winter 2026',
+    professor: 'Prof. Sara Lindqvist (Demo)',
+    alias: '3rd Year Computer Science',
+    difficulty: 2,
+    hours: 5,
+    recommended: true,
+    overall:
+      'Good elective if you like arguing: participation matters and the readings are short.',
+    worked:
+      'Debates in the last twenty minutes of each lecture explained the reading better than the lecture did.',
+    challenging:
+      'Two readings a week with no guidance on which one to prioritize.',
+    advice:
+      'Read the conclusion first; only one reading per week is actually examined.',
+    methods: ['textbook_reading', 'study_groups'],
+    helpful: ['textbook_reading'],
+    votes: 5,
+    created: '2026-04-17T14:45:00.000Z',
+    effort: 2,
+    stress: 2,
+  }),
+  seedReview({
+    id: 'rev-eng1120-1',
+    courseId: 'eng-1120',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Meera Nair (Demo)',
+    alias: '1st Year Psychology',
+    difficulty: 2,
+    hours: 4,
+    recommended: true,
+    overall:
+      'Frequent short essays, but the feedback loop is fast and a final portfolio replaces the exam.',
+    worked:
+      'Each assignment came back with a model paragraph showing what an A looked like.',
+    challenging:
+      'Citation formatting was marked strictly from the first paper onward.',
+    advice:
+      'Book one writing-centre appointment before the second essay; it is worth a full letter grade.',
+    methods: ['project_based', 'lecture_attendance'],
+    helpful: ['project_based'],
+    votes: 9,
+    created: '2025-12-12T15:20:00.000Z',
+    effort: 2,
+    stress: 3,
+  }),
+  seedReview({
+    id: 'rev-eng1120-2',
+    courseId: 'eng-1120',
+    university: 'uottawa',
+    term: 'Fall 2025',
+    professor: 'Prof. Thomas Bell (Demo)',
+    alias: '1st Year History',
+    difficulty: 3,
+    hours: 5,
+    recommended: false,
+    usefulness: 3,
+    overall:
+      'Clear course, but five written assignments in twelve weeks left no room for other courses.',
+    worked:
+      'Peer review sessions used a checklist instead of vague comments.',
+    challenging:
+      'Grammar and structure deductions compound across essays.',
+    advice:
+      'Write one paragraph a day instead of a full draft the night before.',
+    methods: ['project_based', 'textbook_reading'],
+    helpful: ['textbook_reading'],
+    votes: 7,
+    created: '2026-01-08T17:10:00.000Z',
     effort: 3,
     stress: 3,
   }),

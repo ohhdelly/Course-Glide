@@ -666,18 +666,96 @@
   }
 
   /* "Glide" takes its colour from the active theme: Waterloo gold, uOttawa
-     garnet or the default blue, mixed toward the text colour for contrast. */
+     garnet or the default blue. Stops come from --chart-1, each theme's
+     readable accent, mixed toward the text colour, because the raw accent is
+     1.2:1 on a pale surface (Waterloo gold) and 1.4:1 on a dark one (garnet). */
   .brand-glide {
     background-image: linear-gradient(
       100deg,
-      var(--accent) 0%,
-      color-mix(in oklab, var(--accent) 45%, var(--text)) 52%,
-      var(--accent-strong) 100%
+      color-mix(in oklab, var(--chart-1) 85%, var(--text)) 0%,
+      color-mix(in oklab, var(--chart-1) 62%, var(--text)) 55%,
+      color-mix(in oklab, var(--accent-strong) 70%, var(--text)) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Advisor results and match badges: every tint is mixed from the active
+     university accent, so the list carries the theme colour (Waterloo gold,
+     uOttawa garnet, or the default blue) instead of flat grey. */
+  .result-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent) 34%, var(--border));
+    background-color: color-mix(in oklab, var(--accent) 16%, var(--surface));
+    /* Accent pulled toward body text: Waterloo's gold becomes ink, uOttawa's
+       dark garnet lifts, so 12px labels stay above 4.5:1 in either scheme. */
+    color: color-mix(in oklab, var(--accent-strong) 70%, var(--text));
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result-row {
+    border: 1px solid color-mix(in oklab, var(--accent) 22%, var(--border));
+    background-image: linear-gradient(
+      100deg,
+      color-mix(in oklab, var(--accent) 10%, var(--surface)),
+      var(--surface) 65%
+    );
+    transition: border-color 180ms ease, background-color var(--theme-transition), color var(--theme-transition);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .result-row:hover {
+      border-color: color-mix(in oklab, var(--accent) 52%, var(--border));
+    }
+  }
+
+  .chip-code {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* Course codes read as the primary label of a result, in the theme colour.
+     Uses the readable accent so Waterloo's gold stays legible on white. */
+  .course-code {
+    color: color-mix(in oklab, var(--accent-strong) 70%, var(--text));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+    background-color: color-mix(in oklab, var(--accent) 7%, var(--surface-2));
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .similar-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+    background-color: color-mix(in oklab, var(--accent) 12%, var(--surface));
+    color: color-mix(in oklab, var(--accent-strong) 70%, var(--text));
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Radii placed after surfaces and buttons so nested elements can override to smaller radii */

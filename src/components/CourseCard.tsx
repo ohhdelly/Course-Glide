@@ -12,6 +12,8 @@ interface CourseCardProps {
   layout?: 'grid' | 'list';
   variant?: 'default' | 'explore';
   contextNote?: string;
+  /** How close this course is to the course code currently being searched. */
+  similarityPercent?: number;
   index?: number;
   registerItemRef?: (index: number, el: HTMLButtonElement | null) => void;
   onItemKeyDown?: (index: number, e: React.KeyboardEvent<HTMLButtonElement>) => void;
@@ -146,6 +148,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   layout = 'grid',
   variant = 'default',
   contextNote,
+  similarityPercent,
   index = 0,
   registerItemRef,
   onItemKeyDown,
@@ -235,8 +238,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               onKeyDown={handlePrimaryKeyDown}
               className="block w-full min-w-0 text-left focus-visible:outline-none after:absolute after:inset-0"
             >
-              <div className="text-base font-semibold text-[var(--text)] tabular-nums truncate">
-                {course.code}
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="course-code text-base font-semibold truncate">
+                  {course.code}
+                </span>
+                {similarityPercent !== undefined && (
+                  <span className="similar-badge shrink-0">{similarityPercent}% similar</span>
+                )}
               </div>
               <div className="mt-0.5 text-sm font-normal text-[var(--text-muted)] truncate">
                 {course.title}
@@ -280,8 +288,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             onKeyDown={handlePrimaryKeyDown}
             className="min-w-0 flex-1 text-left focus-visible:outline-none after:absolute after:inset-0"
           >
-            <div className="text-base font-semibold text-[var(--text)] tabular-nums truncate">
-              {course.code}
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="course-code text-base font-semibold truncate">
+                {course.code}
+              </span>
+              {similarityPercent !== undefined && (
+                <span className="similar-badge shrink-0">{similarityPercent}% similar</span>
+              )}
             </div>
             <div className="mt-1 text-sm font-normal text-[var(--text-muted)] truncate">
               {course.title}

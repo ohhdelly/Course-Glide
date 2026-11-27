@@ -19,6 +19,11 @@ import type {
   UniversityId,
 } from '../types/course';
 import { filterAndSearchCourses } from '../utils/trustLens';
+import {
+  courseSimilarityPercent,
+  findCourseByCode,
+  isCourseCodeQuery,
+} from '../utils/courseSimilarity';
 import { CourseCard } from './CourseCard';
 import { ExploreSelect, type ExploreSelectOption } from './ExploreSelect';
 import { AdvisorPanel } from './AdvisorPanel';
@@ -127,6 +132,9 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
   const [advisorNote, setAdvisorNote] = useState<string | null>(null);
   const [serverData, setServerData] = useState<PaginatedCoursesResponse | null>(null);
   const [suggestions, setSuggestions] = useState<Course[]>([]);
+  const [similarPool, setSimilarPool] = useState<Course[]>([]);
+  // Statistics for the neighbour pool, so seeded reviews show on similar rows.
+  const [similarStats, setSimilarStats] = useState<Record<string, CourseStats>>({});
   const abortRef = useRef<AbortController | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const gridContainerRef = useRef<HTMLDivElement | null>(null);
@@ -285,6 +293,65 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
     serverData?.total ?? (!hasAnyFilter ? catalogueFallbackCount : fallbackCourses.length);
   const totalPages = serverData?.totalPages ?? Math.max(1, Math.ceil(totalMatches / PAGE_SIZE));
   const currentPage = serverData?.page ?? page;
+
+  // A code search returns exactly one catalogue course, so the anchor comes from
+  // the fetched results; the local demo set is only the fallback.
+  const codeAnchor = useMemo(
+    () =>
+      isCourseCodeQuery(debouncedQuery)
+        ? findCourseByCode(displayedCourses, debouncedQuery)
+        : undefined,
+    [debouncedQuery, displayedCourses]
+  );
+
+  // The exact-code result is a single course, so pull its subject's catalogue
+  // entries to score as neighbours instead of relying on the small local set.
+  useEffect(() => {
+    if (!codeAnchor) {
+      setSimilarPool([]);
+      setSimilarStats({});
+      return;
+    }
+    const controller = new AbortController();
+    const subject = codeAnchor.subjectCode ?? codeAnchor.code.split(' ')[0];
+    const params = new URLSearchParams({
+      q: subject,
+      universityId: codeAnchor.universityId,
+      sortBy: 'relevance',
+      page: '1',
+      limit: '24',
+    });
+    fetch(`/api/courses?${params.toString()}`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: PaginatedCoursesResponse | null) => {
+        if (data?.courses) setSimilarPool(data.courses);
+        if (data?.statsMap) setSimilarStats(data.statsMap);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [codeAnchor]);
+
+  const similarCourses = useMemo(() => {
+    if (!codeAnchor) return [];
+    const pool = similarPool.length > 0 ? similarPool : courses;
+    // The subject search also matches on description text, so keep only the
+    // anchor's own subject rather than scoring unrelated courses.
+    const subject = codeAnchor.subjectCode ?? codeAnchor.code.split(' ')[0];
+    return pool
+      .filter(
+        (course) =>
+          course.id !== codeAnchor.id &&
+          course.subjectCode === subject &&
+          (selectedUniversity === 'all' || course.universityId === selectedUniversity)
+      )
+      .map((course) => ({ course, percent: courseSimilarityPercent(codeAnchor, course) }))
+      .sort(
+        (a, b) =>
+          b.percent - a.percent ||
+          a.course.code.localeCompare(b.course.code, 'en', { numeric: true })
+      )
+      .slice(0, 4);
+  }, [codeAnchor, similarPool, courses, selectedUniversity]);
 
   const availableSubjects = useMemo(() => {
     const list = serverData?.subjects ?? initialSubjects;
@@ -884,6 +951,30 @@ export const ExplorePage: React.FC<ExplorePageProps> = ({
             />
           ))}
         </div>
+      )}
+
+      {/* Closest catalogue neighbours for a course-code search */}
+      {codeAnchor && similarCourses.length > 0 && (
+        <section aria-label={`Similar to ${codeAnchor.code}`} className="mt-6">
+          <h2 className="mb-2 type-small font-semibold text-[var(--text)]">
+            Similar to <span className="course-code">{codeAnchor.code}</span>
+          </h2>
+          <div className="divide-y divide-[var(--border)] rounded-card border border-[var(--border)] bg-[var(--surface)]">
+            {similarCourses.map(({ course, percent }) => (
+              <CourseCard
+                key={course.id}
+                variant="explore"
+                layout="list"
+                course={course}
+                stats={effectiveStatsMap[course.id] ?? similarStats[course.id]}
+                similarityPercent={percent}
+                isSaved={savedCourseIds.includes(course.id)}
+                onToggleSave={onToggleSave}
+                onOpenCourse={onOpenCourse}
+              />
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Pagination */}
