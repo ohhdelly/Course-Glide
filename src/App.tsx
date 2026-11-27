@@ -32,6 +32,7 @@ import { ExplorePage } from './components/ExplorePage';
 import { CourseDetailPage } from './components/CourseDetailPage';
 import { SavedCoursesPage } from './components/SavedCoursesPage';
 import { HowItWorksPage } from './components/HowItWorksPage';
+import { DemoQaPage } from './components/DemoQaPage';
 import { WriteReviewModal } from './components/WriteReviewModal';
 import { ReportReviewModal } from './components/ReportReviewModal';
 import { ProfileModal } from './components/ProfileModal';
@@ -63,6 +64,7 @@ function parseRouteFromHash(): AppRoute {
   if (hash.startsWith('/explore')) return { page: 'explore' };
   if (hash.startsWith('/saved')) return { page: 'saved' };
   if (hash.startsWith('/how-it-works')) return { page: 'how-it-works' };
+  if (hash.startsWith('/demo-qa')) return { page: 'demo-qa' };
   if (hash.startsWith('/course/')) {
     const rest = hash.slice('/course/'.length);
     const [courseId, tab] = rest.split('/');
@@ -86,6 +88,7 @@ function routeToHash(route: AppRoute): string {
   if (route.page === 'explore') return '#/explore';
   if (route.page === 'saved') return '#/saved';
   if (route.page === 'how-it-works') return '#/how-it-works';
+  if (route.page === 'demo-qa') return '#/demo-qa';
   if (route.page === 'course') {
     return `#/course/${route.courseId}/${route.initialTab ?? 'overview'}`;
   }
@@ -689,6 +692,19 @@ export default function App() {
             />
           )}
 
+          {route.page === 'demo-qa' && (
+            <DemoQaPage
+              totalCourses={catalogueMeta?.totalCourses}
+              waterlooCourseCount={catalogueMeta?.waterlooCourseCount}
+              subjectCount={catalogueMeta?.subjectCount}
+              calendarVersion={catalogueMeta?.waterlooCalendarVersion}
+              onGoExplore={() => navigate({ page: 'explore' })}
+              onOpenCourse={(courseId, tab) =>
+                navigate({ page: 'course', courseId, initialTab: tab ?? 'overview' })
+              }
+            />
+          )}
+
           {route.page === 'how-it-works' && (
             <HowItWorksPage
               courses={courses}
@@ -700,6 +716,7 @@ export default function App() {
               }
               onGoExplore={() => navigate({ page: 'explore' })}
               waterlooCourseCount={catalogueMeta?.waterlooCourseCount}
+              subjectCount={catalogueMeta?.subjectCount}
             />
           )}
         </div>
@@ -725,6 +742,13 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center rounded-control px-2 font-medium text-[var(--text)] underline-offset-4 hover:underline"
             >
               How CourseGlide Works
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate({ page: 'demo-qa' })}
+              className="inline-flex min-h-[44px] items-center rounded-control px-2 font-medium text-[var(--text)] underline-offset-4 hover:underline"
+            >
+              Demo Q&amp;A
             </button>
           </div>
         </div>

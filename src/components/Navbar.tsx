@@ -14,6 +14,7 @@ export type AppRoute =
   | { page: 'explore' }
   | { page: 'saved' }
   | { page: 'how-it-works' }
+  | { page: 'demo-qa' }
   | {
       page: 'course';
       courseId: string;
@@ -260,6 +261,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               How it works
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNav({ page: 'demo-qa' })}
+              aria-current={route.page === 'demo-qa' ? 'page' : undefined}
+              className={`flex min-h-[44px] items-center justify-center rounded-control border-b-2 px-3 py-2 text-center type-caption font-medium transition-colors ${
+                route.page === 'demo-qa'
+                  ? 'border-[var(--accent-strong)] bg-[var(--surface-2)] text-[var(--text)] font-semibold'
+                  : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+              }`}
+            >
+              Demo Q&amp;A
             </button>
           </nav>
         </div>

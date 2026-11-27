@@ -12,7 +12,7 @@ CourseGlide is a university course intelligence platform. It pairs an official a
 
 | Area | What it does |
 | --- | --- |
-| **Course catalogue** | 4,346 courses from the 2026–2027 University of Waterloo Undergraduate Studies Academic Calendar (+ uOttawa demo courses), with 131 subjects, prerequisites, antirequisites and calendar metadata. |
+| **Course catalogue** | 4,358 course records — 4,343 from the 2026–2027 University of Waterloo Undergraduate Studies Academic Calendar plus 15 uOttawa demo courses — with 140 subjects, prerequisites, antirequisites and calendar metadata. |
 | **Trust Lens** | Deterministic scoring that ranks reviews by informational value, computes difficulty/workload/recommendation stats and flags low-confidence samples instead of hiding them. |
 | **Explore & filters** | Full-text search, university/department/level filters, max difficulty, weekly-hour caps, review coverage and sortable results. |
 | **Course pages** | Overview, student reviews, teaching team and study strategies tabs, plus cited "Insights" bullets tied back to individual review IDs. |
@@ -106,7 +106,14 @@ src/theme/                 University theming
 
 ## 🧪 Tests
 
-`src/theme/universityTheme.test.ts` and `src/utils/trustLens.test.ts` cover theme resolution and Trust Lens scoring/ranking.
+Six `node:test` suites live beside the logic they cover:
+
+- `src/utils/trustLens.test.ts` — Trust Lens scoring and tiers, review ranking and filtering, course statistics, load index, peak-week map, teaching-team views, search typo tolerance, catalogue loading
+- `src/utils/scoreExplanations.test.ts` — every explanation carries its displayed value and real components, and is deterministic
+- `src/utils/scoreBaseline.test.ts` — regression baselines for course scores, review scores and tiers, load index, peak-week intensities and advisor match percentages
+- `src/utils/courseTakeaway.test.ts` — overview takeaways, including unreviewed courses that must not invent metrics
+- `src/utils/dataVisuals.test.ts` — rating distributions, workload breakdowns, term workload summaries and hour formatting
+- `src/theme/universityTheme.test.ts` — theme resolution
 
 ## 📝 Notes
 

@@ -27,6 +27,7 @@ interface HowItWorksPageProps {
   onOpenCourse: (courseId: string, tab?: 'overview' | 'reviews' | 'teaching' | 'strategies') => void;
   onGoExplore: () => void;
   waterlooCourseCount?: number;
+  subjectCount?: number;
 }
 
 interface StageItem {
@@ -138,6 +139,7 @@ export const HowItWorksPage: React.FC<HowItWorksPageProps> = ({
   onOpenCourse,
   onGoExplore,
   waterlooCourseCount = 4343,
+  subjectCount = 140,
 }) => {
   const prefersReducedMotion = useReducedMotion();
 
@@ -158,7 +160,7 @@ export const HowItWorksPage: React.FC<HowItWorksPageProps> = ({
         stage: 'Discover',
         heading: 'Find courses that fit you.',
         revealedCopy: 'Explore courses by subject, workload, or teaching experience.',
-        previewLine: `${waterlooCourseCount.toLocaleString()} Waterloo courses · 128 subjects`,
+        previewLine: `${waterlooCourseCount.toLocaleString()} Waterloo courses · ${subjectCount} subjects`,
         icon: Compass,
       },
       {
@@ -180,7 +182,7 @@ export const HowItWorksPage: React.FC<HowItWorksPageProps> = ({
         icon: BookOpenCheck,
       },
     ],
-    [waterlooCourseCount]
+    [waterlooCourseCount, subjectCount]
   );
 
   const orderedDemoReviews = useMemo(() => {

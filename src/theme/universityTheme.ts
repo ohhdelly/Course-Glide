@@ -204,7 +204,7 @@ export const UNIVERSITY_THEMES: Record<string, UniversityThemeConfig> = {
 };
 
 export interface ThemeResolutionInput {
-  routePage: 'landing' | 'explore' | 'saved' | 'how-it-works' | 'course';
+  routePage: 'landing' | 'explore' | 'saved' | 'how-it-works' | 'demo-qa' | 'course';
   selectedUniversity: UniversityId;
   activeCourseUniversityId?: Exclude<UniversityId, 'all'> | null;
 }
